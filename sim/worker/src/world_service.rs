@@ -124,7 +124,7 @@ impl cao_world::world_server::World for WorldService {
         let positions = if radius <= 0 {
             vec![]
         } else {
-            self.room_bounds
+            Hexagon::from_radius(radius)
                 .iter_points()
                 .map(|point| cao_common::Axial {
                     q: point.q,
