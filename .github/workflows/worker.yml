@@ -45,8 +45,7 @@ jobs:
 
       - name: Run tests
         run: |
-          cargo +${{ matrix.rust }} test --benches --tests
-          cargo +${{ matrix.rust }} test --doc
+          make test
         working-directory: sim
         env:
           RUST_LOG: caolo_sim=trace

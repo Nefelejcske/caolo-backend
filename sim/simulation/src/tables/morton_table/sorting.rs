@@ -4,8 +4,9 @@ use super::morton_key::MortonKey;
 use std::mem::{size_of, swap};
 
 const RADIX_MASK_LEN: usize = 8; // how many bits are considered at a time
-const RADIX_MASK: u32 = (1 << (RADIX_MASK_LEN + 1)) - 1;
-const NUM_BUCKETS: usize = RADIX_MASK as usize + 1;
+const NUM_BUCKETS: usize = 1usize << (RADIX_MASK_LEN as usize);
+const RADIX_MASK: u32 = (NUM_BUCKETS - 1) as u32;
+const MORTON_BITS: usize = size_of::<MortonKey>() * 8;
 
 pub fn sort<T: Default>(keys: &mut Vec<MortonKey>, values: &mut [T]) {
     debug_assert!(
@@ -23,7 +24,7 @@ pub fn sort<T: Default>(keys: &mut Vec<MortonKey>, values: &mut [T]) {
 #[inline]
 fn sort_radix<T: Default>(keys: &mut Vec<MortonKey>, values: &mut [T]) {
     debug_assert_eq!(keys.len(), values.len());
-    let mut tmp = vec![Default::default(); keys.len() * 2];
+    let mut tmp: Vec<(usize, MortonKey)> = vec![Default::default(); keys.len() * 2];
     // double buffer (index, key) pairs
     let (mut tmp_a, mut tmp_b) = tmp.as_mut_slice().split_at_mut(keys.len());
     debug_assert_eq!(tmp_a.len(), tmp_b.len());
@@ -32,10 +33,9 @@ fn sort_radix<T: Default>(keys: &mut Vec<MortonKey>, values: &mut [T]) {
     }
 
     let mut swapbuffs = false;
-    const MORTON_BITS: usize = size_of::<MortonKey>() * 8;
-    for k in (0..=MORTON_BITS - RADIX_MASK_LEN).step_by(RADIX_MASK_LEN) {
+    for k in (0..=MORTON_BITS).step_by(RADIX_MASK_LEN) {
         debug_assert!(k <= std::u8::MAX as usize);
-        radix_pass(k as u8, tmp_a, tmp_b);
+        radix_pass(k as u32, tmp_a, tmp_b);
         swap(&mut tmp_a, &mut tmp_b);
         swapbuffs = !swapbuffs;
     }
@@ -45,8 +45,8 @@ fn sort_radix<T: Default>(keys: &mut Vec<MortonKey>, values: &mut [T]) {
     }
 
     let mut vs = Vec::with_capacity(keys.len());
-
     keys.clear();
+
     for (i, key) in tmp_a {
         keys.push(*key);
         vs.push(std::mem::take(&mut values[*i]));
@@ -56,7 +56,7 @@ fn sort_radix<T: Default>(keys: &mut Vec<MortonKey>, values: &mut [T]) {
 }
 
 fn radix_pass(
-    k: u8,
+    k: u32,
     keys: &[(usize, MortonKey)], // key, index pairs
     out: &mut [(usize, MortonKey)],
 ) {
@@ -89,8 +89,44 @@ fn radix_pass(
 }
 
 #[inline(always)]
-fn compute_bucket(k: u8, MortonKey(key): MortonKey) -> usize {
-    let key = key >> k;
+fn compute_bucket(k: u32, MortonKey(key): MortonKey) -> usize {
+    let (key, _) = key.overflowing_shr(k);
     let ind = key & RADIX_MASK;
     ind as usize
+}
+
+#[cfg(test)]
+mod tests {
+    use rand::prelude::SliceRandom;
+
+    use super::*;
+
+    #[test]
+    fn test_sorting_sorted() {
+        let control: Vec<MortonKey> = (0..(1 << 31))
+            .step_by(2000)
+            .chain(
+                [
+                    std::u32::MAX - 4,
+                    std::u32::MAX - 3,
+                    std::u32::MAX - 2,
+                    std::u32::MAX - 1,
+                    std::u32::MAX,
+                ]
+                .iter()
+                .copied(),
+            )
+            .map(|i| MortonKey(i))
+            .collect();
+
+        let mut keys = control.clone();
+        keys.shuffle(&mut rand::thread_rng());
+
+        let mut vals = keys.clone();
+
+        sort(&mut keys, vals.as_mut_slice());
+
+        assert_eq!(keys, control);
+        assert_eq!(vals, control);
+    }
 }
