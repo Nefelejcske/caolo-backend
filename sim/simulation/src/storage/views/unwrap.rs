@@ -33,8 +33,7 @@ impl<'a, Id: TableId, C: Component<Id>> Deref for UnwrapView<'a, Id, C> {
     type Target = C;
 
     fn deref(&self) -> &Self::Target {
-        &self
-            .0
+        self.0
             .value
             .as_ref()
             .expect("UnwrapView dereferenced with an empty table")

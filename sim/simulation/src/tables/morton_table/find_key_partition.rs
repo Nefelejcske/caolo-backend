@@ -8,7 +8,7 @@ use std::arch::x86_64::{_mm_cmpgt_epi32, _mm_movemask_epi8, _mm_set_epi32, _popc
 #[cfg(target_arch = "x86_64")]
 #[inline]
 pub fn find_key_partition(skiplist: &SkipList, key: MortonKey) -> usize {
-    unsafe { find_key_partition_sse2(&skiplist, key) }
+    unsafe { find_key_partition_sse2(skiplist, key) }
 }
 
 #[cfg(not(target_arch = "x86_64"))]

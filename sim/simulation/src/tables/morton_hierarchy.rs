@@ -181,7 +181,7 @@ where
 
         // collect the groups into a hashmap
         let groups: std::collections::HashMap<Axial, &[(WorldPosition, Row)]> =
-            GroupByRooms::new(&values).collect();
+            GroupByRooms::new(values).collect();
         let groups = &groups;
 
         // clippy will flag the collect, however we must collect otherwise the &self reference
