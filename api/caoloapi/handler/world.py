@@ -23,7 +23,8 @@ async def __get_room_terrain_layout():
     channel = await queen_channel()
     stub = cao_world_pb2_grpc.WorldStub(channel)
 
-    room_layout = await stub.GetRoomLayout(cao_world_pb2.Empty())
+    msg = cao_world_pb2.GetRoomLayoutMsg(ty=cao_world_pb2.RoomLayoutType.HQ)
+    room_layout = await stub.GetRoomLayout(msg)
     TERRAIN_LAYOUT_CACHE = [(p.q, p.r) for p in room_layout.positions]
 
     return TERRAIN_LAYOUT_CACHE
@@ -57,4 +58,4 @@ async def rooms():
 
     return MessageToDict(
         res, including_default_value_fields=True, preserving_proto_field_name=False
-    ).get("roomIds", [])
+    ).get("rooms", [])

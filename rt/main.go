@@ -50,8 +50,10 @@ func initTerrain(conn *grpc.ClientConn, hub *GameStateHub) {
 		log.Fatalf("Failed to query terrain %v", err)
 	}
 
-	for i := range roomList.RoomIds {
-		roomId := roomList.RoomIds[i]
+	for i := range roomList.Rooms {
+		room := roomList.Rooms[i]
+        roomId := room.RoomId
+        // roomTy := room.RoomTy // TODO
 		terrain, err := client.GetRoomTerrain(context.Background(), roomId)
 		if err != nil {
 			log.Fatalf("Failed to query terrain of room %v: %v", roomId, err)

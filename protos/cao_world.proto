@@ -27,15 +27,30 @@ enum Terrain {
     BRIDGE = 3;
 }
 
-/// All rooms in the world will have the same terrain layout, described here
+enum RoomLayoutType {
+    HQ = 0;
+    // OUTPOST = 1;
+}
+
+message GetRoomLayoutMsg
+{
+    RoomLayoutType ty = 1;
+}
+
 message RoomLayout
 {
     repeated cao_common.Axial positions = 1;
 }
 
+message Room
+{
+    cao_common.Axial room_id = 1;
+    RoomLayoutType room_ty = 2;
+}
+
 message RoomList
 {
-    repeated cao_common.Axial room_ids = 1;
+    repeated Room rooms = 1;
 }
 
 message Bot
@@ -139,7 +154,7 @@ service World
 {
     /// Stream the entities on updates
     rpc Entities(Empty) returns (stream RoomEntities) { }
-    rpc GetRoomLayout(Empty) returns (RoomLayout) { }
+    rpc GetRoomLayout(GetRoomLayoutMsg) returns (RoomLayout) { }
     rpc GetRoomList(Empty) returns (RoomList) { }
 
     rpc GetRoomTerrain(cao_common.Axial) returns (RoomTerrain) { }

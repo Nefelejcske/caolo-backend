@@ -118,17 +118,48 @@ impl cao_world::world_server::World for WorldService {
 
     async fn get_room_layout(
         &self,
-        _: tonic::Request<cao_world::Empty>,
+        r: tonic::Request<cao_world::GetRoomLayoutMsg>,
     ) -> Result<tonic::Response<cao_world::RoomLayout>, tonic::Status> {
-        let positions = self
-            .room_bounds
-            .iter_points()
-            .map(|point| cao_common::Axial {
-                q: point.q,
-                r: point.r,
+        let ty = cao_world::RoomLayoutType::from_i32(r.get_ref().ty);
+        let res = match ty {
+            Some(cao_world::RoomLayoutType::Hq) => {
+                let positions = self
+                    .room_bounds
+                    .iter_points()
+                    .map(|point| cao_common::Axial {
+                        q: point.q,
+                        r: point.r,
+                    })
+                    .collect();
+                tonic::Response::new(cao_world::RoomLayout { positions })
+            }
+            None => {
+                return Err(tonic::Status::invalid_argument("Bad RoomLayoutType"));
+            }
+        };
+        Ok(res)
+    }
+
+    async fn get_room_list(
+        &self,
+        _: tonic::Request<cao_world::Empty>,
+    ) -> Result<tonic::Response<cao_world::RoomList>, tonic::Status> {
+        let rooms = self
+            .terrain
+            .keys()
+            .map(|point| {
+                let room_id = cao_common::Axial {
+                    q: point.q,
+                    r: point.r,
+                };
+
+                cao_world::Room {
+                    room_id: Some(room_id),
+                    room_ty: cao_world::RoomLayoutType::Hq as i32,
+                }
             })
             .collect();
-        Ok(tonic::Response::new(cao_world::RoomLayout { positions }))
+        Ok(tonic::Response::new(cao_world::RoomList { rooms }))
     }
 
     async fn get_room_terrain(
@@ -156,21 +187,6 @@ impl cao_world::world_server::World for WorldService {
                 .map(|t| t.into())
                 .collect(),
         }))
-    }
-
-    async fn get_room_list(
-        &self,
-        _: tonic::Request<cao_world::Empty>,
-    ) -> Result<tonic::Response<cao_world::RoomList>, tonic::Status> {
-        let room_ids = self
-            .terrain
-            .keys()
-            .map(|point| cao_common::Axial {
-                q: point.q,
-                r: point.r,
-            })
-            .collect();
-        Ok(tonic::Response::new(cao_world::RoomList { room_ids }))
     }
 }
 
