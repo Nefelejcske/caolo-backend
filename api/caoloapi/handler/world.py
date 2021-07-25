@@ -13,21 +13,7 @@ from ..queen import queen_channel
 
 router = APIRouter(prefix="/world", tags=["world"])
 
-TERRAIN_LAYOUT_CACHE = None
-
-
-async def __get_room_terrain_layout(radius):
-    global TERRAIN_LAYOUT_CACHE
-    if TERRAIN_LAYOUT_CACHE is not None:
-        return TERRAIN_LAYOUT_CACHE
-    channel = await queen_channel()
-    stub = cao_world_pb2_grpc.WorldStub(channel)
-
-    msg = cao_world_pb2.GetRoomLayoutMsg(radius=radius)
-    room_layout = await stub.GetRoomLayout(msg)
-    TERRAIN_LAYOUT_CACHE = [(p.q, p.r) for p in room_layout.positions]
-
-    return TERRAIN_LAYOUT_CACHE
+TERRAIN_LAYOUT_CACHE = {}
 
 
 @router.get("/room-terrain-layout", response_model=List[Tuple[int, int]])
@@ -39,6 +25,21 @@ async def room_terrain_layout(radius: int = Query(...)):
     will correspond to the i-th coordinates returned by this endpoint
     """
     return await __get_room_terrain_layout(radius)
+
+
+async def __get_room_terrain_layout(radius):
+    global TERRAIN_LAYOUT_CACHE
+    if radius in TERRAIN_LAYOUT_CACHE:
+        return TERRAIN_LAYOUT_CACHE[radius]
+
+    channel = await queen_channel()
+    stub = cao_world_pb2_grpc.WorldStub(channel)
+
+    msg = cao_world_pb2.GetRoomLayoutMsg(radius=radius)
+    room_layout = await stub.GetRoomLayout(msg)
+    TERRAIN_LAYOUT_CACHE[radius] = [(p.q, p.r) for p in room_layout.positions]
+
+    return TERRAIN_LAYOUT_CACHE
 
 
 @router.get("/tile-enum")
