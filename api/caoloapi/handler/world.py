@@ -16,14 +16,14 @@ router = APIRouter(prefix="/world", tags=["world"])
 TERRAIN_LAYOUT_CACHE = None
 
 
-async def __get_room_terrain_layout():
+async def __get_room_terrain_layout(radius):
     global TERRAIN_LAYOUT_CACHE
     if TERRAIN_LAYOUT_CACHE is not None:
         return TERRAIN_LAYOUT_CACHE
     channel = await queen_channel()
     stub = cao_world_pb2_grpc.WorldStub(channel)
 
-    msg = cao_world_pb2.GetRoomLayoutMsg(ty=cao_world_pb2.RoomLayoutType.HQ)
+    msg = cao_world_pb2.GetRoomLayoutMsg(radius=radius)
     room_layout = await stub.GetRoomLayout(msg)
     TERRAIN_LAYOUT_CACHE = [(p.q, p.r) for p in room_layout.positions]
 
@@ -31,14 +31,14 @@ async def __get_room_terrain_layout():
 
 
 @router.get("/room-terrain-layout", response_model=List[Tuple[int, int]])
-async def room_terrain_layout():
+async def room_terrain_layout(radius: int = Query(...)):
     """
     return the coordinates of the room grid points in a list.
 
     If you query the terrain the i-th terrain enum value
     will correspond to the i-th coordinates returned by this endpoint
     """
-    return await __get_room_terrain_layout()
+    return await __get_room_terrain_layout(radius)
 
 
 @router.get("/tile-enum")

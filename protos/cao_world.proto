@@ -27,14 +27,9 @@ enum Terrain {
     BRIDGE = 3;
 }
 
-enum RoomLayoutType {
-    HQ = 0;
-    // OUTPOST = 1;
-}
-
 message GetRoomLayoutMsg
 {
-    RoomLayoutType ty = 1;
+    int32 radius = 1;
 }
 
 message RoomLayout
@@ -45,7 +40,7 @@ message RoomLayout
 message Room
 {
     cao_common.Axial room_id = 1;
-    RoomLayoutType room_ty = 2;
+    int32 radius = 2;
 }
 
 message RoomList

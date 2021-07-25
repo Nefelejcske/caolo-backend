@@ -120,23 +120,19 @@ impl cao_world::world_server::World for WorldService {
         &self,
         r: tonic::Request<cao_world::GetRoomLayoutMsg>,
     ) -> Result<tonic::Response<cao_world::RoomLayout>, tonic::Status> {
-        let ty = cao_world::RoomLayoutType::from_i32(r.get_ref().ty);
-        let res = match ty {
-            Some(cao_world::RoomLayoutType::Hq) => {
-                let positions = self
-                    .room_bounds
-                    .iter_points()
-                    .map(|point| cao_common::Axial {
-                        q: point.q,
-                        r: point.r,
-                    })
-                    .collect();
-                tonic::Response::new(cao_world::RoomLayout { positions })
-            }
-            None => {
-                return Err(tonic::Status::invalid_argument("Bad RoomLayoutType"));
-            }
+        let radius = r.get_ref().radius;
+        let positions = if radius <= 0 {
+            vec![]
+        } else {
+            self.room_bounds
+                .iter_points()
+                .map(|point| cao_common::Axial {
+                    q: point.q,
+                    r: point.r,
+                })
+                .collect()
         };
+        let res = tonic::Response::new(cao_world::RoomLayout { positions });
         Ok(res)
     }
 
@@ -155,7 +151,7 @@ impl cao_world::world_server::World for WorldService {
 
                 cao_world::Room {
                     room_id: Some(room_id),
-                    room_ty: cao_world::RoomLayoutType::Hq as i32,
+                    radius: self.room_bounds.radius,
                 }
             })
             .collect();
