@@ -1,9 +1,0 @@
-*
-!caoloweb
-!setup.py
-!start.sh
-!poetry.lock
-!pyproject.toml
-__pycache__
-*.egg-info
-*.pyc

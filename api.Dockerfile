@@ -37,12 +37,13 @@ RUN sed -i '/.*git.*/d' requirements.txt
 RUN .env/bin/pip install -r requirements.txt
 RUN .env/bin/pip install -r git-req.txt
 
-# Actually install caoloapi
+# Build caoloapi
 WORKDIR /caolo
 COPY ./protos/ ./protos/
 COPY ./api/ ./api/
 WORKDIR /caolo/api
 RUN .env/bin/pip install -e.
+RUN .env/bin/poetry build
 
 # ----------- Prod image -----------
 
@@ -50,10 +51,17 @@ FROM python:3.9-slim
 
 WORKDIR /caolo/api
 
+
+RUN apt-get update
+RUN apt-get install -y git
+
 COPY --from=build /caolo/api/start.sh ./
-COPY --from=build /caolo/api/ ./
+COPY --from=build /caolo/api/.env ./.env
+COPY --from=build /caolo/api/dist ./dist
 
 ENV PATH="/caolo/api/.env/bin:$PATH"
+
+RUN pip install ./dist/caoloapi-0.1.0-py3-none-any.whl
 
 RUN chmod +x start.sh
 
