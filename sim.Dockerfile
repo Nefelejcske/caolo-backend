@@ -63,10 +63,8 @@ FROM ubuntu:18.04
 WORKDIR /caolo
 
 RUN apt-get update -y
-RUN apt-get install bash openssl -y
+RUN apt-get install openssl -y
 
 COPY --from=build /caolo/sim/target/release/caolo-worker ./caolo-worker
-
-RUN ls -al
 
 ENTRYPOINT [ "./caolo-worker" ]
