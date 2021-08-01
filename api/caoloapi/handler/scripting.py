@@ -7,7 +7,6 @@ import cao_lang
 
 from fastapi import (
     APIRouter,
-    Response,
     Query,
     Request,
     HTTPException,
@@ -30,7 +29,7 @@ router = APIRouter(prefix="/scripting", tags=["scripting"])
 
 
 @router.get("/schema", response_model=List[Dict])
-async def get_schema(req: Request):
+async def get_schema():
     stub = ScriptingStub(await queen_channel())
     res = await stub.GetSchema(Empty())
     return MessageToDict(
