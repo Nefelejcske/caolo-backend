@@ -79,7 +79,7 @@ impl cao_world::world_server::World for WorldService {
 
     async fn entities(
         &self,
-        _r: tonic::Request<cao_world::Empty>,
+        _r: tonic::Request<cao_common::Empty>,
     ) -> Result<tonic::Response<Self::EntitiesStream>, tonic::Status> {
         let addr = _r.remote_addr();
 
@@ -138,7 +138,7 @@ impl cao_world::world_server::World for WorldService {
 
     async fn get_room_list(
         &self,
-        _: tonic::Request<cao_world::Empty>,
+        _: tonic::Request<cao_common::Empty>,
     ) -> Result<tonic::Response<cao_world::RoomList>, tonic::Status> {
         let rooms = self
             .terrain

@@ -23,6 +23,12 @@ message Uuid
 /// newtype wrapper around a json serialized object
 message Json
 {
-    bytes value = 1;
+  bytes value = 1;
 }
 
+message Empty { }
+
+service Health
+{
+  rpc Ping(Empty) returns (Empty) { }
+}

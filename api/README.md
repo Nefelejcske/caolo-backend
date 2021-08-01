@@ -17,8 +17,8 @@
 
 ```
 diesel database setup
-
 poetry install
+pip install .
 ```
 
 ## Running
@@ -32,3 +32,16 @@ poetry install
 ## OpenAPI
 
 Visit `http[s]://<url>/docs`
+
+## E2E testing
+
+- Start `sim`
+- Start a database
+
+```
+make test
+
+# or
+
+pytest test/
+```

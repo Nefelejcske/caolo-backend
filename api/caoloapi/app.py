@@ -1,13 +1,17 @@
-from typing import Dict, List, Tuple
+import asyncio
 import logging
 
-from fastapi import FastAPI, Response, Query, Request
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 import asyncpg
-from .config import QUEEN_TAG, DB_URL, QUEEN_URL
+from .config import DB_URL
 
 from . import handler
+from .queen import queen_channel
+
+import cao_common_pb2
+import cao_common_pb2_grpc
 
 
 logging.basicConfig(
@@ -39,7 +43,7 @@ _DB_POOL = None
 
 async def db_pool():
     global _DB_POOL
-    if not _DB_POOL:
+    if _DB_POOL is None:
         _DB_POOL = await asyncpg.create_pool(DB_URL)
     return _DB_POOL
 
@@ -48,6 +52,7 @@ async def db_pool():
 async def db_session(req, call_next):
     resp = Response(status_code=500)
     pool = await db_pool()
+    assert pool is not None
     async with pool.acquire() as con:
         req.state.db = con
         resp = await call_next(req)
@@ -62,6 +67,15 @@ async def rate_limit(req, call_next):
 
 @app.get("/health")
 async def health():
+    async def _ping_queen():
+        channel = await queen_channel()
+        stub = cao_common_pb2_grpc.HealthStub(channel)
+        msg = cao_common_pb2.Empty()
+        resp = await stub.Ping(msg)
+        return resp
+
+    await asyncio.gather(_ping_queen(), db_pool())  # test dependencies
+
     return Response(status_code=204)
 
 

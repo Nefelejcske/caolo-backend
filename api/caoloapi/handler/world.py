@@ -1,11 +1,10 @@
 from typing import Dict, List, Tuple
 
-from fastapi import APIRouter, Query, Depends, HTTPException, status
+from fastapi import APIRouter, Query
 
-import grpc
+import cao_common_pb2
 import cao_world_pb2
 import cao_world_pb2_grpc
-import cao_common_pb2
 from google.protobuf.json_format import MessageToDict
 
 from ..queen import queen_channel
@@ -39,7 +38,7 @@ async def __get_room_terrain_layout(radius):
     room_layout = await stub.GetRoomLayout(msg)
     TERRAIN_LAYOUT_CACHE[radius] = [(p.q, p.r) for p in room_layout.positions]
 
-    return TERRAIN_LAYOUT_CACHE
+    return TERRAIN_LAYOUT_CACHE[radius]
 
 
 @router.get("/tile-enum")
@@ -55,8 +54,10 @@ async def rooms():
     channel = await queen_channel()
     stub = cao_world_pb2_grpc.WorldStub(channel)
 
-    res = await stub.GetRoomList(cao_world_pb2.Empty())
+    res = await stub.GetRoomList(cao_common_pb2.Empty())
 
     return MessageToDict(
-        res, including_default_value_fields=True, preserving_proto_field_name=False
+        res,
+        including_default_value_fields=True,
+        preserving_proto_field_name=False,
     ).get("rooms", [])

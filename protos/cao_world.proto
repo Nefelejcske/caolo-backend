@@ -143,14 +143,12 @@ message RoomEntities
     repeated Resource resources = 5;
 }
 
-message Empty { }
-
 service World
 {
     /// Stream the entities on updates
-    rpc Entities(Empty) returns (stream RoomEntities) { }
+    rpc Entities(cao_common.Empty) returns (stream RoomEntities) { }
     rpc GetRoomLayout(GetRoomLayoutMsg) returns (RoomLayout) { }
-    rpc GetRoomList(Empty) returns (RoomList) { }
+    rpc GetRoomList(cao_common.Empty) returns (RoomList) { }
 
     rpc GetRoomTerrain(cao_common.Axial) returns (RoomTerrain) { }
 }

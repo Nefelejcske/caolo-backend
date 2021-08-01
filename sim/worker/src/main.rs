@@ -3,10 +3,12 @@ mod input;
 mod protos;
 
 mod command_service;
+mod health_service;
 mod scripting_service;
 mod world_service;
 
 use crate::protos::cao_commands::command_server::CommandServer;
+use crate::protos::cao_common::health_server::HealthServer;
 use crate::protos::cao_script::scripting_server::ScriptingServer;
 use crate::protos::cao_world::world_server::WorldServer;
 use caolo_sim::executor::SimpleExecutor;
@@ -160,6 +162,7 @@ fn main() {
             Arc::new(terrain),
             world_span,
         )))
+        .add_service(HealthServer::new(health_service::HealthService {}))
         .serve(addr);
 
     let game_loop = game_loop(world, executor, outpayload, tick_latency).instrument(game_loop_span);

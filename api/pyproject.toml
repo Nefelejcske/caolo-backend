@@ -19,6 +19,9 @@ python-jose = "^3.2.0"
 cao-lang = { git = "https://github.com/caolo-game/cao-lang.git" }
 
 [tool.poetry.dev-dependencies]
+pytest = "^6.2.4"
+requests = "^2.26.0"
+pytest-dependency = "^0.5.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", 'setuptools>=40', 'grpcio-tools']
