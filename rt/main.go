@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	cao_common "github.com/caolo-game/cao-rt/cao_common_pb"
 	cao_world "github.com/caolo-game/cao-rt/cao_world_pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
@@ -20,7 +21,7 @@ func listenToWorld(conn *grpc.ClientConn, worldState chan *cao_world.RoomEntitie
 	client := cao_world.NewWorldClient(conn)
 
 	for {
-		stream, err := client.Entities(context.Background(), &cao_world.Empty{})
+		stream, err := client.Entities(context.Background(), &cao_common.Empty{})
 		if err != nil {
 			panic(err)
 		}
@@ -45,15 +46,15 @@ func listenToWorld(conn *grpc.ClientConn, worldState chan *cao_world.RoomEntitie
 func initTerrain(conn *grpc.ClientConn, hub *GameStateHub) {
 	client := cao_world.NewWorldClient(conn)
 
-	roomList, err := client.GetRoomList(context.Background(), &cao_world.Empty{})
+	roomList, err := client.GetRoomList(context.Background(), &cao_common.Empty{})
 	if err != nil {
 		log.Fatalf("Failed to query terrain %v", err)
 	}
 
 	for i := range roomList.Rooms {
 		room := roomList.Rooms[i]
-        roomId := room.RoomId
-        // roomTy := room.RoomTy // TODO
+		roomId := room.RoomId
+		// roomTy := room.RoomTy // TODO
 		terrain, err := client.GetRoomTerrain(context.Background(), roomId)
 		if err != nil {
 			log.Fatalf("Failed to query terrain of room %v: %v", roomId, err)

@@ -25,7 +25,7 @@ fn create_world(room_radius: u32) -> std::pin::Pin<Box<World>> {
 }
 
 fn bench_find_path_in_room(c: &mut Criterion) {
-    let mut world = create_world(29);
+    let mut world = create_world(8);
 
     let terrain_points;
     let room;
