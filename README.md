@@ -15,7 +15,7 @@ Code layout:
  |+ worker/             # Executable code running the simulation and interfacing
 ```
 
-## Building via Docker
+## Building via Skaffold
 
 ### Requirements
 

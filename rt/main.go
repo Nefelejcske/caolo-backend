@@ -49,7 +49,6 @@ func getRoomData(roomId *cao_common.Axial, client cao_world.WorldClient, send_te
 	if err != nil {
 		log.Fatalf("Failed to query terrain of room %v: %v", roomId, err)
 	}
-	log.Printf("Got terrain for room %v", roomId)
 	send_terrain <- terrain
 }
 

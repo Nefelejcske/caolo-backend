@@ -4,6 +4,10 @@ build:
   tagPolicy:
     sha256: {}
   artifacts:
+    - image: caolo/caolo-sim
+      context: .
+      docker:
+        dockerfile: sim.Dockerfile
     - image: caolo/caolo-release
       context: .
       docker:
@@ -16,10 +20,6 @@ build:
       context: .
       docker:
         dockerfile: rt.Dockerfile
-    - image: caolo/caolo-sim
-      context: .
-      docker:
-        dockerfile: sim.Dockerfile
 
 deploy:
   kubectl:
