@@ -1,0 +1,20 @@
+apiVersion: skaffold/v1
+kind: Config
+build:
+  artifacts:
+  - image: release
+    context: .
+    docker:
+      dockerfile: release.Dockerfile
+  - image: api
+    context: .
+    docker:
+      dockerfile: api.Dockerfile
+  - image: rt
+    context: .
+    docker:
+      dockerfile: rt.Dockerfile
+  - image: sim
+    context: .
+    docker:
+      dockerfile: sim.Dockerfile
