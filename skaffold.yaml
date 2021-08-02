@@ -1,27 +1,25 @@
 apiVersion: skaffold/v2beta19
 kind: Config
+metadata:
+  name: caolo-backend
 build:
-  tagPolicy:
-    sha256: {}
   artifacts:
     - image: caolo/caolo-sim
-      context: .
       docker:
         dockerfile: sim.Dockerfile
-    - image: caolo/caolo-release
-      context: .
-      docker:
-        dockerfile: release.Dockerfile
     - image: caolo/caolo-api
-      context: .
       docker:
         dockerfile: api.Dockerfile
+    - image: caolo/caolo-release
+      docker:
+        dockerfile: release.Dockerfile
     - image: caolo/caolo-rt
-      context: .
       docker:
         dockerfile: rt.Dockerfile
-
 deploy:
   kubectl:
     manifests:
-      - k8s/*
+      - k8s/db.yml
+      - k8s/queen.yml
+      - k8s/rt.yml
+      - k8s/web.yml
