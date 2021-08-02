@@ -1,10 +1,7 @@
-from typing import Dict, List, Tuple
-from uuid import UUID, uuid4
+from uuid import UUID
 import logging
 from fastapi import (
     APIRouter,
-    Response,
-    Query,
     Request,
     Body,
     Depends,
@@ -14,16 +11,13 @@ from fastapi import (
 import json
 from pydantic import BaseModel
 
-import asyncio
 import grpc
 
 import cao_commands_pb2 as cao_commands
 import cao_commands_pb2_grpc
 import cao_script_pb2_grpc
-import cao_script_pb2 as cao_script
 
 from .scripting import CaoLangProgram, _compile_caolang_program
-from ..config import QUEEN_TAG, QUEEN_URL
 from .users import get_current_user_id
 from ..api_schema import WorldPosition, StructureType
 from ..queen import queen_channel
@@ -35,6 +29,7 @@ router = APIRouter(prefix="/commands", tags=["commands"])
 def commands_stub():
     channel = queen_channel()
     return cao_commands_pb2_grpc.CommandStub(channel)
+
 
 def scripting_stub():
     channel = queen_channel()
@@ -48,7 +43,6 @@ class BotScriptPayload(BaseModel):
 
 @router.post("/bot-script")
 async def set_bot_script(
-    req: Request,
     req_payload: BotScriptPayload = Body(...),
     current_user_id=Depends(get_current_user_id),
 ):
@@ -63,7 +57,7 @@ async def set_bot_script(
     stub = scripting_stub()
 
     try:
-        _result = await stub.UpdateEntityScript(msg)
+        await stub.UpdateEntityScript(msg)
     except grpc.aio.AioRpcError as err:
         if err.code() == grpc.StatusCode.INVALID_ARGUMENT:
             raise HTTPException(
@@ -84,7 +78,6 @@ class PlaceStructurePayload(BaseModel):
 
 @router.post("/place-structure")
 async def place_structure(
-    req: Request,
     req_payload: PlaceStructurePayload = Body(...),
     current_user_id=Depends(get_current_user_id),
 ):
@@ -104,7 +97,7 @@ async def place_structure(
         )
     stub = commands_stub()
     try:
-        _result = await stub.PlaceStructure(msg)
+        await stub.PlaceStructure(msg)
     except grpc.aio.AioRpcError as err:
         if err.code() == grpc.StatusCode.INVALID_ARGUMENT:
             raise HTTPException(

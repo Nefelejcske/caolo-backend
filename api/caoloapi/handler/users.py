@@ -67,6 +67,10 @@ async def get_myself(req: Request, current_user=Depends(get_current_user_id)):
         """,
         current_user,
     )
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Log in first"
+        )
     return User(
         user_id=current_user["id"],
         username=current_user["username"],
@@ -98,7 +102,7 @@ async def register(req: Request, form_data: RegisterForm = Body(...)):
     db = req.state.db
 
     raw_pw = form_data.pw
-    salt = "".join(random.choice(string.ascii_letters) for i in range(10))
+    salt = "".join(random.choice(string.ascii_letters) for _ in range(10))
     pepper = random.choice(range(*PEPPER_RANGE))
 
     pw = hashpw(raw_pw, salt, pepper)
