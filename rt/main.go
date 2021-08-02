@@ -13,6 +13,7 @@ import (
 	cao_world "github.com/caolo-game/cao-rt/cao_world_pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
+	"google.golang.org/grpc/connectivity"
 )
 
 var addr = flag.String("addr", "localhost:8080", "http service address")
@@ -86,9 +87,15 @@ func initTerrain(conn *grpc.ClientConn, hub *GameStateHub) {
 	}
 }
 
-func main() {
-	flag.Parse()
+func MinInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
 
+// Wait until the queen is online
+func waitForConnectionReady() *grpc.ClientConn {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithInsecure(), grpc.WithConnectParams(grpc.ConnectParams{
 		Backoff: backoff.Config{
@@ -100,13 +107,45 @@ func main() {
 		MinConnectTimeout: time.Second * 10,
 	}))
 
-	log.Println("Starting")
-
 	conn, err := grpc.Dial(*simAddr, opts...)
 	if err != nil {
 		log.Fatalf("Failed to connect %v", err)
 	}
+
+	var backoff = 500
+	for {
+		conn.WaitForStateChange(context.Background(), conn.GetState())
+		state := conn.GetState()
+		switch state {
+		case connectivity.Connecting:
+			break
+		case connectivity.Idle:
+		case connectivity.Ready:
+			return conn
+		case connectivity.Shutdown:
+		case connectivity.TransientFailure:
+			log.Printf("Connection state changed state=%v. Backing off for %dms", state, backoff)
+			conn.Close()
+
+			time.Sleep(time.Duration(backoff) * time.Millisecond)
+			backoff = MinInt(backoff*2, 5000)
+
+			conn, err = grpc.Dial(*simAddr, opts...)
+			if err != nil {
+				log.Fatalf("Failed to connect %v", err)
+			}
+		}
+	}
+}
+
+func main() {
+	flag.Parse()
+
+	log.Println("Starting")
+
+	conn := waitForConnectionReady()
 	defer conn.Close()
+
 	hub := NewGameStateHub()
 
 	go listenToWorld(conn, hub.WorldState)
