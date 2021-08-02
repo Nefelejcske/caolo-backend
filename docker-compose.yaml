@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: ./release.Dockerfile
-    image: frenetiq/caolo-release:bleeding
+    image: caolo/caolo-release:bleeding
     env_file: docker.env
     depends_on:
       - db
@@ -12,7 +12,7 @@ services:
     build:
       context: .
       dockerfile: ./api.Dockerfile
-    image: frenetiq/caolo-api:bleeding
+    image: caolo/caolo-api:bleeding
     env_file: docker.env
     environment:
       HOST: 0.0.0.0
@@ -34,7 +34,7 @@ services:
     build:
       context: .
       dockerfile: ./sim.Dockerfile
-    image: frenetiq/caolo-sim:bleeding
+    image: caolo/caolo-sim:bleeding
     env_file: docker.env
     ports:
       - "50051:50051"
@@ -43,7 +43,7 @@ services:
     build:
       context: .
       dockerfile: ./rt.Dockerfile
-    image: frenetiq/caolo-rt:bleeding
+    image: caolo/caolo-rt:bleeding
     env_file: docker.env
     ports:
       - "8080:8080"
