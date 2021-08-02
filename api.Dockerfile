@@ -42,7 +42,8 @@ WORKDIR /caolo
 COPY ./protos/ ./protos/
 COPY ./api/ ./api/
 WORKDIR /caolo/api
-RUN .env/bin/pip install -e.
+# build protos
+RUN .env/bin/python setup.py protos
 RUN .env/bin/poetry build
 
 # ----------- Prod image -----------
@@ -50,7 +51,6 @@ RUN .env/bin/poetry build
 FROM python:3.9-slim
 
 WORKDIR /caolo/api
-
 
 RUN apt-get update
 RUN apt-get install -y git
