@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from caoloapi.app import app
+from pprint import pprint
 
 client = TestClient(app)
 
@@ -32,3 +33,61 @@ def test_schema():
         ]
     )
     assert sorted(list(body[0].keys())) == expected_keys
+
+
+def test_compile_hello_world():
+    response = client.post(
+        "/scripting/compile",
+        json={
+            "lanes": [
+                {
+                    "name": "hello",
+                    "cards": [
+                        {"ty": "StringLiteral", "val": "World"},
+                        {"ty": "CallNative", "val": "console_log"},
+                    ],
+                }
+            ]
+        },
+    )
+
+    pprint(response.json())
+    assert response.status_code == 200
+
+
+def test_compile_bad_ty():
+    response = client.post(
+        "/scripting/compile",
+        json={
+            "lanes": [
+                {
+                    "name": "hello",
+                    "cards": [
+                        {"ty": "poggers-moggers", "val": "console_log"},
+                    ],
+                }
+            ]
+        },
+    )
+
+    pprint(response.json())
+    assert response.status_code == 400
+
+
+def test_compile_missing_val():
+    response = client.post(
+        "/scripting/compile",
+        json={
+            "lanes": [
+                {
+                    "name": "hello",
+                    "cards": [
+                        {"ty": "CallNative"},
+                    ],
+                }
+            ]
+        },
+    )
+
+    pprint(response.json())
+    assert response.status_code == 400

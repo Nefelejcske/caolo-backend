@@ -2,7 +2,6 @@ from uuid import UUID
 import logging
 from fastapi import (
     APIRouter,
-    Request,
     Body,
     Depends,
     HTTPException,

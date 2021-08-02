@@ -87,7 +87,8 @@ async def cao_lang_version() -> str:
 async def compile_program(req: Request, _body: CaoLangProgram = Body(...)):
     # Body is used for openapi hint
     # we need the program to be json encoded, so just use the raw body
-    payload: bytes = await req.body()
+    _body # silence unused warning
+    payload = await req.body()
     payload = payload.decode(encoding="UTF-8")
     _compile_caolang_program(payload)
     return {"status": "Ok"}
