@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: queen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: queen
+  serviceName: queen
+  template:
+    metadata:
+      labels:
+        app: queen
+
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: queen
+          imagePullPolicy: Always
+          image: caolo/caolo-sim:latest
+          resources:
+            requests:
+              memory: "200Mi"
+              cpu: "4"
+            limits:
+              memory: "1Gi"
+          command:
+            - ./caolo-worker
+          env:
+            - name: CAO_N_ACTORS
+              value: "7500"
+            - name: CAO_ROOM_RADIUS
+              value: "30"
+            - name: CAO_MAP_OVERWORLD_RADIUS
+              value: "10"
+            - name: CAO_QUEEN_TAG
+              value: boises
+            - name: RUST_LOG
+              value: info
+            - name: CAO_TARGET_TICK_LATENCY_MS
+              value: "1000"
+            - name: CAO_SERVICE_ADDR
+              value: 0.0.0.0:50051
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: queen
+spec:
+  type: ClusterIP
+  ports:
+    - name: queen
+      port: 50051
+  selector:
+    app: queen

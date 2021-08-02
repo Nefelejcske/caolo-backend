@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      initContainers:
+        - name: web-release
+          image: caolo/caolo-release:latest
+          imagePullPolicy: Always
+          command:
+            - bash
+            - /caolo/release.sh
+          env:
+            - name: DATABASE_URL
+              value: postgres://postgres:xcLKtqZjDwOthsA0mnDOtBTKOhYAJwqzwxuGFrGQ7KYEAKNRF952gBB1DwSJMuB0q4q09mrCK5z3hRfnumW@web-db:5432
+
+      restartPolicy: Always
+      containers:
+        - name: web
+          image: caolo/caolo-api:latest
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+          env:
+            - name: WEB_CONCURRENCY
+              value: "2"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "8000"
+            - name: DATABASE_URL
+              value: postgres://postgres:xcLKtqZjDwOthsA0mnDOtBTKOhYAJwqzwxuGFrGQ7KYEAKNRF952gBB1DwSJMuB0q4q09mrCK5z3hRfnumW@web-db:5432?sslmode=disable
+            - name: CAO_QUEEN_TAG
+              value: boises
+            - name: CAO_QUEEN_URL
+              value: queen:50051
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  type: LoadBalancer
+  ports:
+    - name: "web"
+      port: 8000
+  selector:
+    app: web

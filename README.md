@@ -17,6 +17,17 @@ Code layout:
 
 ## Building via Docker
 
+### Requirements
+
+- [Skaffold](https://skaffold.dev/docs/install/)
+- [Docker](https://www.docker.com/)
+
 ```
-make all
+skaffold build
+```
+
+## Running tests
+
+```
+make test
 ```

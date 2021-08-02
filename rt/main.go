@@ -9,6 +9,7 @@ import (
 	"time"
 
 	cao_common "github.com/caolo-game/cao-rt/cao_common_pb"
+	"github.com/caolo-game/cao-rt/cao_world_pb"
 	cao_world "github.com/caolo-game/cao-rt/cao_world_pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
@@ -43,27 +44,46 @@ func listenToWorld(conn *grpc.ClientConn, worldState chan *cao_world.RoomEntitie
 	}
 }
 
+func getRoomData(roomId *cao_common.Axial, client cao_world.WorldClient, send_terrain chan *cao_world_pb.RoomTerrain) {
+	terrain, err := client.GetRoomTerrain(context.Background(), roomId)
+	if err != nil {
+		log.Fatalf("Failed to query terrain of room %v: %v", roomId, err)
+	}
+	log.Printf("Got terrain for room %v", roomId)
+	send_terrain <- terrain
+}
+
 func initTerrain(conn *grpc.ClientConn, hub *GameStateHub) {
 	client := cao_world.NewWorldClient(conn)
 
 	roomList, err := client.GetRoomList(context.Background(), &cao_common.Empty{})
 	if err != nil {
-		log.Fatalf("Failed to query terrain %v", err)
+		log.Fatalf("Failed to query room list %v", err)
 	}
+
+	// Query the room terrains' in parallel
+	//
+
+	var ch = make(chan *cao_world_pb.RoomTerrain)
+	var todo = len(roomList.Rooms)
 
 	for i := range roomList.Rooms {
 		room := roomList.Rooms[i]
 		roomId := room.RoomId
-		// roomTy := room.RoomTy // TODO
-		terrain, err := client.GetRoomTerrain(context.Background(), roomId)
-		if err != nil {
-			log.Fatalf("Failed to query terrain of room %v: %v", roomId, err)
+		go getRoomData(roomId, client, ch)
+	}
+
+	for todo > 0 {
+		select {
+		case terrain := <-ch:
+			roomId := RoomId{
+				Q: terrain.RoomId.Q,
+				R: terrain.RoomId.R,
+			}
+			hub.Terrain[roomId] = terrain
+
+			todo -= 1
 		}
-		rid := RoomId{
-			Q: roomId.Q,
-			R: roomId.R,
-		}
-		hub.Terrain[rid] = terrain
 	}
 }
 
@@ -85,7 +105,7 @@ func main() {
 
 	conn, err := grpc.Dial(*simAddr, opts...)
 	if err != nil {
-		log.Fatalf("failed to connect %v", err)
+		log.Fatalf("Failed to connect %v", err)
 	}
 	defer conn.Close()
 	hub := NewGameStateHub()

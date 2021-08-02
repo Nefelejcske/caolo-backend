@@ -2,7 +2,7 @@ apiVersion: skaffold/v2beta19
 kind: Config
 build:
   tagPolicy:
-    gitCommit: {}
+    sha256: {}
   artifacts:
     - image: caolo/caolo-release
       context: .
@@ -20,14 +20,8 @@ build:
       context: .
       docker:
         dockerfile: sim.Dockerfile
-test:
-  - image: caolo/caolo-sim
-    custom:
-      - command: cargo test --benches --all
-        dependencies:
-          paths:
-            - "sim/**/*.rs"
-      - command: cargo test --doc
-        dependencies:
-          paths:
-            - "sim/**/*.rs"
+
+deploy:
+  kubectl:
+    manifests:
+      - k8s/*
