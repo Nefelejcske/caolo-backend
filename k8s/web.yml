@@ -39,6 +39,8 @@ spec:
             httpGet:
               path: /health
               port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 5
           env:
             - name: WEB_CONCURRENCY
               value: "2"
