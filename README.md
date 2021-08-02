@@ -19,11 +19,24 @@ Code layout:
 
 ### Requirements
 
-- [Skaffold](https://skaffold.dev/docs/install/)
-- [Docker](https://www.docker.com/)
+-   [Skaffold](https://skaffold.dev/docs/install/)
+-   [kubectl](https://kubernetes.io/docs/tasks/tools/)
+-   [Docker](https://www.docker.com/)
+
+### Build and push the image
 
 ```
 skaffold build
+```
+
+### Configuring your kubernetes cluster
+
+**TBA**
+
+### Build & Deploy
+
+```
+skaffold run
 ```
 
 ## Running tests
