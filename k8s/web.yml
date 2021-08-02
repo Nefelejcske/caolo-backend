@@ -14,19 +14,19 @@ spec:
     spec:
       initContainers:
         - name: web-release
-          image: caolo/caolo-release:latest
+          image: caolo/caolo-release
           imagePullPolicy: Always
           command:
             - bash
             - /caolo/release.sh
           env:
             - name: DATABASE_URL
-              value: postgres://postgres:xcLKtqZjDwOthsA0mnDOtBTKOhYAJwqzwxuGFrGQ7KYEAKNRF952gBB1DwSJMuB0q4q09mrCK5z3hRfnumW@web-db:5432
+              value: postgres://postgres:poggers@web-db:5432
 
       restartPolicy: Always
       containers:
         - name: web
-          image: caolo/caolo-api:latest
+          image: caolo/caolo-api
           imagePullPolicy: Always
           resources:
             requests:
@@ -47,7 +47,7 @@ spec:
             - name: PORT
               value: "8000"
             - name: DATABASE_URL
-              value: postgres://postgres:xcLKtqZjDwOthsA0mnDOtBTKOhYAJwqzwxuGFrGQ7KYEAKNRF952gBB1DwSJMuB0q4q09mrCK5z3hRfnumW@web-db:5432?sslmode=disable
+              value: postgres://postgres:poggers@web-db:5432?sslmode=disable
             - name: CAO_QUEEN_TAG
               value: boises
             - name: CAO_QUEEN_URL

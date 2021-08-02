@@ -15,7 +15,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: rt
-          image: caolo/caolo-rt:latest
+          image: caolo/caolo-rt
           imagePullPolicy: Always
           resources:
             requests:

@@ -3,6 +3,8 @@ kind: Config
 metadata:
   name: caolo-backend
 build:
+  tagPolicy:
+    gitCommit: {}
   artifacts:
     - image: caolo/caolo-sim
       docker:

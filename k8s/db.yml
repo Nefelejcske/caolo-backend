@@ -18,7 +18,7 @@ spec:
           image: postgres
           env:
             - name: POSTGRES_PASSWORD
-              value: "xcLKtqZjDwOthsA0mnDOtBTKOhYAJwqzwxuGFrGQ7KYEAKNRF952gBB1DwSJMuB0q4q09mrCK5z3hRfnumW"
+              value: "poggers"
 
 ---
 apiVersion: v1
