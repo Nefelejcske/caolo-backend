@@ -118,7 +118,6 @@ class UpdateScriptPayload(BaseModel):
 
 @router.post("/update-script")
 async def update_script(
-    req: Request,
     req_payload: UpdateScriptPayload = Body(...),
     current_user_id=Depends(get_current_user_id),
 ):
@@ -136,7 +135,7 @@ async def update_script(
 
     stub = scripting_stub()
     try:
-        _result = await stub.UpdateScript(msg)
+        await stub.UpdateScript(msg)
     except grpc.aio.AioRpcError as err:
         if err.code() == grpc.StatusCode.INVALID_ARGUMENT:
             raise HTTPException(
