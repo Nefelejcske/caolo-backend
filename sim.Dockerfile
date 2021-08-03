@@ -22,7 +22,7 @@ WORKDIR /caolo
 COPY ./.cargo/ ./.cargo/
 # NOTE that chef cook and cargo build have to be executed from the same working directory!
 WORKDIR /caolo/sim
-RUN cargo install cargo-chef
+COPY --from=planner $CARGO_HOME $CARGO_HOME
 COPY --from=planner /caolo/sim/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
