@@ -1,9 +1,8 @@
 # ============= planner ============================================================
 # later stages may use these cached layers
-FROM rust:latest AS planner
+FROM lukemathwalker/cargo-chef:latest AS planner
 
 WORKDIR /caolo
-RUN cargo install cargo-chef
 COPY ./.cargo/ ./.cargo/
 COPY ./protos/ ./protos/
 COPY ./sim/ ./sim/
@@ -13,7 +12,7 @@ RUN cargo chef prepare --recipe-path recipe.json
 
 # ============= cache dependencies ============================================================
 
-FROM rust:latest AS deps
+FROM lukemathwalker/cargo-chef:latest AS deps
 
 RUN apt-get update
 RUN apt-get install lld clang libc-dev pkgconf -y
