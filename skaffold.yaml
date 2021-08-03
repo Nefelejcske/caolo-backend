@@ -3,6 +3,9 @@ kind: Config
 metadata:
   name: caolo-backend
 build:
+  local:
+    tryImportMissing: true
+    concurrency: 0
   tagPolicy:
     gitCommit: {}
   artifacts:
