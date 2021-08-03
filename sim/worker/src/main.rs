@@ -79,7 +79,7 @@ fn main() {
 
     let config = config::Config::load();
 
-    info!("Loaded config {:?}", config);
+    info!("Loaded config\n{:#?}", config);
 
     let script_chunk_size = env::var("CAO_QUEEN_SCRIPT_CHUNK_SIZE")
         .ok()
