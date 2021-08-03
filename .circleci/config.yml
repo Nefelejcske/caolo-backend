@@ -6,7 +6,8 @@ orbs:
 commands:
   kubernetes-deploy:
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
 
       - kubernetes/install-kubectl:
           kubectl-version: v1.15.10
