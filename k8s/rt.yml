@@ -16,7 +16,7 @@ spec:
       containers:
         - name: rt
           image: caolo/caolo-rt
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent 
           resources:
             requests:
               memory: "64Mi"

@@ -15,7 +15,7 @@ spec:
       initContainers:
         - name: web-release
           image: caolo/caolo-release
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command:
             - bash
             - /caolo/release.sh
@@ -27,7 +27,7 @@ spec:
       containers:
         - name: web
           image: caolo/caolo-api
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           resources:
             requests:
               memory: "64Mi"

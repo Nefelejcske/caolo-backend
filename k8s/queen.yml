@@ -17,7 +17,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: queen
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           image: caolo/caolo-sim
           resources:
             requests:
