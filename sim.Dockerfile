@@ -27,8 +27,6 @@ RUN sed -i '/build\s*=\s*\"build\.rs\"/d' simulation/Cargo.toml
 # Delete the bench section
 RUN sed -i '/\[\[bench/,+2d' simulation/Cargo.toml
 
-
-ENV SQLX_OFFLINE=true
 RUN cargo build --release
 RUN rm -f target/release/deps/caolo_*
 
@@ -54,7 +52,6 @@ COPY ./protos/ ./protos/
 COPY ./sim/ ./sim/
 WORKDIR /caolo/sim
 
-ENV SQLX_OFFLINE=true
 RUN cargo build --release
 
 # ========== Copy the built binary to a scratch container, to minimize the image size ==========

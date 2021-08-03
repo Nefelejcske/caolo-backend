@@ -79,13 +79,6 @@ fn main() {
 
     let config = config::Config::load();
 
-    let _sentry = env::var("SENTRY_URI")
-        .ok()
-        .map(|uri| sentry::init(uri.as_str()))
-        .ok_or_else(|| {
-            eprintln!("Sentry URI was not provided");
-        });
-
     info!("Loaded config {:?}", config);
 
     let script_chunk_size = env::var("CAO_QUEEN_SCRIPT_CHUNK_SIZE")
