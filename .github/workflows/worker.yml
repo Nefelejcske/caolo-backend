@@ -2,31 +2,24 @@ name: Queen
 
 on:
   push:
-    branches: [master]
+    branches: [master, main]
   pull_request:
-    branches: [master]
+    branches: [master, main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     name: Test suite
 
-    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
-      matrix:
-        rust: [stable]
-        experimental: [false]
-        include:
-          - rust: nightly
-            experimental: true
 
     steps:
       - uses: actions/checkout@v2
       - name: Install toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: stable
 
       - name: Install protoc
         run: |
@@ -38,10 +31,8 @@ jobs:
 
       - name: Check all features
         run: |
-          cargo +${{ matrix.rust }} check-all-features
+          cargo +stable check-all-features
         working-directory: sim
-        env:
-          SQLX_OFFLINE: true
 
       - name: Run tests
         run: |
@@ -52,7 +43,6 @@ jobs:
           RUST_BACKTRACE: 1
           CARGO_INCREMENTAL: 0
           RUSTDOCFLAGS: "-Cpanic=abort"
-          SQLX_OFFLINE: true
 
   clippy_check:
     runs-on: ubuntu-latest
@@ -74,5 +64,3 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-features --manifest-path ./sim/Cargo.toml
-        env:
-          SQLX_OFFLINE: true
