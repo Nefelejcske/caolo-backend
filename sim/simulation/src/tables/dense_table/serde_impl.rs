@@ -103,7 +103,7 @@ mod tests {
             .map(|_| {
                 entity = entity.next();
                 let e = entity.clone();
-                let val = rng.gen_range(0.0f32, 128.0);
+                let val = rng.gen_range(0.0f32..128.0);
                 (e, val)
             })
             .collect::<Vec<_>>();

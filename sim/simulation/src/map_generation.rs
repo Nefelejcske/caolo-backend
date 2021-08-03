@@ -42,11 +42,11 @@ pub type MapGenerationTables = (
 pub fn generate_full_map(
     overworld_params: &OverworldGenerationParams,
     room_params: &RoomGenerationParams,
-    seed: Option<[u8; 16]>,
+    seed: Option<[u8; 32]>,
     (mut terrain, rooms, mut room_props, room_connections): MapGenerationTables,
 ) -> Result<(), MapGenError> {
     let seed = seed.unwrap_or_else(|| {
-        let mut bytes = [0; 16];
+        let mut bytes = [0; 32];
         thread_rng().fill_bytes(&mut bytes);
         bytes
     });

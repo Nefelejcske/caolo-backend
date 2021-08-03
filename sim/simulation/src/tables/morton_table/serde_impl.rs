@@ -92,8 +92,8 @@ mod tests {
 
         let points = (0..128)
             .map(|_| {
-                let a = Axial::new(rng.gen_range(0, 15_000), rng.gen_range(0, 15_000));
-                let val = rng.gen_range(0.0f32, 128.0);
+                let a = Axial::new(rng.gen_range(0..15_000), rng.gen_range(0..15_000));
+                let val = rng.gen_range(0.0f32..128.0);
                 (a, val)
             })
             .collect::<Vec<_>>();

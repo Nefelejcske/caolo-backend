@@ -57,7 +57,7 @@ pub fn init_world_entities(storage: &mut World, n_fake_users: usize) {
         trace!("initializing room #{}", i);
         let spawnid = storage.insert_entity();
 
-        let room = rng.gen_range(0, rooms.len());
+        let room = rng.gen_range(0..rooms.len());
         let room = rooms[room];
         taken_rooms.push(room);
 
@@ -161,8 +161,8 @@ fn uncontested_pos<T: crate::tables::TableRow + Send + Sync + Default>(
     let from = bounds.center - Axial::new(bounds.radius, bounds.radius);
     let to = bounds.center + Axial::new(bounds.radius, bounds.radius);
     for _ in 0..TRIES {
-        let x = rng.gen_range(from.q, to.q);
-        let y = rng.gen_range(from.r, to.r);
+        let x = rng.gen_range(from.q..to.q);
+        let y = rng.gen_range(from.r..to.r);
 
         let pos = Axial::new(x, y);
 

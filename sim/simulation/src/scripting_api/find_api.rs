@@ -181,7 +181,7 @@ mod tests {
         expected_id: EntityId,
         expected_pos: WorldPosition,
     ) -> std::pin::Pin<Box<World>> {
-        let mut seed = [0; 16];
+        let mut seed = [0; 32];
         thread_rng().fill(&mut seed);
         let mut rng = SmallRng::from_seed(seed);
 
@@ -197,8 +197,8 @@ mod tests {
         for _ in 0..128 {
             let id = storage.insert_entity();
             let pos = loop {
-                let q = rng.gen_range(0, 256);
-                let r = rng.gen_range(0, 256);
+                let q = rng.gen_range(0..256);
+                let r = rng.gen_range(0..256);
 
                 let pos = Axial::new(q, r);
                 if center_pos.pos.hex_distance(pos) > center_pos.pos.hex_distance(expected_pos.pos)

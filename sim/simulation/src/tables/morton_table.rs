@@ -16,9 +16,7 @@ pub mod sorting;
 #[cfg(test)]
 mod tests;
 
-pub use self::litmax_bigmin::msb_de_bruijn;
-pub use self::morton_key::*;
-pub use self::skiplist::*;
+pub use self::{litmax_bigmin::msb_de_bruijn, morton_key::*, skiplist::*};
 
 use self::litmax_bigmin::round_down_to_one_less_than_pow_two;
 use super::*;

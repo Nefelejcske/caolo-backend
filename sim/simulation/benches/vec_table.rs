@@ -13,9 +13,9 @@ fn insert_at_random(c: &mut Criterion) {
         let mut rng = get_rand();
         let mut table = DenseTable::<EntityId, i32>::new();
         b.iter(|| {
-            let id = rng.gen_range(0, 1 << 20);
+            let id = rng.gen_range(0..=1 << 20);
             let id = EntityId(id);
-            let res = table.insert_or_update(id, rng.gen_range(0, 200));
+            let res = table.insert_or_update(id, rng.gen_range(0..=200));
             debug_assert!(res);
             res
         });
@@ -27,9 +27,9 @@ fn insert_at_random_w_reserve(c: &mut Criterion) {
         let mut rng = get_rand();
         let mut table = DenseTable::<EntityId, i32>::with_capacity(1 << 20);
         b.iter(|| {
-            let id = rng.gen_range(0, 1 << 20);
+            let id = rng.gen_range(0..=1 << 20);
             let id = EntityId(id);
-            let res = table.insert_or_update(id, rng.gen_range(0, 200));
+            let res = table.insert_or_update(id, rng.gen_range(0..=200));
             debug_assert!(res);
             res
         });
@@ -46,10 +46,9 @@ fn update_all_iter_2pow14_sparse(c: &mut Criterion) {
         for i in 0..LEN {
             let mut id = Default::default();
             while table.contains_id(id) {
-                id = EntityId(rng.gen_range(
-                    0,
-                    u32::try_from(LEN * 6 / 5).expect("max len to fit into u32"),
-                ));
+                id = EntityId(
+                    rng.gen_range(0..u32::try_from(LEN * 6 / 5).expect("max len to fit into u32")),
+                );
             }
             table.insert_or_update(id, i);
         }
@@ -91,14 +90,14 @@ fn get_by_id_random_2_pow_16(c: &mut Criterion) {
             let mut id = Default::default();
             while table.contains_id(id) {
                 id = EntityId(
-                    rng.gen_range(0, u32::try_from(LEN * 2).expect("max len to fit into u32")),
+                    rng.gen_range(0..=u32::try_from(LEN * 2).expect("max len to fit into u32")),
                 );
             }
             table.insert_or_update(id, i);
             ids.push((id, i));
         }
         b.iter(|| {
-            let ind = rng.gen_range(0, LEN);
+            let ind = rng.gen_range(0..LEN);
             let (id, x) = ids[ind];
             let res = table.get_by_id(id);
             debug_assert_eq!(*res.expect("result to be found"), x);
@@ -119,15 +118,16 @@ fn override_update_random(c: &mut Criterion) {
             for i in 0..size {
                 let mut id = Default::default();
                 while table.contains_id(id) {
-                    id = EntityId(
-                        rng.gen_range(0, u32::try_from(size * 2).expect("max len to fit into u32")),
-                    );
+                    id =
+                        EntityId(rng.gen_range(
+                            0..=u32::try_from(size * 2).expect("max len to fit into u32"),
+                        ));
                 }
                 table.insert_or_update(id, i);
                 ids.push((id, i));
             }
             b.iter(|| {
-                let ind = rng.gen_range(0, size);
+                let ind = rng.gen_range(0..size);
                 let (id, x) = ids[ind];
                 let res = table.insert_or_update(id, x * 2);
                 debug_assert!(res);
@@ -151,7 +151,7 @@ fn override_update_all_serial(c: &mut Criterion) {
                 let mut id = Default::default();
                 while table.contains_id(id) {
                     id = EntityId(
-                        rng.gen_range(0, u32::try_from(size * 2).expect("max len to fit into u32")),
+                        rng.gen_range(0..u32::try_from(size * 2).expect("max len to fit into u32")),
                     );
                 }
                 table.insert_or_update(id, i);

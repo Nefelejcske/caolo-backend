@@ -19,8 +19,8 @@ fn contains_rand(c: &mut Criterion) {
 
             let table = MortonTable::from_iterator((0..size).map(|i| {
                 let p = Axial {
-                    q: rng.gen_range(0, 8000),
-                    r: rng.gen_range(0, 8000),
+                    q: rng.gen_range(0..=8000),
+                    r: rng.gen_range(0..=8000),
                 };
                 (p, i)
             }))
@@ -28,8 +28,8 @@ fn contains_rand(c: &mut Criterion) {
 
             b.iter(|| {
                 let p = Axial {
-                    q: rng.gen_range(0, 8000),
-                    r: rng.gen_range(0, 8000),
+                    q: rng.gen_range(0..=8000),
+                    r: rng.gen_range(0..=8000),
                 };
                 table.contains_key(p)
             })
@@ -47,8 +47,8 @@ fn get_entities_in_range_sparse(c: &mut Criterion) {
 
             let table = MortonTable::from_iterator((0..size).map(|_| {
                 let p = Axial {
-                    q: rng.gen_range(0, 3900 * 2),
-                    r: rng.gen_range(0, 3900 * 2),
+                    q: rng.gen_range(0..=3900 * 2),
+                    r: rng.gen_range(0..=3900 * 2),
                 };
                 (p, EntityComponent(EntityId(rng.gen())))
             }))
@@ -58,8 +58,8 @@ fn get_entities_in_range_sparse(c: &mut Criterion) {
             b.iter(|| {
                 let table = &table;
                 let p = Axial {
-                    q: rng.gen_range(0, 3900 * 2),
-                    r: rng.gen_range(0, 3900 * 2),
+                    q: rng.gen_range(0..=3900 * 2),
+                    r: rng.gen_range(0..=3900 * 2),
                 };
                 let mut entities = Vec::with_capacity(512 * 512);
                 table.find_by_range(p, radius, &mut entities);
@@ -79,8 +79,8 @@ fn get_entities_in_range_dense(c: &mut Criterion) {
 
             let table = MortonTable::from_iterator((0..size).map(|_| {
                 let p = Axial {
-                    q: rng.gen_range(0, 200 * 2),
-                    r: rng.gen_range(0, 200 * 2),
+                    q: rng.gen_range(0..=200 * 2),
+                    r: rng.gen_range(0..=200 * 2),
                 };
                 (p, EntityComponent(EntityId(rng.gen())))
             }))
@@ -90,8 +90,8 @@ fn get_entities_in_range_dense(c: &mut Criterion) {
             b.iter(|| {
                 let table = &table;
                 let p = Axial {
-                    q: rng.gen_range(0, 200 * 2),
-                    r: rng.gen_range(0, 200 * 2),
+                    q: rng.gen_range(0..=200 * 2),
+                    r: rng.gen_range(0..=200 * 2),
                 };
                 let mut entities = Vec::with_capacity(50 * 50);
                 table.find_by_range(p, radius, &mut entities);
@@ -113,8 +113,8 @@ fn make_morton_table(c: &mut Criterion) {
                 let table = MortonTable::from_iterator((0..size).map(|_| {
                     (
                         Axial {
-                            q: rng.gen_range(0, 3900 * 2),
-                            r: rng.gen_range(0, 3900 * 2),
+                            q: rng.gen_range(0..=3900 * 2),
+                            r: rng.gen_range(0..=3900 * 2),
                         },
                         rng.next_u32(),
                     )
@@ -144,8 +144,8 @@ fn rebuild_morton_table(c: &mut Criterion) {
                     .extend((0..size).map(|_| {
                         (
                             Axial {
-                                q: rng.gen_range(0, 3900 * 2),
-                                r: rng.gen_range(0, 3900 * 2),
+                                q: rng.gen_range(0..=3900 * 2),
+                                r: rng.gen_range(0..=3900 * 2),
                             },
                             rng.next_u32(),
                         )
@@ -166,8 +166,8 @@ fn at_rand(c: &mut Criterion) {
 
             let table = MortonTable::from_iterator((0..len).map(|_| {
                 let pos = Axial {
-                    q: rng.gen_range(0, 3900 * 2),
-                    r: rng.gen_range(0, 3900 * 2),
+                    q: rng.gen_range(0..=3900 * 2),
+                    r: rng.gen_range(0..=3900 * 2),
                 };
                 (pos, rng.next_u32())
             }))
@@ -175,8 +175,8 @@ fn at_rand(c: &mut Criterion) {
 
             b.iter(|| {
                 let pos = Axial {
-                    q: rng.gen_range(0, 3900 * 2),
-                    r: rng.gen_range(0, 3900 * 2),
+                    q: rng.gen_range(0..=3900 * 2),
+                    r: rng.gen_range(0..=3900 * 2),
                 };
                 table.at(pos)
             });
@@ -195,8 +195,8 @@ fn at_in_table_rand(c: &mut Criterion) {
             let mut points = Vec::with_capacity(len);
             let table = MortonTable::from_iterator((0..len).map(|_| {
                 let pos = Axial {
-                    q: rng.gen_range(0, 3900 * 2),
-                    r: rng.gen_range(0, 3900 * 2),
+                    q: rng.gen_range(0..=3900 * 2),
+                    r: rng.gen_range(0..=3900 * 2),
                 };
                 points.push(pos.clone());
                 (pos, rng.next_u32())
@@ -204,7 +204,7 @@ fn at_in_table_rand(c: &mut Criterion) {
             .unwrap();
 
             b.iter(|| {
-                let i = rng.gen_range(0, points.len());
+                let i = rng.gen_range(0..=points.len());
                 let pos = &points[i];
                 table.at(*pos)
             });
@@ -222,16 +222,16 @@ fn random_insert(c: &mut Criterion) {
             let mut table = MortonTable::<usize>::new();
 
             for _ in 0..size {
-                let q = rng.gen_range(0, 29000);
-                let r = rng.gen_range(0, 29000);
+                let q = rng.gen_range(0..=29000);
+                let r = rng.gen_range(0..=29000);
                 let p = Axial::new(q, r);
 
                 table.insert(p, 420).unwrap();
             }
 
             b.iter(|| {
-                let q = rng.gen_range(0, 29000);
-                let r = rng.gen_range(0, 29000);
+                let q = rng.gen_range(0..=29000);
+                let r = rng.gen_range(0..=29000);
                 let p = Axial::new(q, r);
 
                 table.insert(p, 420).unwrap()
@@ -251,8 +251,8 @@ fn random_update(c: &mut Criterion) {
             let mut memory = Vec::new();
 
             for _ in 0..size {
-                let q = rng.gen_range(0, 29000);
-                let r = rng.gen_range(0, 29000);
+                let q = rng.gen_range(0..=29000);
+                let r = rng.gen_range(0..=29000);
                 let p = Axial::new(q, r);
                 memory.push(p);
 
@@ -263,7 +263,7 @@ fn random_update(c: &mut Criterion) {
             let table = &mut table;
 
             b.iter(move || {
-                let i = rng.gen_range(0, memory.len());
+                let i = rng.gen_range(0..=memory.len());
                 let p = memory[i].clone();
                 let mut updated = table.update(p, rng.next_u32());
                 black_box(&mut updated);

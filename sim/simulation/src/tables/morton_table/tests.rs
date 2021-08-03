@@ -35,18 +35,18 @@ fn simple_from_iterator() {
         Axial::new(2, 42),
         Axial::new(1 << 15 - 1, 23),
         Axial::new(1, 1 << 14 - 2),
-        Axial::new(rng.gen_range(0, 1 << 15), rng.gen_range(0, 1 << 15)),
-        Axial::new(rng.gen_range(0, 1 << 15), rng.gen_range(0, 1 << 15)),
-        Axial::new(rng.gen_range(0, 1 << 15), rng.gen_range(0, 1 << 15)),
-        Axial::new(rng.gen_range(0, 1 << 15), rng.gen_range(0, 1 << 15)),
-        Axial::new(rng.gen_range(0, 1 << 15), rng.gen_range(0, 1 << 15)),
-        Axial::new(rng.gen_range(0, 1 << 15), rng.gen_range(0, 1 << 15)),
-        Axial::new(rng.gen_range(0, 1 << 15), rng.gen_range(0, 1 << 15)),
-        Axial::new(rng.gen_range(0, 1 << 15), rng.gen_range(0, 1 << 15)),
-        Axial::new(rng.gen_range(0, 1 << 15), rng.gen_range(0, 1 << 15)),
-        Axial::new(rng.gen_range(0, 1 << 15), rng.gen_range(0, 1 << 15)),
-        Axial::new(rng.gen_range(0, 1 << 15), rng.gen_range(0, 1 << 15)),
-        Axial::new(rng.gen_range(0, 1 << 15), rng.gen_range(0, 1 << 15)),
+        Axial::new(rng.gen_range(0..1 << 15), rng.gen_range(0..1 << 15)),
+        Axial::new(rng.gen_range(0..1 << 15), rng.gen_range(0..1 << 15)),
+        Axial::new(rng.gen_range(0..1 << 15), rng.gen_range(0..1 << 15)),
+        Axial::new(rng.gen_range(0..1 << 15), rng.gen_range(0..1 << 15)),
+        Axial::new(rng.gen_range(0..1 << 15), rng.gen_range(0..1 << 15)),
+        Axial::new(rng.gen_range(0..1 << 15), rng.gen_range(0..1 << 15)),
+        Axial::new(rng.gen_range(0..1 << 15), rng.gen_range(0..1 << 15)),
+        Axial::new(rng.gen_range(0..1 << 15), rng.gen_range(0..1 << 15)),
+        Axial::new(rng.gen_range(0..1 << 15), rng.gen_range(0..1 << 15)),
+        Axial::new(rng.gen_range(0..1 << 15), rng.gen_range(0..1 << 15)),
+        Axial::new(rng.gen_range(0..1 << 15), rng.gen_range(0..1 << 15)),
+        Axial::new(rng.gen_range(0..1 << 15), rng.gen_range(0..1 << 15)),
     ];
     points.shuffle(&mut rng);
     MortonTable::from_iterator(points.iter().enumerate().map(|(i, p)| (*p, i))).unwrap();
@@ -65,8 +65,8 @@ fn test_range_query_all_by_rng(rng: &mut impl rand::Rng) {
     let points = (0..256)
         .map(|i| {
             let p = Axial {
-                q: rng.gen_range(-64, 64),
-                r: rng.gen_range(-64, 64),
+                q: rng.gen_range(-64..=64),
+                r: rng.gen_range(-64..=64),
             } + center;
             (p, i)
         })
@@ -102,7 +102,8 @@ fn test_range_query_all_by_rng(rng: &mut impl rand::Rng) {
 #[test]
 fn regression_query_all_duplicated_items_bug() {
     let seed = [
-        26, 84, 47, 127, 109, 136, 2, 23, 141, 90, 81, 183, 80, 116, 43, 39,
+        26, 84, 47, 127, 109, 136, 2, 23, 141, 90, 81, 183, 80, 116, 43, 39, 26, 84, 47, 127, 109,
+        136, 2, 23, 141, 90, 81, 183, 80, 116, 43, 39,
     ];
 
     let mut rng = rand::rngs::SmallRng::from_seed(seed);
@@ -114,7 +115,7 @@ fn regression_query_all_duplicated_items_bug() {
 fn test_range_query_all() {
     for _ in 0..16 {
         let mut rng = rand::thread_rng();
-        let mut seed = [0; 16];
+        let mut seed = [0; 32];
         rng.fill_bytes(&mut seed);
 
         dbg!(&seed);
@@ -219,8 +220,8 @@ fn at_few_items() {
 
         for _ in 0..i {
             let p = Axial {
-                q: rng.gen_range(0, 128),
-                r: rng.gen_range(0, 128),
+                q: rng.gen_range(0..128),
+                r: rng.gen_range(0..128),
             };
             let i = 1000 * p.q + p.r;
             points.insert((p, i as usize));
@@ -246,8 +247,8 @@ fn at() {
 
     for _ in 0..64 {
         let p = Axial {
-            q: rng.gen_range(0, 128),
-            r: rng.gen_range(0, 128),
+            q: rng.gen_range(0..128),
+            r: rng.gen_range(0..128),
         };
         let i = 1000 * p.q + p.r;
         points.insert((p, i as usize));
@@ -269,8 +270,8 @@ fn morton_key_reconstruction_rand() {
     let mut rng = rand::thread_rng();
 
     for _ in 0..(1 << 12) {
-        let q = rng.gen_range(0, 2000);
-        let r = rng.gen_range(0, 2000);
+        let q = rng.gen_range(0..2000);
+        let r = rng.gen_range(0..2000);
 
         let morton = MortonKey::new(q, r);
 
@@ -288,8 +289,8 @@ fn from_iterator_inserts_correctly() {
     let mut points = HashMap::with_capacity(len);
     let table = MortonTable::from_iterator((0..len).filter_map(|_| {
         let pos = Axial {
-            q: rng.gen_range(0, 3900 * 2),
-            r: rng.gen_range(0, 3900 * 2),
+            q: rng.gen_range(0..3900 * 2),
+            r: rng.gen_range(0..3900 * 2),
         };
         if !points.contains_key(&pos) {
             return None;
@@ -312,8 +313,8 @@ fn dedupe_simple() {
 
     let mut table = MortonTable::from_iterator((0..128).flat_map(|_| {
         let pos = Axial {
-            q: rng.gen_range(0, 1 << 15),
-            r: rng.gen_range(0, 1 << 15),
+            q: rng.gen_range(0..1 << 15),
+            r: rng.gen_range(0..1 << 15),
         };
         vec![(pos, 0), (pos, 1), (pos, 3)]
     }))

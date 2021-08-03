@@ -132,8 +132,8 @@ pub fn generate_room(
         let maxq = center.q + r2;
         let maxr = center.r + r2;
 
-        let q = rng.gen_range(minq, maxq);
-        let r = rng.gen_range(minr, maxr);
+        let q = rng.gen_range(minq..=maxq);
+        let r = rng.gen_range(minr..=maxr);
         terrain[Axial::new(q, r)] = TerrainComponent(TileTerrainType::Plain);
     }
 

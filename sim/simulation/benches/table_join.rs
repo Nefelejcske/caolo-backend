@@ -27,7 +27,7 @@ fn random_vec_table(len: usize, domain: u32) -> DenseTable<EntityId, LargeCompon
     for _ in 0..len {
         let mut res = false;
         while !res {
-            let id = EntityId(rng.gen_range(0, domain));
+            let id = EntityId(rng.gen_range(0..=domain));
             res = table.insert_or_update(id, LargeComponent::default());
         }
     }
@@ -40,7 +40,7 @@ fn random_bt_table(len: usize, domain: u32) -> BTreeTable<EntityId, LargeCompone
     for _ in 0..len {
         let mut res = false;
         while !res {
-            let id = EntityId(rng.gen_range(0, domain));
+            let id = EntityId(rng.gen_range(0..=domain));
             res = table.insert_or_update(id, LargeComponent::default());
         }
     }

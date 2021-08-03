@@ -15,10 +15,10 @@ cao_storage_derive = { path = "../cao-storage-derive" }
 cao-profile = { git = "https://github.com/caolo-game/cao-profile.git", optional = true, features = [
     "http"
 ] }
-rand = { version = "0.7", features = ["small_rng"] }
+rand = { version = "0.8", features = ["small_rng"] }
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "0.8", features = ["serde", "v4"] }
-arrayvec = { version = "0.6", features = ["serde"] }
+arrayvec = { version = "0.7", features = ["serde"] }
 serde = "1"
 serde_derive = "1"
 thiserror = "1"
@@ -40,9 +40,9 @@ tracing-subscriber = { version = "0.2", features = [
 ] }
 
 [build-dependencies]
-toml = "0.4"
+toml = "0.5"
 serde = { version = "1", features = ["derive"] }
-semver = "0.11"
+semver = "1"
 
 [[bench]]
 name = "simulation_benchmarks"

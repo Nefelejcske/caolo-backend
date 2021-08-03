@@ -1,5 +1,5 @@
 # ============= cache dependencies ============================================================
-FROM rust:1.51 AS deps
+FROM rust:latest AS deps
 
 RUN apt-get update
 RUN apt-get install lld clang libc-dev pkgconf -y
@@ -32,7 +32,7 @@ RUN rm -f target/release/deps/caolo_*
 
 # ==============================================================================================
 
-FROM rust:1.51 AS build
+FROM rust:latest AS build
 
 RUN apt-get update
 RUN apt-get install lld clang libc-dev pkgconf protobuf-compiler -y

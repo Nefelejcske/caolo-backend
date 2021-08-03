@@ -129,8 +129,8 @@ fn random_uncontested_pos_in_range(
     let mut result = None;
     for _ in 0..max_tries {
         // deltas
-        let dq = rng.gen_range(-range, range);
-        let dr = rng.gen_range(-range, range);
+        let dq = rng.gen_range(-range..=range);
+        let dr = rng.gen_range(-range..=range);
 
         // clamp q, r to the bounds
         let q = (cq + dq).max(bfrom.q).min(bto.q);

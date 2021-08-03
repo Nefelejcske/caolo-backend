@@ -62,7 +62,7 @@ pub fn generate_room_layout(
 
     // loosely running the Erdos - Runyi model
     let connection_weights = MortonTable::from_iterator(bounds.iter_points().map(|p| {
-        let weight = rng.gen_range(-4.0, 6.0);
+        let weight = rng.gen_range(-4.0..=6.0);
         let weight = sigmoid(weight);
         (p, weight)
     }))
@@ -99,7 +99,7 @@ fn update_room_connections(
     rng: &mut impl Rng,
     mut room_connections: UnsafeView<Axial, RoomConnections>,
 ) {
-    let w = rng.gen_range(0.0, std::f32::consts::PI).sin().abs();
+    let w = rng.gen_range(0.0..1.0);
     let mut to_connect = [None; 6];
     connection_weights.query_range(point, 3, &mut |p, weight| {
         if w <= *weight {
@@ -116,7 +116,7 @@ fn update_room_connections(
         connection_weights.query_range(point, 3, &mut |p, _| {
             let n = p - point;
             if let Some(i) = Axial::neighbour_index(n) {
-                weights[i] = rng.gen_range(0.5, 1.0);
+                weights[i] = rng.gen_range(0.5..=1.0);
             }
         });
         let (i, _) = weights
@@ -133,10 +133,10 @@ fn update_room_connections(
         room_connections.update_with(point, |RoomConnections(ref mut conn)| {
             for (i, c) in to_connect.iter_mut().enumerate() {
                 if conn[i].is_none() && c.is_some() {
-                    let bridge_len = rng.gen_range(min_bridge_len, max_bridge_len);
+                    let bridge_len = rng.gen_range(min_bridge_len..=max_bridge_len);
                     let padding = room_radius - bridge_len;
 
-                    let offset_start = rng.gen_range(0, padding);
+                    let offset_start = rng.gen_range(0..padding);
                     let offset_end = padding - offset_start;
 
                     // this is a new connection
