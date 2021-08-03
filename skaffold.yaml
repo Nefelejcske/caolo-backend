@@ -3,8 +3,6 @@ kind: Config
 metadata:
   name: caolo-backend
 build:
-  local:
-    push: false
   tagPolicy:
     gitCommit: {}
   artifacts:
