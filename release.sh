@@ -4,9 +4,7 @@ echo Release command starting
 
 backoff=1
 
-COMMAND=migrate -database ${DATABASE_URL} -path db/migrations up
-
-${COMMAND}
+migrate -database ${DATABASE_URL} -path db/migrations up
 
 while [ $? -ne 0 ]; do
     if [ $backoff -gt 16 ]; then 
@@ -18,7 +16,7 @@ while [ $? -ne 0 ]; do
     sleep $backoff;
     backoff=$(($backoff * 2))
 
-    ${COMMAND}
+    migrate -database ${DATABASE_URL} -path db/migrations up
 done;
 
 echo Release command finished
