@@ -1,6 +1,8 @@
 # ============= planner ============================================================
 # later stages may use these cached layers
 FROM lukemathwalker/cargo-chef:latest AS planner
+RUN rustup update
+RUN rustup self update
 
 WORKDIR /caolo
 COPY ./.cargo/ ./.cargo/
@@ -13,6 +15,8 @@ RUN cargo chef prepare --recipe-path recipe.json
 # ============= cache dependencies ============================================================
 
 FROM lukemathwalker/cargo-chef:latest AS deps
+RUN rustup update
+RUN rustup self update
 
 RUN apt-get update
 RUN apt-get install lld clang libc-dev pkgconf -y
@@ -23,11 +27,15 @@ COPY ./.cargo/ ./.cargo/
 WORKDIR /caolo/sim
 COPY --from=planner $CARGO_HOME $CARGO_HOME
 COPY --from=planner /caolo/sim/recipe.json recipe.json
+RUN cargo --version
 RUN cargo chef cook --release --recipe-path recipe.json
 
 # ==============================================================================================
 
-FROM rust:latest AS build
+# note: we don't use cargo-chef in this image, just making sure we use the same rust compiler version
+FROM lukemathwalker/cargo-chef:latest AS build
+RUN rustup update
+RUN rustup self update
 
 RUN apt-get update
 RUN apt-get install lld clang libc-dev pkgconf protobuf-compiler -y
