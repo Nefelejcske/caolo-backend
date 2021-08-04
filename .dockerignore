@@ -1,11 +1,10 @@
 *
-!migrations
-!diesel.toml
+!.cargo
+!db
 !api
 !rt
 !sim
 !protos
-!.cargo
 !release.sh
 **/target
 **/*~

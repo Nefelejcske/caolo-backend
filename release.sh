@@ -4,7 +4,9 @@ echo Release command starting
 
 backoff=1
 
-/caolo/diesel migration run
+COMMAND=migrate -database ${DATABASE_URL} -path db/migrations up
+
+${COMMAND}
 
 while [ $? -ne 0 ]; do
     if [ $backoff -gt 16 ]; then 
@@ -16,7 +18,7 @@ while [ $? -ne 0 ]; do
     sleep $backoff;
     backoff=$(($backoff * 2))
 
-    /caolo/diesel migration run
+    ${COMMAND}
 done;
 
 echo Release command finished

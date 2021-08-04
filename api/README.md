@@ -6,7 +6,7 @@
 -   [Python](https://python.org/)
 -   [Protoc](https://grpc.io/docs/protoc-installation/)
 -   [PostgeSQL](https://www.postgresql.org/)
--   diesel-cli `cargo install diesel_cli --no-default-features --features "postgres"`
+-   [migrate](https://github.com/golang-migrate/migrate/blob/master/cmd/migrate/README.md)
 
 ### Docker builds:
 
@@ -16,7 +16,7 @@
 ## Setting up
 
 ```
-diesel database setup
+migrate -database ${DATABASE_URL} -path ../db/migrations up
 poetry install
 pip install .
 ```

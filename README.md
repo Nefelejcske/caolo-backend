@@ -5,7 +5,7 @@ This repository contains the back-end code of the game Cao-Lo.
 Code layout:
 
 ```txt
-|- migrations/          # SQL schema migrations
+|- db/migrations/       # SQL schema migrations
 |- protos/              # Protobuf messages used in communications between web and worker services
 |- api/                 # Webservice bridging remote clients and the sim
 |- rt/                  # Real-time communications service

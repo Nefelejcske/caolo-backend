@@ -1,16 +1,13 @@
-FROM rust:latest AS build
-
-WORKDIR /caolo
-RUN cargo install diesel_cli --root . --no-default-features --features="postgres"
-# ---------- Copy the built binary to a scratch container, to minimize the image size ----------
-
 FROM ubuntu:18.04
-WORKDIR /caolo
-RUN apt-get update
-RUN apt-get install libpq-dev curl -y
 
-COPY ./migrations/ ./migrations/
+RUN curl -L https://packagecloud.io/golang-migrate/migrate/gpgkey | apt-key add -
+RUN echo "deb https://packagecloud.io/golang-migrate/migrate/ubuntu/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/migrate.list
+RUN apt-get update
+RUN apt-get install bash migrate -y
+
+WORKDIR /caolo
+
+COPY ./db/migrations/ ./db/migrations/
 COPY ./release.sh ./
-COPY --from=build /caolo/bin/ ./
 
 ENTRYPOINT ["./release.sh"]
