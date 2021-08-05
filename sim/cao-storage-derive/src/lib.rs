@@ -224,8 +224,8 @@ fn impl_storage(input: DeriveInput) -> TokenStream {
                                 table_groups.entry(format!("{}", key)).or_insert_with(|| {
                                     TableMeta {
                                         key,
-                                        fields: Vec::with_capacity(16),
-                                        rows: Vec::with_capacity(16),
+                                        fields: Vec::with_capacity(128),
+                                        rows: Vec::with_capacity(128),
                                     }
                                 });
                             entry.fields.push(tokens.next().expect("field name"));
