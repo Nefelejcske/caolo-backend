@@ -76,13 +76,6 @@ description = ""
 category = "main"
 optional = false
 python-versions = "*"
-develop = false
-
-[package.source]
-type = "git"
-url = "https://github.com/caolo-game/cao-lang.git"
-reference = "master"
-resolved_reference = "4b92b820617ebc84a6d85cd0f7e4a6e983642587"
 
 [[package]]
 name = "certifi"
@@ -568,7 +561,7 @@ python-versions = ">=3.6.1"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "7db4a7042d7ff1dc38b5776d1896bf49d504dd1c71ccc5838c5d501b7fb57d8d"
+content-hash = "537ff52a2ef2e628699341326550c60804f54aa451999686a8e8bd8dc9346907"
 
 [metadata.files]
 aioredis = [
@@ -613,7 +606,15 @@ bcrypt = [
     {file = "bcrypt-3.2.0-cp36-abi3-win_amd64.whl", hash = "sha256:81fec756feff5b6818ea7ab031205e1d323d8943d237303baca2c5f9c7846f34"},
     {file = "bcrypt-3.2.0.tar.gz", hash = "sha256:5b93c1726e50a93a033c36e5ca7fdcd29a5c7395af50a6892f5d9e7c6cfbfb29"},
 ]
-cao-lang = []
+cao-lang = [
+    {file = "cao-lang-0.1.11.tar.gz", hash = "sha256:a47c2032cd39b137c7883ec35921a58c987eebcd17b033a265d8e150c47cf89c"},
+    {file = "cao_lang-0.1.11-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f567bd4f4765f3d5c4c0fdab56b645b24d10cffede5f952eecce9b219b5401fa"},
+    {file = "cao_lang-0.1.11-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1792610da9f628fdc65e015eb2e49805147aac8e882da6c61a472770c91a83ff"},
+    {file = "cao_lang-0.1.11-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9c4bd293b7b490ad183ea5e840af65ec41fe242a48d1b8b98c4f8ea0dcae6095"},
+    {file = "cao_lang-0.1.11-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:a24eb2e5bd64141c65988b080918697adad146bfe7d7a2d382c5c8390e830089"},
+    {file = "cao_lang-0.1.11-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7f827525d8d8b336a701d9fa25c592b8c6b38ad2e77c3a5468a4f89d7bd1d422"},
+    {file = "cao_lang-0.1.11-cp39-cp39-win_amd64.whl", hash = "sha256:4c3abdc04350d5669802f0e9b6e160eb343d9e5d1230553f802eb2453154cdf0"},
+]
 certifi = [
     {file = "certifi-2021.5.30-py2.py3-none-any.whl", hash = "sha256:50b1e4f8446b06f41be7dd6338db18e0990601dce795c2b1686458aa7e8fa7d8"},
     {file = "certifi-2021.5.30.tar.gz", hash = "sha256:2bbf76fd432960138b3ef6dda3dde0544f27cbf8546c458e60baf371917ba9ee"},

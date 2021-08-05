@@ -30,12 +30,7 @@ WORKDIR /caolo/api
 
 # Install deps
 RUN .env/bin/poetry export -f requirements.txt -o requirements.txt
-# split git requirements, because the --hash command shits the bed otherwise
-RUN grep git requirements.txt > git-req.txt
-RUN sed -i '/.*git.*/d' requirements.txt
-
 RUN .env/bin/pip install -r requirements.txt
-RUN .env/bin/pip install -r git-req.txt
 
 # Build caoloapi
 WORKDIR /caolo
@@ -53,7 +48,6 @@ FROM python:3.9-slim
 WORKDIR /caolo/api
 
 RUN apt-get update
-RUN apt-get install -y git
 
 COPY --from=build /caolo/api/start.sh ./
 COPY --from=build /caolo/api/.env ./.env
