@@ -10,23 +10,8 @@ WORKDIR /caolo/api
 RUN python -m venv .env
 RUN .env/bin/pip install gunicorn poetry
 
-WORKDIR /caolo
-# install Rust compiler
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
-RUN rustup update
-RUN rustc --version
-RUN cargo --version
-
-RUN mkdir ./protos
-ENV CAO_PROTOS_PATH=/caolo/protos
-
-COPY ./api/pyproject.toml ./api/pyproject.toml
-COPY ./api/poetry.lock ./api/poetry.lock
-RUN mkdir ./api/caoloapi
-RUN mkdir ./api/caoloapi/protos
-
-WORKDIR /caolo/api
+COPY ./api/pyproject.toml ./pyproject.toml
+COPY ./api/poetry.lock ./poetry.lock
 
 # Install deps
 RUN .env/bin/poetry export -f requirements.txt -o requirements.txt
