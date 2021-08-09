@@ -11,7 +11,7 @@ use crate::protos::cao_commands::command_server::CommandServer;
 use crate::protos::cao_common::health_server::HealthServer;
 use crate::protos::cao_script::scripting_server::ScriptingServer;
 use crate::protos::cao_world::world_server::WorldServer;
-use caolo_sim::executor::SimpleExecutor;
+use caolo_sim::executor::{GameConfig, SimpleExecutor};
 use std::{
     env,
     sync::Arc,
@@ -74,6 +74,8 @@ async fn game_loop(
 }
 
 fn main() {
+    let now = std::time::Instant::now();
+
     init();
     let sim_rt = caolo_sim::RuntimeGuard::new();
 
@@ -100,12 +102,12 @@ fn main() {
     info!("Creating cao executor with tag {}", tag);
     let mut executor = SimpleExecutor;
     info!("Init storage");
-    let mut world = executor.initialize(caolo_sim::executor::GameConfig {
+    let mut world = sim_rt.block_on(executor.initialize(GameConfig {
         world_radius: config.world_radius,
         room_radius: config.room_radius,
         queen_tag: tag.clone(),
         ..Default::default()
-    });
+    }));
 
     info!("Starting with {} actors", config.n_actors);
 
@@ -160,6 +162,10 @@ fn main() {
 
     let game_loop = game_loop(world, executor, outpayload, tick_latency).instrument(game_loop_span);
 
+    info!(
+        "Initialization done in {:?}",
+        std::time::Instant::now() - now
+    );
     sim_rt.block_on(async move {
         let (a, _) = futures::join!(server, game_loop);
         a.unwrap();

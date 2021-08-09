@@ -82,10 +82,12 @@ impl SimpleExecutor {
         Ok(())
     }
 
-    pub fn initialize(&mut self, config: GameConfig) -> Pin<Box<World>> {
+    pub async fn initialize(&mut self, config: GameConfig) -> Pin<Box<World>> {
         let mut world = World::new();
 
-        execute_map_generation(&mut *world, &config).expect("Failed to generate world map");
+        execute_map_generation(&mut *world, &config)
+            .await
+            .expect("Failed to generate world map");
 
         world.config.game_config.value = Some(config);
 
@@ -93,7 +95,7 @@ impl SimpleExecutor {
     }
 }
 
-fn execute_map_generation(world: &mut World, config: &GameConfig) -> Result<(), MapGenError> {
+async fn execute_map_generation(world: &mut World, config: &GameConfig) -> Result<(), MapGenError> {
     let world_radius = config.world_radius;
     let room_radius = config.room_radius;
     assert!(room_radius > 6);
@@ -118,7 +120,8 @@ fn execute_map_generation(world: &mut World, config: &GameConfig) -> Result<(), 
         &room_params,
         None,
         FromWorldMut::from_world_mut(world),
-    )?;
+    )
+    .await?;
 
     debug!("world generation done");
     Ok(())
