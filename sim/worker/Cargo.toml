@@ -42,6 +42,7 @@ tracing-subscriber = { version = "0.2", features = [
 jemallocator = "0.3.2"
 
 [dev-dependencies]
+futures-lite = "*"
 
 [build-dependencies]
 tonic-build = { version = "0.5", default-features = false, features = [

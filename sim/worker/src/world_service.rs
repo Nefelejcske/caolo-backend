@@ -196,11 +196,12 @@ mod tests {
         let mut pl = Payload::default();
 
         let mut exc = caolo_sim::prelude::SimpleExecutor;
-        let mut w = exc.initialize(caolo_sim::executor::GameConfig {
-            world_radius: 2,
-            room_radius: 10,
-            ..Default::default()
-        });
+        let mut w =
+            futures_lite::future::block_on(exc.initialize(caolo_sim::executor::GameConfig {
+                world_radius: 2,
+                room_radius: 10,
+                ..Default::default()
+            }));
         caolo_sim::init::init_world_entities(&mut *w, 12);
 
         pl.update(&w);

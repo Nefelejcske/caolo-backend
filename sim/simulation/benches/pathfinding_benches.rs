@@ -15,11 +15,11 @@ fn get_rand() -> impl rand::Rng {
 
 fn create_world(room_radius: u32) -> std::pin::Pin<Box<World>> {
     let mut exc = SimpleExecutor;
-    let world = exc.initialize(GameConfig {
+    let world = futures_lite::future::block_on(exc.initialize(GameConfig {
         world_radius: 6,
         room_radius,
         ..Default::default()
-    });
+    }));
 
     world
 }

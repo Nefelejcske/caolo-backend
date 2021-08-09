@@ -41,6 +41,7 @@ tracing-subscriber = { version = "0.2", features = [
     "env-filter",
     "fmt"
 ] }
+futures-lite = "*"
 
 [build-dependencies]
 toml = "0.5"

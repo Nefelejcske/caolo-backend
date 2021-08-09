@@ -194,11 +194,12 @@ mod tests {
     #[test]
     fn can_init_the_game() {
         let mut exc = SimpleExecutor;
-        let mut world = exc.initialize(crate::executor::GameConfig {
-            world_radius: 2,
-            room_radius: 10,
-            ..Default::default()
-        });
+        let mut world =
+            futures_lite::future::block_on(exc.initialize(crate::executor::GameConfig {
+                world_radius: 2,
+                room_radius: 10,
+                ..Default::default()
+            }));
 
         // smoke test: can the game be even initialized?
         init_world_entities(&mut *world, 12);
