@@ -50,9 +50,7 @@ impl SimpleExecutor {
 
         let intents = {
             debug!("Executing scripts");
-            let intents = execute_scripts(executions.as_slice(), world)
-                .await
-                .expect("script execution");
+            let intents = execute_scripts(executions.as_slice(), world).expect("script execution");
             debug!("Executing scripts Done");
             intents
         };

@@ -8,7 +8,7 @@ use crate::{
     storage::views::{FromWorld, UnwrapView},
 };
 use cao_lang::prelude::*;
-use futures::StreamExt;
+use rayon::prelude::*;
 use std::mem::replace;
 use std::{
     convert::Infallible,
@@ -31,7 +31,7 @@ pub enum ExecutionError {
     },
 }
 
-pub async fn execute_scripts(
+pub fn execute_scripts(
     workload: &[(EntityId, EntityScript)],
     storage: &mut World,
 ) -> Result<Vec<BotIntents>, Infallible> {
@@ -57,7 +57,8 @@ pub async fn execute_scripts(
         num_scripts_errored: u64,
     }
 
-    let run_result = futures::stream::iter(workload)
+    let run_result = workload
+        .par_iter()
         .chunks(chunk_size)
         .map(|entity_scripts| {
             let mut results = RunResult {
@@ -96,13 +97,12 @@ pub async fn execute_scripts(
             }
             results
         })
-        .fold(RunResult::default(), |mut res, intermediate| async move {
+        .reduce(RunResult::default, |mut res, intermediate| {
             res.intents.extend(intermediate.intents);
             res.num_scripts_ran += intermediate.num_scripts_ran;
             res.num_scripts_errored += intermediate.num_scripts_errored;
             res
-        })
-        .await;
+        });
 
     debug!(
         "Executing scripts done. Returning {:?} intents",
