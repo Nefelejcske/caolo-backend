@@ -18,6 +18,7 @@ use crate::{
 };
 use arrayvec::ArrayVec;
 use rand::{rngs::SmallRng, thread_rng, RngCore, SeedableRng};
+use rayon::prelude::*;
 use thiserror::Error;
 
 #[derive(Debug, Clone, Error)]
@@ -68,11 +69,10 @@ pub async fn generate_full_map(
     }
 
     let terrain_tables = rooms
-        // TODO:
-        // update rooms in parallel
         .iter()
+        .par_bridge()
         .try_fold(
-            Vec::with_capacity(rooms.len()),
+            || Vec::with_capacity(rooms.len()),
             |mut terrain_tables, (room, _)| {
                 let mut terrain_table = HexGrid::new(radius as usize);
                 let room_connections = room_connections
@@ -106,6 +106,13 @@ pub async fn generate_full_map(
                 })?;
                 terrain_tables.push((room, terrain_table));
                 Ok(terrain_tables)
+            },
+        )
+        .try_reduce(
+            || Vec::with_capacity(10_000),
+            |mut a, b| {
+                a.extend_from_slice(b.as_slice());
+                Ok(a)
             },
         )?;
     terrain
