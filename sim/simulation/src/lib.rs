@@ -53,9 +53,7 @@ impl RuntimeGuard {
             .expect("Failed to init tokio runtime");
         RuntimeGuard(Arc::new(rt))
     }
-}
 
-impl RuntimeGuard {
     pub fn block_on<F>(&self, f: F) -> F::Output
     where
         F: std::future::Future,
