@@ -71,7 +71,7 @@ typecheck = ["mypy"]
 
 [[package]]
 name = "cao-lang"
-version = "0.1.14"
+version = "0.1.16"
 description = "The node based 'language' that governs the actors of the game Cao-Lo"
 category = "main"
 optional = false
@@ -607,19 +607,19 @@ bcrypt = [
     {file = "bcrypt-3.2.0.tar.gz", hash = "sha256:5b93c1726e50a93a033c36e5ca7fdcd29a5c7395af50a6892f5d9e7c6cfbfb29"},
 ]
 cao-lang = [
-    {file = "cao-lang-0.1.14.tar.gz", hash = "sha256:9ff48aaec402b0892c7e460fab27ccc8f64fe7fccba793bfd51dfd0762296631"},
-    {file = "cao_lang-0.1.14-cp36-cp36m-macosx_10_15_x86_64.whl", hash = "sha256:be434086f7a4992957d59139dcb1aa23d4289be461232b5aef6d3b422dca68a4"},
-    {file = "cao_lang-0.1.14-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cbffd656170b707271a780f211b044581dcba272c8553d71999a8a61cb2e3b43"},
-    {file = "cao_lang-0.1.14-cp36-cp36m-win_amd64.whl", hash = "sha256:d57d46b5484438921d4e3ae45935b66b3ca9426a00a99de366430122b97a4b90"},
-    {file = "cao_lang-0.1.14-cp37-cp37m-macosx_10_15_x86_64.whl", hash = "sha256:df0f669740e792767f1cedf44fc801fce06bc89609ec0dbe181256e530f5792c"},
-    {file = "cao_lang-0.1.14-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:00f0325b9ff904b6a74fffb0a810a01e6934f9fc20a19c1aa52d8a57a2f45d47"},
-    {file = "cao_lang-0.1.14-cp37-cp37m-win_amd64.whl", hash = "sha256:317f8d25222d9b7d56a34a808fdb7ef758b793cbaed9d79e1de94e97215913a4"},
-    {file = "cao_lang-0.1.14-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:32c243833d42cfbfbebe2e7876390553a3a760c7fc56dd9b00dcf2db2dbe7180"},
-    {file = "cao_lang-0.1.14-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:284f8502fd1ed5634764a40d88d4288486723c60dd2831ee7a0281f123dab7d0"},
-    {file = "cao_lang-0.1.14-cp38-cp38-win_amd64.whl", hash = "sha256:c4a677592f7b18bf14a3c79cd4204c2837d8f65fe696c8219eb224cc99be1a82"},
-    {file = "cao_lang-0.1.14-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:792ba129dd4c6f1296fc8a5bff917e15d67d10effc734b4dc538756da0725127"},
-    {file = "cao_lang-0.1.14-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6f2e6d631010c0e578dffca77dfc30d076b8539bd6ae3a38a247990691a3d757"},
-    {file = "cao_lang-0.1.14-cp39-cp39-win_amd64.whl", hash = "sha256:0edad900673ee86c246c0e698cb28a30394e33c1c98896e5f3377cfee063900c"},
+    {file = "cao-lang-0.1.16.tar.gz", hash = "sha256:15ae7e3a572ffc0f0cfffab0bfa496c0ab594c59a775329d4990adf7d53488bf"},
+    {file = "cao_lang-0.1.16-cp36-cp36m-macosx_10_15_x86_64.whl", hash = "sha256:65149a0e90f8df3647f6a000f486f39f93ede1989d1979836a084d712fa3a302"},
+    {file = "cao_lang-0.1.16-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2aad1ba71ea2a6925dbab3bb32d356aa614fca7aa5807ccb5af91361523adf6a"},
+    {file = "cao_lang-0.1.16-cp36-cp36m-win_amd64.whl", hash = "sha256:417fce3a3fb78c84124692ce16aee1b8dded4595515adf796c087a308ada98ff"},
+    {file = "cao_lang-0.1.16-cp37-cp37m-macosx_10_15_x86_64.whl", hash = "sha256:259ebba3b5f416e306e94df3eff5edc639366d06bfcadeaab66b59f1e417a14a"},
+    {file = "cao_lang-0.1.16-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c4fcdd7bae74f03e23c98be0e717820e6c26d252b51cb0213e48d59729f38a0a"},
+    {file = "cao_lang-0.1.16-cp37-cp37m-win_amd64.whl", hash = "sha256:bdea16a82eabeb597634c9668bfd1877c7d458111b2e027406ee85ff203dbcc4"},
+    {file = "cao_lang-0.1.16-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:fec1e579e2fa432ceb05849899837313f552648b245ebb35a118d52e62eeb717"},
+    {file = "cao_lang-0.1.16-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a410b2e63df2bd39ebc77bab80568b7beb0dcef9fc3f980bb14964a163945834"},
+    {file = "cao_lang-0.1.16-cp38-cp38-win_amd64.whl", hash = "sha256:44b22338f5b5a9e739daa9d70933ed1ded990ccbc88024ed7c2b2d1d3e5c5b89"},
+    {file = "cao_lang-0.1.16-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:b1655f8c4b57d4b46fa3771b350a5c3642c1c50eaff6b6c8439cb4a2546c80f2"},
+    {file = "cao_lang-0.1.16-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:69186fc928df3afeecc9d02c45ae351e3770c83b06b2a31743e0606651fd1a97"},
+    {file = "cao_lang-0.1.16-cp39-cp39-win_amd64.whl", hash = "sha256:72e90ce79fb409f2869f6ce0272ecfedc3750abf4a4025b1c4b08b2f66cde08c"},
 ]
 certifi = [
     {file = "certifi-2021.5.30-py2.py3-none-any.whl", hash = "sha256:50b1e4f8446b06f41be7dd6338db18e0990601dce795c2b1686458aa7e8fa7d8"},
