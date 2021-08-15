@@ -243,7 +243,6 @@ pub fn parse_world_pos(point: &FieldTable) -> Result<WorldPosition, ExecutionErr
 fn _get_parse_coordinate(point: &FieldTable, key: &str) -> Result<i32, ExecutionError> {
     let rq = point
         .get_value(Key::from_str(key).unwrap())
-        .copied()
         .unwrap_or_default();
     let rq: i64 = rq
         .try_into()

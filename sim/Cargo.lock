@@ -113,8 +113,9 @@ checksum = "b700ce4376041dcd0a327fd0097c41095743c4c8af8887265942faf1100bd040"
 
 [[package]]
 name = "cao-lang"
-version = "0.1.33"
-source = "git+https://github.com/caolo-game/cao-lang.git#4489e303f318e78e9646334028bb89ab43f8c6d4"
+version = "0.1.36"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8db73504acea8483ca3921d34f4ab8535f0c2a4038cec25d70c892fb220955aa"
 dependencies = [
  "arrayvec",
  "num_enum",

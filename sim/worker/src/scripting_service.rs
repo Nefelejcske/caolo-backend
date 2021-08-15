@@ -136,7 +136,6 @@ impl cao_script::scripting_server::Scripting for ScriptingService {
 
         let schema = caolo_sim::scripting_api::make_import();
         let imports = schema.imports();
-        let basic_descs = cao_lang::compiler::card_description::get_instruction_descriptions();
 
         // TODO: allocator prime candidate for the allocator interface feature
 
@@ -150,14 +149,6 @@ impl cao_script::scripting_server::Scripting for ScriptingService {
                 name: card.desc.name.to_string(),
                 description: card.desc.description.to_string(),
             })
-            .chain(basic_descs.iter().map(|card| SchemaCard {
-                properties: card.properties.iter().map(|x| x.to_string()).collect(),
-                outputs: card.output.iter().map(|x| x.to_string()).collect(),
-                inputs: card.input.iter().map(|x| x.to_string()).collect(),
-                name: card.name.to_string(),
-                description: card.description.to_string(),
-                ty: card.ty.as_str().to_string(),
-            }))
             .collect();
 
         let schema = cao_script::Schema { cards };

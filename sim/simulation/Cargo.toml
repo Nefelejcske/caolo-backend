@@ -10,7 +10,7 @@ build = "build.rs"
 default = []
 
 [dependencies]
-cao-lang = { git = "https://github.com/caolo-game/cao-lang.git" }
+cao-lang = { version = "0.1" }
 cao_storage_derive = { path = "../cao-storage-derive" }
 cao-profile = { git = "https://github.com/caolo-game/cao-profile.git", optional = true, features = [
     "http"
