@@ -561,7 +561,7 @@ python-versions = ">=3.6.1"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "537ff52a2ef2e628699341326550c60804f54aa451999686a8e8bd8dc9346907"
+content-hash = "a53acb2356ab3097b246354f7549c3b51b19a6e8b6de03545ae85a8e736e6a46"
 
 [metadata.files]
 aioredis = [
