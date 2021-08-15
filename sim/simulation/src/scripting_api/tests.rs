@@ -81,7 +81,7 @@ lanes:
 "#;
 
     let program = serde_yaml::from_str(PROGRAM).unwrap();
-    let program = compile(program, None).unwrap();
+    let program = compile(&program, None).unwrap();
 
     vm.run(&program).unwrap();
 }
@@ -110,7 +110,7 @@ lanes:
     "#;
 
     let program = serde_yaml::from_str(PROGRAM).unwrap();
-    let program = compile(program, None).unwrap();
+    let program = compile(&program, None).unwrap();
 
     vm.register_function("say", into_f1(say));
     vm.run(&program).unwrap();
@@ -144,7 +144,7 @@ lanes:
     "#;
 
     let program = serde_yaml::from_str(PROGRAM).unwrap();
-    let program = compile(program, None).unwrap();
+    let program = compile(&program, None).unwrap();
 
     vm.register_function("say", into_f1(say));
     vm.run(&program).unwrap_err();

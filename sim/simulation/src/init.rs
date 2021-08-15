@@ -15,7 +15,7 @@ pub fn init_world_entities(storage: &mut World, n_fake_users: usize) {
         .expect("deserialize example program");
     debug!("compiling default program");
     let compiled =
-        compile(script, CompileOptions::new()).expect("failed to compile example program");
+        compile(&script, CompileOptions::new()).expect("failed to compile example program");
     debug!("compilation done");
 
     crate::query!(

@@ -113,9 +113,9 @@ checksum = "b700ce4376041dcd0a327fd0097c41095743c4c8af8887265942faf1100bd040"
 
 [[package]]
 name = "cao-lang"
-version = "0.1.36"
+version = "0.1.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8db73504acea8483ca3921d34f4ab8535f0c2a4038cec25d70c892fb220955aa"
+checksum = "937e56f423e38696a699c968f1a1dc6a146c5d938e83d133c241f6fd86ac85de"
 dependencies = [
  "arrayvec",
  "num_enum",
@@ -1306,9 +1306,9 @@ dependencies = [
 
 [[package]]
 name = "serde_cbor"
-version = "0.11.1"
+version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e18acfa2f90e8b735b2836ab8d538de304cbb6729a7360729ea5a895d15a622"
+checksum = "2bef2ebfde456fb76bbcf9f59315333decc4fda0b2b44b420243c11e0f5ec1f5"
 dependencies = [
  "half",
  "serde",

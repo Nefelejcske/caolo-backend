@@ -4,9 +4,6 @@ FROM python:3.9-slim AS build
 
 RUN apt-get update
 RUN apt-get install curl git build-essential -y
-# install rust in case the wheel for cao-lang can't be downloaded...
-RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
 RUN pip install -U pip virtualenv
 
 WORKDIR /caolo/api

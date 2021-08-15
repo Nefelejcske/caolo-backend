@@ -60,7 +60,7 @@ pub fn update_program(storage: &mut World, msg: &UpdateScriptCommand) -> UpdateR
     let compilation_unit: cao_lang::compiler::CaoIr =
         serde_json::from_slice(cu).map_err(UpdateProgramError::CuDeserializationError)?;
 
-    let program = cao_lang::prelude::compile(compilation_unit.clone(), None)
+    let program = cao_lang::prelude::compile(&compilation_unit, None)
         .map_err(UpdateProgramError::CompilationError)?;
 
     let program = CompiledScriptComponent(program);
