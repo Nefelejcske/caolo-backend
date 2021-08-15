@@ -105,7 +105,7 @@ fn value_to_string(vm: &Vm<ScriptExecutionData>, value: Value) -> Result<String,
             let has_value = unsafe {
                 let table = &*p;
                 for (hash, value) in table.iter() {
-                    write!(pl, "\n\t{:?} {}", hash, value_to_string(vm, *value)?).map_err(
+                    write!(pl, "\n\t{:?} {}", hash, value_to_string(vm, value)?).map_err(
                         |err| {
                             error!("Failed to write value {:?}", err);
                             ExecutionError::TaskFailure("Internal Error".to_string())
@@ -152,7 +152,7 @@ pub fn write_value<W: std::fmt::Write>(
             let has_value = unsafe {
                 let table = &*p;
                 for (hash, value) in table.iter() {
-                    write!(out, "\n\t{:?} {}", hash, value_to_string(vm, *value)?)
+                    write!(out, "\n\t{:?} {}", hash, value_to_string(vm, value)?)
                         .map_err(invalid_arg)?;
                 }
                 !table.is_empty()
@@ -242,7 +242,7 @@ pub fn parse_world_pos(point: &FieldTable) -> Result<WorldPosition, ExecutionErr
 
 fn _get_parse_coordinate(point: &FieldTable, key: &str) -> Result<i32, ExecutionError> {
     let rq = point
-        .get(Key::from_str(key).unwrap())
+        .get_value(Key::from_str(key).unwrap())
         .copied()
         .unwrap_or_default();
     let rq: i64 = rq

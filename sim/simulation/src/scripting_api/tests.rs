@@ -42,33 +42,37 @@ lanes:
         - ty: SetVar
           val: pos
 
+        - ty: ReadVar
+          val: pos
+        - ty: StringLiteral
+          val: rq
         - ty: ScalarInt
           val: 1
+        - ty: SetProperty
+
         - ty: ReadVar
           val: pos
-        - ty: SetProperty
-          val: rq
-
+        - ty: StringLiteral
+          val: rr
         - ty: ScalarInt
           val: 2
+        - ty: SetProperty
+
         - ty: ReadVar
           val: pos
-        - ty: SetProperty
-          val: rr
-
+        - ty: StringLiteral
+          val: q
         - ty: ScalarInt
           val: 3
+        - ty: SetProperty
+
         - ty: ReadVar
           val: pos
-        - ty: SetProperty
-          val: q
-
+        - ty: StringLiteral
+          val: r
         - ty: ScalarInt
           val: 4
-        - ty: ReadVar
-          val: pos
         - ty: SetProperty
-          val: r
 
         - ty: ReadVar
           val: pos
