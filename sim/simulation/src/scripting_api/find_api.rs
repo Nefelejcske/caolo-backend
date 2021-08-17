@@ -35,7 +35,7 @@ pub fn parse_find_constant(
     profile!("parse_find_constant");
     trace!("parse_find_constant");
     let param = unsafe {
-        vm.get_str(param).ok_or_else(|| {
+        param.get_str().ok_or_else(|| {
             trace!("parse_find_constant called with invalid param");
             ExecutionError::invalid_argument(
                 "parse_find_constant called with non-string param".to_owned(),

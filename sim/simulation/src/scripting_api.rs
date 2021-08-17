@@ -94,7 +94,7 @@ fn value_to_string(vm: &Vm<ScriptExecutionData>, value: Value) -> Result<String,
     let pl = match value {
         Value::String(p) => {
             let s = unsafe {
-                vm.get_str(p)
+                p.get_str()
                     .ok_or(ExecutionError::InvalidArgument { context: None })?
             };
             s.to_string()
@@ -140,7 +140,7 @@ pub fn write_value<W: std::fmt::Write>(
     let res = match value {
         Value::String(p) => {
             let s = unsafe {
-                vm.get_str(p).ok_or_else(|| {
+                p.get_str().ok_or_else(|| {
                     ExecutionError::invalid_argument("Can't read string argument".to_string())
                 })?
             };
@@ -242,7 +242,7 @@ pub fn parse_world_pos(point: &FieldTable) -> Result<WorldPosition, ExecutionErr
 
 fn _get_parse_coordinate(point: &FieldTable, key: &str) -> Result<i32, ExecutionError> {
     let rq = point
-        .get_value(Key::from_str(key).unwrap())
+        .get_value(Handle::from_str(key).unwrap())
         .unwrap_or_default();
     let rq: i64 = rq
         .try_into()
