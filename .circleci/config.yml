@@ -1,61 +1,16 @@
 version: 2.1
-
-orbs:
-  kubernetes: circleci/kubernetes@0.11.0
-
-commands:
-  kubernetes-deploy:
-    steps:
-      - setup_remote_docker
-
-      - kubernetes/install-kubectl:
-          kubectl-version: v1.15.10
-
-      - checkout
-
-      - run:
-          name: container registry log in
-          command: |
-            echo TODO
-          #  sudo $(aws ecr get-login --region ap-south-1 --no-include-email)
-
-      - run:
-          name: install skaffold
-          command: |
-            curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
-            chmod +x skaffold
-            sudo mv skaffold /usr/local/bin
-
-      - run:
-          name: update kube config to connect to the required cluster
-          command: |
-            echo TODO
-            # aws eks --region ap-south-1 update-kubeconfig --name demo-cluster
-
-      - run:
-          name: login to dockerhub
-          command: |
-            docker login -u caolo -p $DOCKERHUB_PASSWORD
-
-      - run:
-          name: build and push
-          command: |
-            skaffold build
-
 jobs:
-  deploy_k8s:
+  build:
     docker:
-      - image: "cimg/base:stable"
-        auth:
-          username: caolo
-          password: $DOCKERHUB_PASSWORD
-    steps:
-      - kubernetes-deploy
+      - image: tiltdev/tilt:latest
 
-workflows:
-  build_and_deploy:
-    jobs:
-      - deploy_k8s:
-          filters:
-            branches:
-              only: /(master)|(main)/
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 19.03.12
+      - run:
+          name: Run Tilt
+          command: |
+            ctlptl create cluster kind --registry=ctlptl-registry
+            tilt ci
+            tilt down

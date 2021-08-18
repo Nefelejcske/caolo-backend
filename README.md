@@ -16,28 +16,22 @@ Code layout:
  |+ worker/             # Executable code running the simulation and interfacing
 ```
 
-## Building via Skaffold
+## Deploying via Tilt
 
 ### Requirements
 
--   [Skaffold](https://skaffold.dev/docs/install/)
+-   [Tilt](https://tilt.dev)
 -   [kubectl](https://kubernetes.io/docs/tasks/tools/)
 -   [Docker](https://www.docker.com/)
-
-### Build and push the image
-
-```
-skaffold build
-```
 
 ### Configuring your kubernetes cluster
 
 **TBA**
 
-### Build & Deploy
+### Deploy the cluster
 
 ```
-skaffold run
+tilt up
 ```
 
 ## Running tests
