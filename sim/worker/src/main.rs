@@ -73,11 +73,11 @@ async fn game_loop(
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let now = std::time::Instant::now();
 
     init();
-    let sim_rt = caolo_sim::RuntimeGuard::new();
 
     let config = config::Config::load();
 
@@ -102,12 +102,14 @@ fn main() {
     info!("Creating cao executor with tag {}", tag);
     let mut executor = SimpleExecutor;
     info!("Init storage");
-    let mut world = sim_rt.block_on(executor.initialize(GameConfig {
-        world_radius: config.world_radius,
-        room_radius: config.room_radius,
-        queen_tag: tag.clone(),
-        ..Default::default()
-    }));
+    let mut world = executor
+        .initialize(GameConfig {
+            world_radius: config.world_radius,
+            room_radius: config.room_radius,
+            queen_tag: tag.clone(),
+            ..Default::default()
+        })
+        .await;
 
     info!("Starting with {} actors", config.n_actors);
 
@@ -166,8 +168,6 @@ fn main() {
         "Initialization done in {:?}",
         std::time::Instant::now() - now
     );
-    sim_rt.block_on(async move {
-        let (a, _) = futures::join!(server, game_loop);
-        a.unwrap();
-    });
+    let (a, _) = futures::join!(server, game_loop);
+    a.unwrap();
 }

@@ -33,35 +33,3 @@ impl<'a> storage::views::FromWorld<'a> for Time {
         Time(w.time())
     }
 }
-
-#[derive(Clone)]
-pub struct RuntimeGuard(std::sync::Arc<tokio::runtime::Runtime>);
-
-impl Default for RuntimeGuard {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl RuntimeGuard {
-    pub fn new() -> RuntimeGuard {
-        use std::sync::Arc;
-
-        let rt = tokio::runtime::Builder::new_multi_thread()
-            .enable_all()
-            .build()
-            .expect("Failed to init tokio runtime");
-        RuntimeGuard(Arc::new(rt))
-    }
-
-    pub fn block_on<F>(&self, f: F) -> F::Output
-    where
-        F: std::future::Future,
-    {
-        self.0.block_on(f)
-    }
-
-    pub fn runtime(&self) -> &std::sync::Arc<tokio::runtime::Runtime> {
-        &self.0
-    }
-}

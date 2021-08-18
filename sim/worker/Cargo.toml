@@ -21,12 +21,16 @@ serde_json = "1"
 serde = "1"
 futures = "0.3"
 serde_derive = "1"
-rand = "*"
 anyhow = "1"
 thiserror = "1"
 dotenv = { version = "0.15", optional = true }
 uuid = { version = "0.8", features = ["v4"] }
-tokio = { version = "1", features = ["sync"] }
+tokio = { version = "1", features = [
+    "sync",
+    "macros",
+    "rt",
+    "rt-multi-thread"
+], default-features = false }
 tokio-stream = "*"
 tonic = { version = "0.5" }
 prost = "0.8"
