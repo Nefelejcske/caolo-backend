@@ -303,6 +303,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use test_env_log::test;
 
     #[test]
     fn check_world_sanity() {

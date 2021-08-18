@@ -5,6 +5,7 @@ use crate::{
     tables::{hex_grid::HexGrid, morton_hierarchy::SpacialStorage, morton_table::MortonTable},
     terrain::TileTerrainType,
 };
+use test_env_log::test;
 
 #[test]
 fn test_simple_wall() {

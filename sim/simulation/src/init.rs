@@ -190,6 +190,7 @@ fn uncontested_pos<T: crate::tables::TableRow + Send + Sync + Default>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use test_env_log::test;
 
     #[test]
     fn can_init_the_game() {
