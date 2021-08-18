@@ -1,10 +1,14 @@
 import asyncio
 import logging
+from typing import Optional
+from dataclasses import dataclass
 
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 import asyncpg
+from starlette.responses import JSONResponse
 from .config import DB_URL
 
 from . import handler
@@ -38,19 +42,20 @@ app.add_middleware(
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-_DB_POOL = None
+_DB_POOL: Optional[asyncpg.Pool] = None
 
 
-async def db_pool():
+async def db_pool() -> asyncpg.Pool:
     global _DB_POOL
     if _DB_POOL is None:
         _DB_POOL = await asyncpg.create_pool(DB_URL)
+    assert _DB_POOL is not None  # Silence the warning
     return _DB_POOL
 
 
 @app.middleware("http")
 async def db_session(req, call_next):
-    resp = Response(status_code=500)
+    resp = Response(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
     pool = await db_pool()
     assert pool is not None
     async with pool.acquire() as con:
@@ -65,18 +70,34 @@ async def rate_limit(req, call_next):
     return await call_next(req)
 
 
-@app.get("/health")
+@dataclass
+class HealthStatus:
+    queen: str
+
+
+@app.get("/health", response_model=HealthStatus)
 async def health():
     async def _ping_queen():
         channel = await queen_channel()
         stub = cao_common_pb2_grpc.HealthStub(channel)
         msg = cao_common_pb2.Empty()
-        resp = await stub.Ping(msg)
-        return resp
+        await stub.Ping(msg)
 
-    await asyncio.gather(_ping_queen(), db_pool())  # test dependencies
+    # test dependencies
+    statuses = await asyncio.gather(_ping_queen(), return_exceptions=True)
 
-    return Response(status_code=204)
+    status_code = status.HTTP_200_OK
+
+    res = HealthStatus(queen="up")
+    if statuses[0]:
+        print("poggies", statuses[0])
+        status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        res.queen = "Unavailable"
+
+    return JSONResponse(
+        jsonable_encoder(res),
+        status_code=status_code,
+    )
 
 
 app.include_router(handler.world.router)
