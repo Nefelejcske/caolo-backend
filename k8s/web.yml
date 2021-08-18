@@ -29,9 +29,6 @@ spec:
           image: caolo/caolo-api
           imagePullPolicy: IfNotPresent
           resources:
-            requests:
-              memory: "64Mi"
-              cpu: "100m"
             limits:
               memory: "1Gi"
               cpu: "1"

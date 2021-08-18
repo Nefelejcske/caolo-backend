@@ -20,9 +20,6 @@ spec:
           imagePullPolicy: IfNotPresent
           image: caolo/caolo-sim
           resources:
-            requests:
-              memory: "200Mi"
-              cpu: "4"
             limits:
               memory: "1Gi"
           command:
