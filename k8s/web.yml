@@ -28,10 +28,6 @@ spec:
         - name: web
           image: caolo/caolo-api
           imagePullPolicy: IfNotPresent
-          resources:
-            limits:
-              memory: "1Gi"
-              cpu: "1"
           livenessProbe:
             httpGet:
               path: /health

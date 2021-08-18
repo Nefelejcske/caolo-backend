@@ -19,9 +19,6 @@ spec:
         - name: queen
           imagePullPolicy: IfNotPresent
           image: caolo/caolo-sim
-          resources:
-            limits:
-              memory: "1Gi"
           command:
             - ./caolo-worker
           env:

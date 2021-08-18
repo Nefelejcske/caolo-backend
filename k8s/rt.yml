@@ -17,10 +17,6 @@ spec:
         - name: rt
           image: caolo/caolo-rt
           imagePullPolicy: IfNotPresent
-          resources:
-            limits:
-              memory: "1Gi"
-              cpu: "1"
           livenessProbe:
             httpGet:
               path: /health
