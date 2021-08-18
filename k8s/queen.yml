@@ -21,6 +21,11 @@ spec:
           image: caolo/caolo-sim
           command:
             - ./caolo-worker
+          livenessProbe:
+            tcpSocket:
+              port: 50051
+            initialDelaySeconds: 5
+            periodSeconds: 5
           env:
             - name: CAO_N_ACTORS
               value: "7500"
