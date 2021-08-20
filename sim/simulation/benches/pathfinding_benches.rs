@@ -13,7 +13,7 @@ fn get_rand() -> impl rand::Rng {
     SmallRng::seed_from_u64(0xdeadbeef)
 }
 
-fn create_world(room_radius: u32) -> std::pin::Pin<Box<World>> {
+fn create_world(room_radius: u32) -> World {
     let mut exc = SimpleExecutor;
     let world = futures_lite::future::block_on(exc.initialize(GameConfig {
         world_radius: 6,
@@ -70,7 +70,7 @@ fn bench_find_path_in_room(c: &mut Criterion) {
                 WorldPosition { room, pos: from },
                 WorldPosition { room, pos: to },
                 1,
-                FromWorld::from_world(&*world),
+                FromWorld::from_world(&world),
                 2000,
                 &mut path,
                 &mut rooms2visit,

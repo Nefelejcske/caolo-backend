@@ -8,7 +8,7 @@ use tracing::debug;
 
 #[derive(Clone)]
 pub struct ScriptingService {
-    world: std::sync::Arc<tokio::sync::Mutex<crate::World>>,
+    world: crate::WorldContainer,
 }
 
 impl std::fmt::Debug for ScriptingService {
@@ -18,7 +18,7 @@ impl std::fmt::Debug for ScriptingService {
 }
 
 impl ScriptingService {
-    pub fn new(world: std::sync::Arc<tokio::sync::Mutex<crate::World>>) -> Self {
+    pub fn new(world: crate::WorldContainer) -> Self {
         Self { world }
     }
 }
@@ -31,7 +31,7 @@ impl cao_script::scripting_server::Scripting for ScriptingService {
     ) -> Result<tonic::Response<cao_script::ScriptList>, tonic::Status> {
         let ids;
         {
-            let w = self.world.lock().await;
+            let w = self.world.read().await;
             let scripts_table = w.view::<ScriptId, CaoIrComponent>();
             ids = scripts_table.iter().map(|(id, _)| id.0).collect::<Vec<_>>();
             // free the world lock asap
@@ -59,7 +59,7 @@ impl cao_script::scripting_server::Scripting for ScriptingService {
         })?;
         let payload;
         {
-            let w = self.world.lock().await;
+            let w = self.world.read().await;
             let scripts_table = w.view::<ScriptId, CaoIrComponent>();
             let ir = &scripts_table
                 .get_by_id(ScriptId(id))
@@ -79,7 +79,7 @@ impl cao_script::scripting_server::Scripting for ScriptingService {
         &self,
         request: tonic::Request<cao_script::UpdateEntityScriptCommand>,
     ) -> Result<tonic::Response<cao_script::CommandResult>, tonic::Status> {
-        let mut w = self.world.lock().await;
+        let mut w = self.world.write().await;
         script_update::update_entity_script(&mut *w, request.get_ref())
             .map(|_: ()| Response::new(cao_script::CommandResult {}))
             .map_err(|err| Status::invalid_argument(err.to_string()))
@@ -89,7 +89,7 @@ impl cao_script::scripting_server::Scripting for ScriptingService {
         &self,
         request: tonic::Request<cao_script::UpdateScriptCommand>,
     ) -> Result<tonic::Response<cao_script::CommandResult>, tonic::Status> {
-        let mut w = self.world.lock().await;
+        let mut w = self.world.write().await;
         script_update::update_program(&mut *w, request.get_ref())
             .map(|_: ()| Response::new(cao_script::CommandResult {}))
             .map_err(|err| Status::invalid_argument(err.to_string()))
@@ -99,7 +99,7 @@ impl cao_script::scripting_server::Scripting for ScriptingService {
         &self,
         request: tonic::Request<cao_script::SetDefaultScriptCommand>,
     ) -> Result<tonic::Response<cao_script::CommandResult>, tonic::Status> {
-        let mut w = self.world.lock().await;
+        let mut w = self.world.write().await;
         script_update::set_default_script(&mut *w, request.get_ref())
             .map(|_: ()| Response::new(cao_script::CommandResult {}))
             .map_err(|err| Status::invalid_argument(err.to_string()))
@@ -109,7 +109,7 @@ impl cao_script::scripting_server::Scripting for ScriptingService {
         &self,
         request: tonic::Request<cao_script::EntityId>,
     ) -> Result<tonic::Response<cao_common::Uuid>, tonic::Status> {
-        let w = self.world.lock().await;
+        let w = self.world.read().await;
         match w
             .view::<caolo_sim::prelude::EntityId, caolo_sim::prelude::EntityScript>()
             .get_by_id(caolo_sim::prelude::EntityId(

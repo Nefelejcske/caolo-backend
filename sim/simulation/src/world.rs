@@ -1,5 +1,4 @@
 use crate::components::*;
-use crate::diagnostics::Diagnostics;
 use crate::indices::*;
 use crate::intents::*;
 use crate::storage::{
@@ -19,8 +18,6 @@ use crate::tables::TableId;
 use crate::Time;
 use crate::{archetype, tables::hex_grid::HexGrid};
 use crate::{components::game_config::GameConfig, prelude::Axial};
-use serde::Serialize;
-use std::pin::Pin;
 
 archetype!(
     module pos2_store key Axial,
@@ -54,8 +51,8 @@ archetype!(
     table DropoffEventComponent : BTreeTable<EntityId, DropoffEventComponent> = dropoff_intents,
     table RespawnTimer : BTreeTable<EntityId, RespawnTimer> = respawn_timer,
 
-    attr serde(skip) table PathCacheComponent : DenseTable<EntityId,PathCacheComponent>= pathcache,
-    attr serde(skip) table ScriptHistory : DenseTable<EntityId,ScriptHistory>= script_history
+    table PathCacheComponent : DenseTable<EntityId,PathCacheComponent> = pathcache,
+    table ScriptHistory : DenseTable<EntityId,ScriptHistory> = script_history
 
     iterby bot
     iterby structure
@@ -67,7 +64,7 @@ archetype!(
 
     table UserComponent : SparseFlagTable<UserId, UserComponent> = user,
     table EntityScript: BTreeTable<UserId, EntityScript> = user_default_script,
-    table Rooms : BTreeTable<UserId, Rooms>= user_rooms,
+    table Rooms : BTreeTable<UserId, Rooms> = user_rooms,
     table UserProperties : BTreeTable<UserId, UserProperties> = user_props
 
     iterby user
@@ -87,23 +84,21 @@ archetype!(
     table Intents<MeleeIntent> : UniqueTable<EmptyKey, Intents<MeleeIntent>> = melee_intents,
     table Intents<ScriptHistoryEntry> : UniqueTable<EmptyKey, Intents<ScriptHistoryEntry>> = script_history_intents,
     table Intents<DeleteEntityIntent> : UniqueTable<EmptyKey, Intents<DeleteEntityIntent>> = delete_entity_intents,
-    table Intents<SayIntent> : UniqueTable<EmptyKey, Intents<SayIntent>> = say_intents,
-
-    table Diagnostics : UniqueTable<EmptyKey, Diagnostics> = diagnostics
+    table Intents<SayIntent> : UniqueTable<EmptyKey, Intents<SayIntent>> = say_intents
 );
 
 archetype!(
     module config_store key ConfigKey,
 
     table RoomProperties : UniqueTable<ConfigKey, RoomProperties> = room_properties,
-    table GameConfig : UniqueTable<ConfigKey, GameConfig>= game_config
+    table GameConfig : UniqueTable<ConfigKey, GameConfig> = game_config
 );
 
 archetype!(
     module positions_store key WorldPosition,
     // don't forget to implement these in `reset_world_storage`
     table TerrainComponent : MortonGridTable<TerrainComponent> = point_terrain,
-    attr serde(skip) table EntityComponent : MortonMortonTable<EntityComponent> = point_entity
+    table EntityComponent : MortonMortonTable<EntityComponent> = point_entity
 );
 
 archetype!(
@@ -122,7 +117,6 @@ impl Component<Axial> for EntityComponent {
     type Table = MortonTable<Self>;
 }
 
-#[derive(Debug, Serialize)]
 pub struct World {
     pub entities: entity_store::Archetype,
     pub room: pos2_store::Archetype,
@@ -133,11 +127,10 @@ pub struct World {
     pub entity_logs: <LogEntry as Component<EntityTime>>::Table,
     pub positions: positions_store::Archetype,
 
-    #[serde(skip)]
-    pub deferred_deletes: entity_store::DeferredDeletes,
+    deferred_deletes: entity_store::DeferredDeletes,
 
-    pub next_entity: EntityId,
-    pub free_entity_list: Vec<EntityId>,
+    next_entity: EntityId,
+    free_entity_list: Vec<EntityId>,
 }
 
 macro_rules! impl_hastable {
@@ -178,11 +171,11 @@ impl storage::HasTable<EntityTime, LogEntry> for World {
 impl World {
     /// Moving World around in memory would invalidate views, so let's make sure it doesn't
     /// happen.
-    pub fn new() -> Pin<Box<Self>> {
+    pub(crate) fn new() -> Self {
         let mut config: config_store::Archetype = Default::default();
         config.game_config.value = Some(Default::default());
 
-        let mut res = Box::pin(World {
+        let mut res = Self {
             config,
             entities: Default::default(),
             room: Default::default(),
@@ -195,11 +188,11 @@ impl World {
             free_entity_list: Default::default(),
 
             user: Default::default(),
-        });
+        };
 
         // initialize the intent tables
         let botints = crate::intents::BotIntents::default();
-        crate::intents::move_into_storage(&mut *res, vec![botints]);
+        crate::intents::move_into_storage(&mut res, vec![botints]);
         res
     }
 

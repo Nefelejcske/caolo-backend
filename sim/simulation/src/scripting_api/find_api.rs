@@ -180,7 +180,7 @@ mod tests {
         center_pos: WorldPosition,
         expected_id: EntityId,
         expected_pos: WorldPosition,
-    ) -> std::pin::Pin<Box<World>> {
+    ) -> World {
         let mut seed = [0; 32];
         thread_rng().fill(&mut seed);
         let mut rng = SmallRng::from_seed(seed);
@@ -268,7 +268,7 @@ mod tests {
                 components::ResourceComponent(components::Resource::Energy),
             );
         let data =
-            ScriptExecutionData::new(&*storage.as_ref(), Default::default(), entity_id, None);
+            ScriptExecutionData::new(&storage, Default::default(), entity_id, None);
         let mut vm = Vm::new(data).unwrap();
 
         let constant = FindConstant::Resource;
@@ -301,7 +301,7 @@ mod tests {
 
         let storage = init_resource_storage(entity_id, center_pos, expected_id, expected_pos);
         let data = ScriptExecutionData::new(
-            &*storage.as_ref(),
+            &storage,
             Default::default(),
             entity_id,
             Default::default(),

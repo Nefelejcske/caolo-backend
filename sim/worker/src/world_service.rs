@@ -202,7 +202,7 @@ mod tests {
                 room_radius: 10,
                 ..Default::default()
             }));
-        caolo_sim::init::init_world_entities(&mut *w, 12);
+        caolo_sim::init::init_world_entities(&mut w, 12);
 
         pl.update(&w);
 

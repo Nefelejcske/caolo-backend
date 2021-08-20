@@ -1,9 +1,8 @@
 use crate::{
     components::{game_config::GameConfig, CompiledScriptComponent, EntityScript, OwnedEntity},
-    diagnostics::Diagnostics,
     indices::{ConfigKey, EntityId, ScriptId, UserId},
     intents::*,
-    prelude::{EmptyKey, World},
+    prelude::World,
     profile,
     storage::views::{FromWorld, UnwrapView},
 };
@@ -33,11 +32,9 @@ pub enum ExecutionError {
 
 pub fn execute_scripts(
     workload: &[(EntityId, EntityScript)],
-    storage: &mut World,
+    storage: &World,
 ) -> Result<Vec<BotIntents>, Infallible> {
     profile!("execute_scripts");
-
-    let start = chrono::Utc::now();
 
     let owners_table = storage.view::<EntityId, OwnedEntity>().reborrow();
 
@@ -107,15 +104,6 @@ pub fn execute_scripts(
     debug!(
         "Executing scripts done. Returning {:?} intents",
         run_result.intents.len()
-    );
-
-    let mut diag = storage.unsafe_view::<EmptyKey, Diagnostics>();
-    let diag: &mut Diagnostics = diag.unwrap_mut_or_default();
-
-    diag.update_scripts(
-        chrono::Utc::now() - start,
-        run_result.num_scripts_ran,
-        run_result.num_scripts_errored,
     );
 
     Ok(run_result.intents)

@@ -67,4 +67,4 @@ RUN apt-get install openssl -y
 
 COPY --from=build /caolo/sim/target/release/caolo-worker ./caolo-worker
 
-ENTRYPOINT [ "./caolo-worker" , "> /dev/null" ]
+ENTRYPOINT [ "./caolo-worker" ]

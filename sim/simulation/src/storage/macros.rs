@@ -310,10 +310,9 @@ macro_rules! archetype {
             use crate::tables::{Table, Component};
             use crate::storage::views::{UnsafeView, View};
             use crate::storage::{HasTable, DeleteById, DeferredDeleteById};
-            use serde::{Serialize, Deserialize};
             pub type Key = $id;
 
-            #[derive(Debug, cao_storage_derive::CaoStorage, Default, Serialize, Deserialize)]
+            #[derive(cao_storage_derive::CaoStorage, Default)]
             $(
                 #[cao_storage_table($id, $name, $row)]
             )*

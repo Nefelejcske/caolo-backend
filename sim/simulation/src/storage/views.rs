@@ -19,7 +19,8 @@
 //!     // do stuff
 //! }
 //!
-//! let mut storage = World::new();
+//! let mut exc = SimpleExecutor;
+//! let mut storage = futures_lite::future::block_on(exc.initialize(Default::default()));
 //! update_minerals(FromWorldMut::from_world_mut(&mut storage), FromWorld::from_world(&storage));
 //! ```
 //!

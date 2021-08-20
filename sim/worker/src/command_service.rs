@@ -5,7 +5,7 @@ use tonic::{Request, Response, Status};
 
 #[derive(Clone)]
 pub struct CommandService {
-    world: std::sync::Arc<tokio::sync::Mutex<crate::World>>,
+    world: crate::WorldContainer,
 }
 
 impl std::fmt::Debug for CommandService {
@@ -15,7 +15,7 @@ impl std::fmt::Debug for CommandService {
 }
 
 impl CommandService {
-    pub fn new(world: std::sync::Arc<tokio::sync::Mutex<crate::World>>) -> Self {
+    pub fn new(world: crate::WorldContainer) -> Self {
         Self { world }
     }
 }
@@ -27,7 +27,7 @@ impl cao_commands::command_server::Command for CommandService {
         &self,
         request: Request<cao_commands::PlaceStructureCommand>,
     ) -> Result<Response<cao_commands::CommandResult>, Status> {
-        let mut w = self.world.lock().await;
+        let mut w = self.world.write().await;
         structures::place_structure(&mut *w, request.get_ref())
             .map(|_: ()| Response::new(cao_commands::CommandResult {}))
             .map_err(|err| Status::invalid_argument(err.to_string()))
@@ -38,7 +38,7 @@ impl cao_commands::command_server::Command for CommandService {
         &self,
         request: tonic::Request<cao_commands::TakeRoomCommand>,
     ) -> Result<tonic::Response<cao_commands::CommandResult>, tonic::Status> {
-        let mut w = self.world.lock().await;
+        let mut w = self.world.write().await;
         rooms::take_room(&mut *w, request.get_ref())
             .map(|_: ()| Response::new(cao_commands::CommandResult {}))
             .map_err(|err| Status::invalid_argument(err.to_string()))
@@ -49,7 +49,7 @@ impl cao_commands::command_server::Command for CommandService {
         &self,
         request: tonic::Request<cao_commands::RegisterUserCommand>,
     ) -> Result<tonic::Response<cao_commands::CommandResult>, tonic::Status> {
-        let mut w = self.world.lock().await;
+        let mut w = self.world.write().await;
         users::register_user(&mut *w, request.get_ref())
             .map(|_: ()| Response::new(cao_commands::CommandResult {}))
             .map_err(|err| Status::invalid_argument(err.to_string()))

@@ -6,23 +6,6 @@ use crate::prelude::*;
 use crate::query;
 
 /// Initialize a spawn at the given position
-///
-/// ```
-/// use caolo_sim::prelude::*;
-/// use caolo_sim::entity_archetypes::init_structure_spawn;
-///
-/// let mut w = World::new();
-///
-/// let id = w.insert_entity();
-/// init_structure_spawn(id, Default::default(), WorldPosition{
-///     room: Axial::new(12,12),
-///     pos: Axial::new(12,12),
-/// }, &mut w);
-///
-///
-/// let _spawn = w.view::<EntityId, SpawnComponent>().get_by_id(id).unwrap();
-///
-/// ```
 pub fn init_structure_spawn(id: EntityId, owner_id: Uuid, pos: WorldPosition, world: &mut World) {
     // TODO tweak these numbas
     query!(

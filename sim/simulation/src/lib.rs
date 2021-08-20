@@ -1,7 +1,4 @@
-use prelude::World;
-
 pub mod components;
-pub mod diagnostics;
 pub mod entity_archetypes;
 pub mod executor;
 pub mod geometry;
@@ -29,7 +26,7 @@ pub mod version {
 pub struct Time(pub u64);
 
 impl<'a> storage::views::FromWorld<'a> for Time {
-    fn from_world(w: &'a World) -> Self {
+    fn from_world(w: &'a prelude::World) -> Self {
         Time(w.time())
     }
 }

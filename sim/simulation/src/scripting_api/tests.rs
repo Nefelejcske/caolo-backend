@@ -3,7 +3,7 @@ use cao_lang::prelude::*;
 
 use super::*;
 
-fn init_basic_storage() -> std::pin::Pin<Box<World>> {
+fn init_basic_storage() -> World {
     World::new()
 }
 
@@ -11,7 +11,7 @@ fn init_basic_storage() -> std::pin::Pin<Box<World>> {
 fn test_parse_world_position() {
     let storage = init_basic_storage();
     let data = ScriptExecutionData::new(
-        &*storage.as_ref(),
+        &storage,
         Default::default(),
         Default::default(),
         Default::default(),
@@ -93,7 +93,7 @@ fn test_say() {
     let entity_id = storage.insert_entity();
 
     let mut vm = Vm::new(ScriptExecutionData::new(
-        &*storage.as_ref(),
+        &storage,
         Default::default(),
         entity_id,
         Default::default(),
@@ -127,7 +127,7 @@ fn test_say_bad_len() {
     let entity_id = storage.insert_entity();
 
     let mut vm = Vm::new(ScriptExecutionData::new(
-        &*storage.as_ref(),
+        &storage,
         Default::default(),
         entity_id,
         Default::default(),

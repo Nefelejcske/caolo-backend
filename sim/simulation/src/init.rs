@@ -203,6 +203,6 @@ mod tests {
             }));
 
         // smoke test: can the game be even initialized?
-        init_world_entities(&mut *world, 12);
+        init_world_entities(&mut world, 12);
     }
 }

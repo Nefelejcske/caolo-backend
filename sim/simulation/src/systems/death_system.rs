@@ -78,8 +78,8 @@ mod tests {
         );
 
         death_update(
-            FromWorldMut::from_world_mut(&mut *store),
-            FromWorld::from_world(&mut *store),
+            FromWorldMut::from_world_mut(&mut store),
+            FromWorld::from_world(&mut store),
         );
         store.post_process();
 
@@ -122,8 +122,8 @@ mod tests {
         assert_eq!(entities, vec![entity_1, entity_2]);
 
         death_update(
-            FromWorldMut::from_world_mut(&mut *store),
-            FromWorld::from_world(&mut *store),
+            FromWorldMut::from_world_mut(&mut store),
+            FromWorld::from_world(&mut store),
         );
         store.post_process();
 

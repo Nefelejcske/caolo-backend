@@ -24,7 +24,7 @@ use uuid::Uuid;
 #[global_allocator]
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
-type World = std::pin::Pin<Box<caolo_sim::prelude::World>>;
+type WorldContainer = Arc<tokio::sync::RwLock<caolo_sim::prelude::World>>;
 
 fn init() {
     #[cfg(feature = "dotenv")]
@@ -38,20 +38,29 @@ fn init() {
 }
 
 async fn game_loop(
-    world: Arc<tokio::sync::Mutex<World>>,
+    world: WorldContainer,
     mut executor: SimpleExecutor,
     outpayload: Arc<tokio::sync::broadcast::Sender<Arc<world_service::Payload>>>,
     tick_latency: Duration,
 ) {
     loop {
         let start = Instant::now();
+
+        let intents = {
+            let world = world.read().await;
+
+            executor.forward_bots(&*world).await.unwrap()
+        };
+        // NOTE: commands may be executed between `forward_bots` and `apply_intents`
+        // allow this for now, but may be worth revisiting
+        {
+            let mut world = world.write().await;
+            executor.apply_intents(&mut *world, intents).await.unwrap();
+        }
         let mut pl = world_service::Payload::default();
         {
-            // free the world mutex at the end of this scope
-            let mut world = world.lock().await;
-            executor.forward(&mut *world).await.unwrap();
-
-            pl.update(&world);
+            let world = world.read().await;
+            pl.update(&*world);
         }
 
         if outpayload.receiver_count() > 0 {
@@ -143,7 +152,7 @@ async fn main() {
         })
         .collect();
 
-    let world = Arc::new(tokio::sync::Mutex::new(world));
+    let world = Arc::new(tokio::sync::RwLock::new(world));
 
     let server = tonic::transport::Server::builder()
         .trace_fn(move |_| tracing::error_span!("service", queen_tag = tag.as_str()))
