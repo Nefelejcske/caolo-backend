@@ -1,4 +1,5 @@
 mod config;
+mod game_loop;
 mod input;
 mod protos;
 
@@ -12,12 +13,8 @@ use crate::protos::cao_common::health_server::HealthServer;
 use crate::protos::cao_script::scripting_server::ScriptingServer;
 use crate::protos::cao_world::world_server::WorldServer;
 use caolo_sim::executor::{GameConfig, SimpleExecutor};
-use std::{
-    env,
-    sync::Arc,
-    time::{Duration, Instant},
-};
-use tracing::{debug, info, warn, Instrument};
+use std::{env, sync::Arc, time::Duration};
+use tracing::{info, Instrument};
 use uuid::Uuid;
 
 #[cfg(not(target_env = "msvc"))]
@@ -35,53 +32,6 @@ fn init() {
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .finish();
     tracing::subscriber::set_global_default(collector).unwrap();
-}
-
-async fn game_loop(
-    world: WorldContainer,
-    mut executor: SimpleExecutor,
-    outpayload: Arc<tokio::sync::broadcast::Sender<Arc<world_service::Payload>>>,
-    tick_latency: Duration,
-) {
-    loop {
-        let start = Instant::now();
-
-        let intents = {
-            let world = world.read().await;
-
-            executor.forward_bots(&*world).await.unwrap()
-        };
-        // NOTE: commands may be executed between `forward_bots` and `apply_intents`
-        // allow this for now, but may be worth revisiting
-        {
-            let mut world = world.write().await;
-            executor.apply_intents(&mut *world, intents).await.unwrap();
-        }
-        let mut pl = world_service::Payload::default();
-        {
-            let world = world.read().await;
-            pl.update(&*world);
-        }
-
-        if outpayload.receiver_count() > 0 {
-            debug!("Sending world entities to subscribers");
-            // while we're sending to the database, also update the outbound payload
-
-            if outpayload.send(Arc::new(pl)).is_err() {
-                // happens if the subscribers disconnect while we prepared the payload
-                warn!("Lost all world subscribers");
-            }
-        }
-
-        info!("Tick done in {:?}", Instant::now() - start);
-
-        let sleep_duration = tick_latency
-            .checked_sub(Instant::now() - start)
-            .unwrap_or_else(|| Duration::from_millis(0));
-
-        debug!("Sleeping for {:?}", sleep_duration);
-        tokio::time::sleep(sleep_duration).await;
-    }
 }
 
 #[tokio::main]
@@ -173,7 +123,8 @@ async fn main() {
         .add_service(HealthServer::new(health_service::HealthService {}))
         .serve(addr);
 
-    let game_loop = game_loop(world, executor, outpayload, tick_latency).instrument(game_loop_span);
+    let game_loop =
+        game_loop::game_loop(world, executor, outpayload, tick_latency).instrument(game_loop_span);
 
     info!(
         "Initialization done in {:?}",
