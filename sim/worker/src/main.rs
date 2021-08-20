@@ -73,6 +73,8 @@ async fn game_loop(
             }
         }
 
+        info!("Tick done in {:?}", Instant::now() - start);
+
         let sleep_duration = tick_latency
             .checked_sub(Instant::now() - start)
             .unwrap_or_else(|| Duration::from_millis(0));
