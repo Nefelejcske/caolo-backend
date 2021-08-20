@@ -28,7 +28,7 @@ WORKDIR /caolo/sim
 COPY --from=planner $CARGO_HOME $CARGO_HOME
 COPY --from=planner /caolo/sim/recipe.json recipe.json
 RUN cargo --version
-RUN cargo chef cook --release --recipe-path recipe.json
+RUN cargo chef cook --release --no-default-features --recipe-path recipe.json
 
 # ==============================================================================================
 
@@ -55,7 +55,7 @@ COPY ./protos/ ./protos/
 COPY ./sim/ ./sim/
 
 WORKDIR /caolo/sim
-RUN cargo build --release
+RUN cargo build --release --no-default-features
 
 # ========== Copy the built binary to a new container, to minimize the image size ==========
 
@@ -67,4 +67,4 @@ RUN apt-get install openssl -y
 
 COPY --from=build /caolo/sim/target/release/caolo-worker ./caolo-worker
 
-ENTRYPOINT [ "./caolo-worker" ]
+ENTRYPOINT [ "./caolo-worker" , "> /dev/null" ]
