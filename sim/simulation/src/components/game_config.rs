@@ -18,8 +18,8 @@ impl Default for GameConfig {
             execution_limit: 128,
             target_tick_ms: 100,
             queen_tag: uuid::Uuid::new_v4().to_string(),
-            world_radius: 32,
-            room_radius: 50,
+            world_radius: 4,
+            room_radius: 8,
             path_finding_limit: 1000,
         }
     }
