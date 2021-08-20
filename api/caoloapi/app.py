@@ -90,7 +90,7 @@ async def health():
 
     res = HealthStatus(queen="up")
     if statuses[0]:
-        logging.error("Queen is not available", statuses[0])
+        logging.error("Queen is not available: %s", statuses[0])
         status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         res.queen = "Unavailable"
 
