@@ -17,3 +17,7 @@ pub mod cao_world {
 pub mod cao_intents {
     tonic::include_proto!("cao_intents");
 }
+
+pub mod cao_users {
+    tonic::include_proto!("cao_users");
+}

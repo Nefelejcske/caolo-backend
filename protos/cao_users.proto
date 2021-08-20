@@ -1,0 +1,18 @@
+syntax = "proto3";
+package cao_users;
+
+import "cao_common.proto";
+
+option go_package = "github.com/caolo-game/cao-rt/cao_users_pb";
+
+message UserInfo
+{
+    cao_common.Uuid userId = 1;
+    int32 level = 2;
+}
+
+service Users
+{
+    rpc ListUsers(cao_common.Empty) returns (stream cao_common.Uuid) { }
+    rpc GetUserInfo(cao_common.Uuid) returns (UserInfo) { }
+}

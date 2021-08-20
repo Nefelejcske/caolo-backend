@@ -2,7 +2,7 @@ use crate::protos::cao_commands::RegisterUserCommand;
 use caolo_sim::{prelude::*, query};
 use std::{convert::TryFrom, num::TryFromIntError};
 use thiserror::Error;
-use tracing::debug;
+use tracing::{info, trace};
 use uuid::Uuid;
 
 #[derive(Debug, Error)]
@@ -21,7 +21,7 @@ pub fn register_user(
     world: &mut World,
     msg: &RegisterUserCommand,
 ) -> Result<(), RegisterUserError> {
-    debug!("Register user");
+    trace!("Register user");
 
     let user_id = msg
         .user_id
@@ -34,6 +34,8 @@ pub fn register_user(
 
     let level = msg.level;
     let level = u16::try_from(level).map_err(RegisterUserError::BadLevel)?;
+
+    info!("Registering new user. Id: {} level: {}", user_id, level);
 
     if world
         .view::<UserId, UserProperties>()

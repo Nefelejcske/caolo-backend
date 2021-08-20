@@ -10,6 +10,12 @@ pub struct Axial {
     pub r: i32,
 }
 
+impl std::fmt::Display for Axial {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[{}, {}]", self.q, self.r)
+    }
+}
+
 unsafe impl Send for Axial {}
 
 impl Axial {

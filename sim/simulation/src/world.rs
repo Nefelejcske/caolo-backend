@@ -252,6 +252,10 @@ impl World {
             .map(|conf| conf.queen_tag.as_str())
     }
 
+    pub fn list_users(&self) -> impl Iterator<Item = UserId> + '_ {
+        self.user.user.iter().map(|(id, _)| id)
+    }
+
     /// # Safety
     /// This function is safe to call if no references obtained via UnsafeView are held.
     pub unsafe fn reset_world_storage(&mut self) -> Result<&mut Self, ExtendFailure> {

@@ -6,11 +6,13 @@ mod protos;
 mod command_service;
 mod health_service;
 mod scripting_service;
+mod users_service;
 mod world_service;
 
 use crate::protos::cao_commands::command_server::CommandServer;
 use crate::protos::cao_common::health_server::HealthServer;
 use crate::protos::cao_script::scripting_server::ScriptingServer;
+use crate::protos::cao_users::users_server::UsersServer;
 use crate::protos::cao_world::world_server::WorldServer;
 use caolo_sim::executor::{GameConfig, SimpleExecutor};
 use std::{env, sync::Arc, time::Duration};
@@ -121,6 +123,9 @@ async fn main() {
             world_span,
         )))
         .add_service(HealthServer::new(health_service::HealthService {}))
+        .add_service(UsersServer::new(crate::users_service::UsersService::new(
+            Arc::clone(&world),
+        )))
         .serve(addr);
 
     let game_loop =

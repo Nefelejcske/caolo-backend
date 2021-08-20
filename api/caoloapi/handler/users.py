@@ -4,21 +4,20 @@ import string
 import random
 from uuid import UUID
 
-from fastapi import (
-    APIRouter,
-    Request,
-    Depends,
-    HTTPException,
-    Body,
-    status,
-)
+from fastapi import APIRouter, Request, Depends, HTTPException, Body, status, Query
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field, EmailStr
 from jose import JWTError
 
-
 from asyncpg.exceptions import UniqueViolationError
 
+import cao_commands_pb2
+import cao_commands_pb2_grpc
+import cao_common_pb2
+import cao_users_pb2_grpc
+from google.protobuf.json_format import MessageToDict
+
+from ..queen import queen_channel
 from ..model.auth import (
     hashpw,
     verifypw,
@@ -97,6 +96,42 @@ class RegisterForm(BaseModel):
     )
 
 
+@router.get("/sim-users")
+async def list_users():
+    # TODO:
+    # admins only
+    queen = await queen_channel()
+    stub = cao_users_pb2_grpc.UsersStub(queen)
+    msg = cao_common_pb2.Empty()
+
+    payload = []
+    async for userid in stub.ListUsers(msg):
+        userid = MessageToDict(
+            userid,
+            including_default_value_fields=True,
+            preserving_proto_field_name=False,
+        )
+        payload.append(userid)
+
+    return payload
+
+
+@router.get("/sim-user")
+async def get_user_from_sim(user_id: UUID = Query(...)):
+    queen = await queen_channel()
+    stub = cao_users_pb2_grpc.UsersStub(queen)
+    msg = cao_common_pb2.Uuid()
+    msg.data = user_id.bytes
+
+    result = await stub.GetUserInfo(msg)
+
+    return MessageToDict(
+        result,
+        including_default_value_fields=True,
+        preserving_proto_field_name=False,
+    )
+
+
 @router.post("/register")
 async def register(req: Request, form_data: RegisterForm = Body(...)):
     db = req.state.db
@@ -107,35 +142,53 @@ async def register(req: Request, form_data: RegisterForm = Body(...)):
 
     pw = hashpw(raw_pw, salt, pepper)
 
-    try:
-        res = await db.fetchrow(
-            """
-            INSERT INTO user_account (username, display_name, email, pw, salt)
-            VALUES ($1, $1, $2, $3, $4)
-            RETURNING id
-            """,
-            form_data.username,
-            form_data.email,
-            pw,
-            salt,
-        )
+    async with db.transaction():
+        pass
 
-    except UniqueViolationError as err:
-        status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        detail = ""
-        if err.constraint_name == "username_is_unique":
-            status_code = status.HTTP_400_BAD_REQUEST
-            detail = "Username is already in use"
-        elif err.constraint_name == "email_is_unique":
-            status_code = status.HTTP_400_BAD_REQUEST
-            detail = "Email is already in use"
-        else:
-            logging.exception("Failed to register new user, constraint not handled")
+        try:
+            res = await db.fetchrow(
+                """
+                INSERT INTO user_account (username, display_name, email, pw, salt)
+                VALUES ($1, $1, $2, $3, $4)
+                RETURNING id
+                """,
+                form_data.username,
+                form_data.email,
+                pw,
+                salt,
+            )
 
-        raise HTTPException(status_code=status_code, detail=detail) from err
+        except UniqueViolationError as err:
+            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+            detail = ""
+            if err.constraint_name == "username_is_unique":
+                status_code = status.HTTP_400_BAD_REQUEST
+                detail = "Username is already in use"
+            elif err.constraint_name == "email_is_unique":
+                status_code = status.HTTP_400_BAD_REQUEST
+                detail = "Email is already in use"
+            else:
+                logging.exception("Failed to register new user, constraint not handled")
 
-    token = await _update_access_token(res["id"], db)
+            raise HTTPException(status_code=status_code, detail=detail) from err
+
+        # NOTE: these two futures could run concurrently, however `db` can not be passed to another coroutine...
+        # we could use the connection pool directly instead and try with that...
+        await _register_user_in_sim(res["id"])
+        token = await _update_access_token(res["id"], db)
     return {"access_token": token, "token_type": "bearer"}
+
+
+async def _register_user_in_sim(userid):
+    queen = await queen_channel()
+
+    stub = cao_commands_pb2_grpc.CommandStub(queen)
+    cao_user_id = cao_common_pb2.Uuid()
+    cao_user_id.data = userid.bytes
+    msg = cao_commands_pb2.RegisterUserCommand(userId=cao_user_id, level=1)
+    res = await stub.RegisterUser(msg)
+
+    logging.info("Queen RegisterUser result: %s", res)
 
 
 async def _update_access_token(userid, db):

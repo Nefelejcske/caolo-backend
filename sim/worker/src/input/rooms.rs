@@ -2,7 +2,7 @@ use crate::protos::cao_commands::TakeRoomCommand;
 use anyhow::Context;
 use caolo_sim::prelude::*;
 use thiserror::Error;
-use tracing::debug;
+use tracing::{info, trace};
 use uuid::Uuid;
 
 #[derive(Debug, Error)]
@@ -22,7 +22,7 @@ pub enum TakeRoomError {
 }
 
 pub fn take_room(world: &mut World, msg: &TakeRoomCommand) -> Result<(), TakeRoomError> {
-    debug!("Taking room");
+    trace!("Taking room");
 
     let user_id = msg
         .user_id
@@ -39,8 +39,17 @@ pub fn take_room(world: &mut World, msg: &TakeRoomCommand) -> Result<(), TakeRoo
         .ok_or(TakeRoomError::MissingField("room_id"))?;
     let room_id = Axial::new(room_id.q, room_id.r);
 
+    let span = tracing::error_span!(
+        "take_room",
+        user_id = %user_id,
+        room_id = %room_id
+    );
+    let _e = span.enter();
+    info!("Attempting to take room");
+
     let has_owner = world.view::<Axial, OwnedEntity>().contains_key(room_id);
     if has_owner {
+        info!("Room is taken");
         return Err(TakeRoomError::Owned);
     }
 
@@ -58,11 +67,13 @@ pub fn take_room(world: &mut World, msg: &TakeRoomCommand) -> Result<(), TakeRoo
     let available_rooms = match props.map(|p| p.level) {
         Some(l) => l,
         None => {
+            info!("Room is not registered");
             return Err(TakeRoomError::NotRegistered(user_id));
         }
     };
 
     if num_rooms > available_rooms as usize {
+        info!("User would exceed max rooms");
         return Err(TakeRoomError::MaxRoomsExceeded(available_rooms as usize));
     }
     let mut rooms = rooms.cloned().unwrap_or_else(Rooms::default);
