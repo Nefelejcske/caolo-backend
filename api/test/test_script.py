@@ -9,7 +9,7 @@ client = TestClient(app)
 @pytest.mark.dependency()
 def test_health():
     response = client.get("/health")
-    assert response.status_code == 204
+    assert response.status_code == 200
 
 
 @pytest.mark.dependency(depends=["test_health"])
