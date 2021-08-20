@@ -60,11 +60,13 @@ impl cao_users::users_server::Users for UsersService {
         })?;
         let user_id = UserId(user_id);
 
-        let w = self.world.read().await;
-        let props_table: View<UserId, UserProperties> = w.view();
-        let properties = props_table.get_by_id(user_id).cloned();
-        drop(props_table);
-        drop(w); // free the lock
+        let properties;
+        {
+            // free the read guard asap
+            let w = self.world.read().await;
+            let props_table: View<UserId, UserProperties> = w.view();
+            properties = props_table.get_by_id(user_id).cloned();
+        }
 
         let result = match properties {
             Some(properies) => cao_users::UserInfo {
