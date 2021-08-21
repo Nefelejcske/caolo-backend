@@ -3,7 +3,10 @@ mod ser_resources;
 mod ser_structures;
 mod util;
 
-use caolo_sim::prelude::{Axial, Hexagon, TerrainComponent, World};
+use caolo_sim::{
+    components::RoomComponent,
+    prelude::{Axial, Hexagon, TerrainComponent, World},
+};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::{
@@ -22,6 +25,7 @@ pub struct WorldService {
     entities: WorldPayloadSender,
     room_bounds: Hexagon,
     terrain: Arc<HashMap<Axial, Vec<TerrainComponent>>>,
+    rooms: Arc<HashMap<Axial, RoomComponent>>,
     tracing_span: tracing::Span,
 }
 
@@ -43,6 +47,7 @@ impl WorldService {
         entities: WorldPayloadSender,
         room_bounds: Hexagon,
         terrain: Arc<HashMap<Axial, Vec<TerrainComponent>>>,
+        rooms: Arc<HashMap<Axial, RoomComponent>>,
         span: tracing::Span,
     ) -> Self {
         Self {
@@ -50,6 +55,7 @@ impl WorldService {
             room_bounds,
             terrain,
             tracing_span: span,
+            rooms,
         }
     }
 }
@@ -149,9 +155,16 @@ impl cao_world::world_server::World for WorldService {
                     r: point.r,
                 };
 
+                let center = self.rooms[point].absolute_center;
+                let center = cao_common::Axial {
+                    q: center.q,
+                    r: center.r,
+                };
+
                 cao_world::Room {
                     room_id: Some(room_id),
                     radius: self.room_bounds.radius,
+                    center: Some(center),
                 }
             })
             .collect();

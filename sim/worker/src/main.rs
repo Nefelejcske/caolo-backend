@@ -105,6 +105,11 @@ async fn main() {
             )
         })
         .collect();
+    let rooms = world
+        .view::<caolo_sim::prelude::Axial, caolo_sim::prelude::RoomComponent>()
+        .iter()
+        .map(|(room_id, comp)| (room_id, *comp))
+        .collect();
 
     let world = Arc::new(tokio::sync::RwLock::new(world));
 
@@ -120,6 +125,7 @@ async fn main() {
             Arc::clone(&outpayload),
             room_bounds,
             Arc::new(terrain),
+            Arc::new(rooms),
             world_span,
         )))
         .add_service(HealthServer::new(health_service::HealthService {}))

@@ -30,6 +30,9 @@ pub struct RoomProperties {
     pub center: Axial,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct RoomComponent;
+pub struct RoomComponent {
+    /// Center of the room relative to the `world`
+    pub absolute_center: Axial,
+}

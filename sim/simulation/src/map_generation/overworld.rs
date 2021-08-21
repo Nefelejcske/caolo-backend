@@ -29,6 +29,7 @@ pub enum OverworldGenerationError {
 /// [ ] TODO: resource map?
 /// [ ] TODO: political map?
 /// [ ] TODO: parallellism?
+/// [ ] TODO: non-uniform room sizes
 pub fn generate_room_layout(
     OverworldGenerationParams {
         radius,
@@ -50,7 +51,14 @@ pub fn generate_room_layout(
     // Init the grid
     rooms.clear();
     rooms
-        .extend(bounds.iter_points().map(|p| (p, RoomComponent)))
+        .extend(bounds.iter_points().map(|p| {
+            (
+                p,
+                RoomComponent {
+                    absolute_center: p * room_radius + center,
+                },
+            )
+        }))
         .map_err(OverworldGenerationError::ExtendFail)?;
 
     room_connections.clear();

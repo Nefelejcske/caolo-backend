@@ -40,7 +40,8 @@ message RoomLayout
 message Room
 {
     cao_common.Axial room_id = 1;
-    int32 radius = 2;
+    cao_common.Axial center = 2;
+    int32 radius = 3;
 }
 
 message RoomList
