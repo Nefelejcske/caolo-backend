@@ -11,6 +11,7 @@ COPY ./protos/ ./protos/
 COPY ./sim/ ./sim/
 
 WORKDIR /caolo/sim
+RUN cargo --version
 RUN cargo chef prepare --recipe-path recipe.json
 
 # ============= cache dependencies ============================================================

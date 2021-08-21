@@ -19,7 +19,7 @@ jobs:
       - name: Install toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: nightly
 
       - name: Install protoc
         run: |
@@ -31,7 +31,7 @@ jobs:
 
       - name: Check all features
         run: |
-          cargo +stable check-all-features
+          cargo check-all-features
         working-directory: sim
 
       - name: Run tests
