@@ -136,6 +136,9 @@ func (c *client) writePump() {
 				return
 			}
 			terrain := c.hub.Terrain[roomId]
+			if terrain == nil {
+				continue
+			}
 			err := sendJson(c.conn, "terrain", terrain)
 			if err != nil {
 				return
