@@ -88,6 +88,37 @@ impl Hexagon {
     }
 }
 
+/// Rounds the given Axial coorinates to the nearest hex
+pub fn hex_round(point: [f32; 2]) -> Axial {
+    let x = point[0];
+    let z = point[1];
+    let y = -x - z;
+
+    let cube = cube_round([x, y, z]);
+    Axial::hex_cube_to_axial(cube)
+}
+
+/// Rounds the Cube representation of a hexagon to the nearest hex
+pub fn cube_round(point: [f32; 3]) -> [i32; 3] {
+    let mut rx = point[0].round();
+    let mut ry = point[1].round();
+    let mut rz = point[2].round();
+
+    let dx = (rx - point[0]).abs();
+    let dy = (ry - point[1]).abs();
+    let dz = (rz - point[2]).abs();
+
+    if dx > dy && dx > dz {
+        rx = -ry - rz;
+    } else if dy > dz {
+        ry = -rx - rz;
+    } else {
+        rz = -rx - ry;
+    }
+
+    [rx as i32, ry as i32, rz as i32]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

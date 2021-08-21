@@ -7,11 +7,16 @@ RUN rustup self update
 WORKDIR /caolo
 COPY sim/.cargo/ sim/.cargo/
 COPY sim/rust-toolchain.toml sim/rust-toolchain.toml
+
+# cache the toolchain
+WORKDIR /caolo/sim
+RUN cargo --version
+
+WORKDIR /caolo
 COPY ./protos/ ./protos/
 COPY ./sim/ ./sim/
 
 WORKDIR /caolo/sim
-RUN cargo --version
 RUN cargo chef prepare --recipe-path recipe.json
 
 # ============= cache dependencies ============================================================
@@ -26,12 +31,12 @@ RUN apt-get install lld clang libc-dev pkgconf -y
 WORKDIR /caolo
 COPY sim/.cargo/ sim/.cargo/
 COPY sim/rust-toolchain.toml sim/rust-toolchain.toml
+RUN cargo --version 
 # NOTE that chef cook and cargo build have to be executed from the same working directory!
 WORKDIR /caolo/sim
 COPY --from=planner $CARGO_HOME $CARGO_HOME
 COPY --from=planner /caolo/sim/recipe.json recipe.json
 # cache the toolchain
-RUN cargo --version 
 RUN cargo chef cook --release --no-default-features --recipe-path recipe.json
 
 # ==============================================================================================

@@ -5,6 +5,7 @@ pub use params::*;
 
 use crate::components::{RoomComponent, RoomConnection, RoomConnections};
 use crate::geometry::{Axial, Hexagon};
+use crate::prelude::hex_round;
 use crate::storage::views::UnsafeView;
 use crate::tables::morton_table::{ExtendFailure, MortonTable};
 use rand::Rng;
@@ -21,6 +22,21 @@ pub enum OverworldGenerationError {
 
     #[error("Failed to build Room weight table: {0:?}")]
     WeightMapInitFail(ExtendFailure),
+}
+
+/// Transform the room_id into absolute 'room tile' space
+fn room_id_to_axial(room_id: Axial, max_size: i32) -> Axial {
+    let sqrt3: f64 = 3.0f64.sqrt();
+    // 1) convert room_id to world space based on flat top hexes with radius `max_radius`
+    let x = max_size as f64 * (3. / 2. * room_id.q as f64);
+    let y = max_size as f64 * (sqrt3 / 2. * room_id.q as f64 + sqrt3 * room_id.r as f64);
+
+    // 2) convert the world space coordinates back to axial, but pointy-top with radius of 1
+
+    let q = sqrt3 / 3. * x - 1. / 3. * y; // /1 omitted
+    let r = 2. / 3. * y;
+
+    hex_round([q as f32, r as f32])
 }
 
 /// Insert the given number of rooms in the given radius (where the unit is a room).
@@ -51,11 +67,11 @@ pub fn generate_room_layout(
     // Init the grid
     rooms.clear();
     rooms
-        .extend(bounds.iter_points().map(|p| {
+        .extend(bounds.iter_points().map(|room_id| {
             (
-                p,
+                room_id,
                 RoomComponent {
-                    absolute_center: p * room_radius + center,
+                    absolute_center: room_id_to_axial(room_id, room_radius * 2) + center,
                 },
             )
         }))
