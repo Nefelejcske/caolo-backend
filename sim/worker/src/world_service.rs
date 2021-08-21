@@ -183,8 +183,13 @@ impl cao_world::world_server::World for WorldService {
             .get(&p)
             .ok_or_else(|| tonic::Status::not_found("Room does not exist"))?;
 
+        let center = self.rooms[&p].absolute_center;
         Ok(tonic::Response::new(cao_world::RoomTerrain {
             room_id: Some(cao_common::Axial { q, r }),
+            center: Some(cao_common::Axial {
+                q: center.q,
+                r: center.r,
+            }),
             tiles: room
                 .iter()
                 .map(|TerrainComponent(t)| match t {

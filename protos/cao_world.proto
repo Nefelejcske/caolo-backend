@@ -16,8 +16,9 @@ message Bounded
 message RoomTerrain
 {
     cao_common.Axial roomId = 1;
+    cao_common.Axial center = 2;
     /// Returned tiles will have the same positions as in RoomLayout
-    repeated Terrain tiles = 2;
+    repeated Terrain tiles = 3;
 }
 
 enum Terrain {
