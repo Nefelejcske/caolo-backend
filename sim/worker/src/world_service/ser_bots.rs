@@ -9,6 +9,7 @@ use super::util::push_room_pl;
 
 type BotTables<'a> = (
     View<'a, WorldPosition, EntityComponent>,
+    View<'a, Axial, RoomComponent>,
     View<'a, EntityId, Bot>,
     View<'a, EntityId, CarryComponent>,
     View<'a, EntityId, HpComponent>,
@@ -27,6 +28,7 @@ pub fn bot_payload(
     out: &mut HashMap<Axial, cao_world::RoomEntities>,
     (
         room_entities,
+        rooms,
         bots,
         carry,
         hp,
@@ -44,6 +46,7 @@ pub fn bot_payload(
     let room_entities = room_entities.iter_rooms();
 
     let mut room = None;
+    let mut offset = None;
     let mut accumulator = Vec::with_capacity(128);
 
     for (next_room, entities) in room_entities {
@@ -60,6 +63,7 @@ pub fn bot_payload(
                 );
             }
             room = Some(next_room);
+            offset = rooms.get_by_id(next_room.0).map(|x| x.offset);
             accumulator.clear();
         }
         for (pos, EntityComponent(entity_id)) in entities.iter() {
@@ -67,7 +71,11 @@ pub fn bot_payload(
                 let entity_id = *entity_id;
                 accumulator.push(cao_world::Bot {
                     id: entity_id.0.into(),
-                    pos: Some(cao_common::Axial { q: pos.q, r: pos.r }),
+                    pos: Some(cao_common::WorldPosition {
+                        pos: Some(pos.into()),
+                        room: room.map(|x| x.0.into()),
+                        offset: offset.map(|x| x.into()),
+                    }),
                     hp: hp
                         .get_by_id(entity_id)
                         .copied()

@@ -13,6 +13,9 @@ message WorldPosition
 {
   Axial room = 1;
   Axial pos = 2;
+  // World offset
+  // absolute position = pos + offset
+  Axial offset = 3;
 }
 
 message Uuid

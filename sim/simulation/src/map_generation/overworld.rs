@@ -71,7 +71,7 @@ pub fn generate_room_layout(
             (
                 room_id,
                 RoomComponent {
-                    absolute_center: room_id_to_axial(room_id, room_radius * 2) + center,
+                    offset: room_id_to_axial(room_id, room_radius * 2) + center,
                 },
             )
         }))

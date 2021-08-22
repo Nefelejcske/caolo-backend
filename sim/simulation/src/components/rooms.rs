@@ -33,6 +33,6 @@ pub struct RoomProperties {
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct RoomComponent {
-    /// Center of the room relative to the `world`
-    pub absolute_center: Axial,
+    /// Offset coordinates in world space
+    pub offset: Axial,
 }

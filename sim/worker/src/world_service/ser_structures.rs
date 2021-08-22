@@ -7,6 +7,7 @@ use caolo_sim::prelude::*;
 
 type StructureTables<'a> = (
     View<'a, WorldPosition, EntityComponent>,
+    View<'a, Axial, RoomComponent>,
     View<'a, EntityId, Structure>,
     View<'a, EntityId, HpComponent>,
     View<'a, EntityId, OwnedEntity>,
@@ -19,11 +20,23 @@ type StructureTables<'a> = (
 
 pub fn structure_payload(
     out: &mut HashMap<Axial, cao_world::RoomEntities>,
-    (room_entities, structures, hp, owner, energy, energy_regen, spawn, spawn_q, WorldTime(time)): StructureTables,
+    (
+        room_entities,
+        rooms,
+        structures,
+        hp,
+        owner,
+        energy,
+        energy_regen,
+        spawn,
+        spawn_q,
+        WorldTime(time),
+    ): StructureTables,
 ) {
     let room_entities = room_entities.iter_rooms();
 
     let mut room = None;
+    let mut offset = None;
     let mut accumulator = Vec::with_capacity(128);
 
     for (next_room, entities) in room_entities {
@@ -40,6 +53,7 @@ pub fn structure_payload(
                 );
             }
             room = Some(next_room);
+            offset = rooms.get_by_id(next_room.0).map(|x| x.offset);
             accumulator.clear();
         }
         for (pos, EntityComponent(entity_id)) in entities.iter() {
@@ -47,7 +61,12 @@ pub fn structure_payload(
                 let entity_id = *entity_id;
                 let mut pl = cao_world::Structure {
                     id: entity_id.0.into(),
-                    pos: Some(cao_common::Axial { q: pos.q, r: pos.r }),
+                    pos: Some(cao_common::WorldPosition {
+                        pos: Some(pos.into()),
+                        room: room.map(|x| x.0.into()),
+                        offset: offset.map(|x| x.into()),
+                    }),
+
                     hp: hp
                         .get_by_id(entity_id)
                         .copied()

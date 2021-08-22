@@ -155,16 +155,16 @@ impl cao_world::world_server::World for WorldService {
                     r: point.r,
                 };
 
-                let center = self.rooms[point].absolute_center;
-                let center = cao_common::Axial {
-                    q: center.q,
-                    r: center.r,
+                let offset = self.rooms[point].offset;
+                let offset = cao_common::Axial {
+                    q: offset.q,
+                    r: offset.r,
                 };
 
                 cao_world::Room {
                     room_id: Some(room_id),
                     radius: self.room_bounds.radius,
-                    center: Some(center),
+                    offset: Some(offset),
                 }
             })
             .collect();
@@ -183,10 +183,10 @@ impl cao_world::world_server::World for WorldService {
             .get(&p)
             .ok_or_else(|| tonic::Status::not_found("Room does not exist"))?;
 
-        let center = self.rooms[&p].absolute_center;
+        let center = self.rooms[&p].offset;
         Ok(tonic::Response::new(cao_world::RoomTerrain {
             room_id: Some(cao_common::Axial { q, r }),
-            center: Some(cao_common::Axial {
+            offset: Some(cao_common::Axial {
                 q: center.q,
                 r: center.r,
             }),

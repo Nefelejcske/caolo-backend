@@ -16,7 +16,7 @@ message Bounded
 message RoomTerrain
 {
     cao_common.Axial roomId = 1;
-    cao_common.Axial center = 2;
+    cao_common.Axial offset = 2;
     /// Returned tiles will have the same positions as in RoomLayout
     repeated Terrain tiles = 3;
 }
@@ -41,7 +41,7 @@ message RoomLayout
 message Room
 {
     cao_common.Axial room_id = 1;
-    cao_common.Axial center = 2;
+    cao_common.Axial offset = 2;
     int32 radius = 3;
 }
 
@@ -54,7 +54,7 @@ message Bot
 {
     int64 id = 1;
     // Assume that roomId is part of the context
-    cao_common.Axial pos = 2;
+    cao_common.WorldPosition pos = 2;
     Bounded carry = 3;
     Bounded hp = 4;
     cao_common.Uuid script = 5;
@@ -79,7 +79,7 @@ message Structure
 {
     int64 id = 1;
     // Assume that roomId is part of the context
-    cao_common.Axial pos = 2;
+    cao_common.WorldPosition pos = 2;
     Bounded hp = 3;
     Bounded energy = 4;
     int64 energyRegen = 5;
@@ -102,7 +102,7 @@ message Resource
 {
     int64 id = 1;
     // Assume that roomId is part of the context
-    cao_common.Axial pos = 2;
+    cao_common.WorldPosition pos = 2;
 
     oneof resource_type
     {

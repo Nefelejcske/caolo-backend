@@ -21,3 +21,9 @@ pub mod cao_intents {
 pub mod cao_users {
     tonic::include_proto!("cao_users");
 }
+
+impl From<caolo_sim::prelude::Axial> for cao_common::Axial {
+    fn from(ax: caolo_sim::prelude::Axial) -> Self {
+        cao_common::Axial { q: ax.q, r: ax.r }
+    }
+}
