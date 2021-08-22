@@ -24,8 +24,8 @@ func NewClient(conn *websocket.Conn, hub *GameStateHub) client {
 		conn:        conn,
 		hub:         hub,
 		roomIds:     []RoomId{},
-		entities:    make(chan *RoomState),
-		onNewRoomId: make(chan RoomId),
+		entities:    make(chan *RoomState, 100),
+		onNewRoomId: make(chan RoomId, 100),
 	}
 }
 
