@@ -61,7 +61,7 @@ func (c *client) readPump() {
 		c.hub.unregister <- c
 		c.conn.Close()
 	}()
-	c.conn.SetReadLimit(256)
+	c.conn.SetReadLimit(10 * 1024)
 	c.conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(60 * time.Second)); return nil })
 	for {
@@ -141,11 +141,13 @@ func (c *client) writePump() {
 			}
 			err := sendJson(c.conn, "terrain", terrain)
 			if err != nil {
+				log.Printf("Failed to send terrain %v", err)
 				return
 			}
 			entities := c.hub.Entities[roomId]
 			err = sendJson(c.conn, "entities", entities)
 			if err != nil {
+				log.Printf("Failed to send initial entities %v", err)
 				return
 			}
 		case entities, ok := <-c.entities:
@@ -153,15 +155,18 @@ func (c *client) writePump() {
 			if !ok {
 				// hub closed this channel
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+                log.Println("Hub closed the channel");
 				return
 			}
 			err := sendJson(c.conn, "entities", entities)
 			if err != nil {
+				log.Printf("Failed to send entities %v", err)
 				return
 			}
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				log.Printf("Failed to ping %v", err)
 				return
 			}
 		}

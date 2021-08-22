@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	cao_world "github.com/caolo-game/cao-rt/cao_world_pb"
 )
 
@@ -77,6 +79,7 @@ func (hub *GameStateHub) Run() {
 				select {
 				case client.entities <- &state:
 				default:
+                    log.Printf("Failed to send state to client, closing connection %v", client)
 					delete(hub.clients, client)
 					close(client.entities)
 				}
