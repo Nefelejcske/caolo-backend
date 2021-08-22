@@ -23,7 +23,7 @@ func NewClient(conn *websocket.Conn, hub *GameStateHub) client {
 	return client{
 		conn:        conn,
 		hub:         hub,
-		roomIds:     []RoomId{},
+		roomIds:     make([]RoomId, 100),
 		entities:    make(chan *RoomState, 100),
 		onNewRoomId: make(chan RoomId, 100),
 	}
@@ -155,7 +155,7 @@ func (c *client) writePump() {
 			if !ok {
 				// hub closed this channel
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-                log.Println("Hub closed the channel");
+				log.Println("Hub closed the channel")
 				return
 			}
 			err := sendJson(c.conn, "entities", entities)
