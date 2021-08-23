@@ -30,8 +30,9 @@ func NewClient(conn *websocket.Conn, hub *GameStateHub) client {
 }
 
 type InputMsg struct {
-	Ty     string `json:"ty"`
-	RoomId RoomId `json:"room_id,omitempty"`
+	Ty      string   `json:"ty"`
+	RoomId  RoomId   `json:"room_id,omitempty"`
+	RoomIds []RoomId `json:"room_ids",omitempty"`
 }
 
 func FindRoomIdIndex(arr []RoomId, key RoomId) int {
@@ -78,6 +79,18 @@ func (c *client) readPump() {
 			return
 		}
 		switch pl.Ty {
+		case "room_ids":
+			if len(c.roomIds)+len(pl.RoomIds) > 100 {
+				log.Println("Client is listening to too many roomIds")
+				continue
+			}
+			log.Printf("Client subscribed to %v", pl.RoomIds)
+			c.roomIds = append(c.roomIds, pl.RoomIds...)
+
+			for i := range pl.RoomIds {
+				id := pl.RoomIds[i]
+				c.onNewRoomId <- id
+			}
 		case "room_id":
 			if len(c.roomIds) > 100 {
 				log.Println("Client is listening to too many roomIds")
