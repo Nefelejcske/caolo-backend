@@ -25,14 +25,15 @@ pub enum OverworldGenerationError {
 }
 
 /// Transform the room_id into absolute 'room tile' space
-fn room_id_to_axial(room_id: Axial, max_size: i32) -> Axial {
+fn room_id_to_axial(room_id: Axial, grid_size: i32) -> Axial {
     let sqrt3: f64 = 3.0f64.sqrt();
-    // 1) convert room_id to world space based on flat top hexes with radius `max_radius`
-    let x = max_size as f64 * (3. / 2. * room_id.q as f64);
-    let y = max_size as f64 * (sqrt3 / 2. * room_id.q as f64 + sqrt3 * room_id.r as f64);
+    let size = (grid_size as f64 + 1.0) * sqrt3;
+
+    // 1) convert room_id to world space based on flat top hexes with size `grid_size`
+    let x = size * (3. / 2. * room_id.q as f64);
+    let y = size * (sqrt3 / 2. * room_id.q as f64 + sqrt3 * room_id.r as f64);
 
     // 2) convert the world space coordinates back to axial, but pointy-top with radius of 1
-
     let q = sqrt3 / 3. * x - 1. / 3. * y; // /1 omitted
     let r = 2. / 3. * y;
 
@@ -71,7 +72,7 @@ pub fn generate_room_layout(
             (
                 room_id,
                 RoomComponent {
-                    offset: room_id_to_axial(room_id, room_radius * 2),
+                    offset: room_id_to_axial(room_id, room_radius),
                 },
             )
         }))
