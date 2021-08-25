@@ -436,7 +436,6 @@ where
     }
 
     /// If any found return the closest one to `center` and the distance to it.
-    // TODO: try spiraling out from center to find a match faster
     pub fn find_closest_by_filter<F>(&self, center: Axial, filter: F) -> Option<(u32, Axial, &Row)>
     where
         F: Fn(Axial, &Row) -> bool,
