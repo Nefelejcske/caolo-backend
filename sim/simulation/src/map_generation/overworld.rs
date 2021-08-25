@@ -27,7 +27,7 @@ pub enum OverworldGenerationError {
 /// Transform the room_id into absolute 'room tile' space
 fn room_id_to_axial(room_id: Axial, grid_size: i32) -> Axial {
     const SQRT3: f64 = 1.73205080756887;
-    let size = (grid_size as f64) * SQRT3;
+    let size = (grid_size as f64 + 1.0) * SQRT3;
 
     // 1) convert room_id to world space based on flat top hexes with size `grid_size`
     let x = size * (3. / 2. * room_id.q as f64);
