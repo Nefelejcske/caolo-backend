@@ -23,7 +23,7 @@ func NewClient(conn *websocket.Conn, hub *GameStateHub) client {
 	return client{
 		conn:        conn,
 		hub:         hub,
-		roomIds:     make([]RoomId, 100),
+		roomIds:     make([]RoomId, 0, 100),
 		entities:    make(chan *RoomState, 100),
 		onNewRoomId: make(chan RoomId, 100),
 	}
@@ -78,6 +78,7 @@ func (c *client) readPump() {
 			log.Printf("Invalid message %v", err)
 			return
 		}
+		log.Printf("Incoming message %v", pl.Ty)
 		switch pl.Ty {
 		case "room_ids":
 			if len(c.roomIds)+len(pl.RoomIds) > 100 {
@@ -92,7 +93,7 @@ func (c *client) readPump() {
 				c.onNewRoomId <- id
 			}
 		case "room_id":
-			if len(c.roomIds) > 100 {
+			if len(c.roomIds) >= 100 {
 				log.Println("Client is listening to too many roomIds")
 				continue
 			}
@@ -102,6 +103,11 @@ func (c *client) readPump() {
 		case "unsubscribe_room_id":
 			log.Printf("Client unsubscribed from %v", pl.RoomId)
 			c.roomIds = RemoveRoomId(c.roomIds, pl.RoomId)
+		case "unsubscribe_room_ids":
+			log.Printf("Client unsubscribed from %v", pl.RoomIds)
+			for i := range pl.RoomIds {
+				c.roomIds = RemoveRoomId(c.roomIds, pl.RoomIds[i])
+			}
 		case "clear_room_ids":
 			log.Println("Client cleared their room subs")
 			c.roomIds = []RoomId{}
