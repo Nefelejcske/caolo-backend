@@ -21,6 +21,10 @@ spec:
           image: caolo/caolo-sim
           command:
             - ./caolo-worker
+          readinessProbe:
+            tcpSocket:
+              port: 50051
+            initialDelaySeconds: 5
           livenessProbe:
             tcpSocket:
               port: 50051
