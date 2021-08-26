@@ -25,6 +25,7 @@ spec:
             tcpSocket:
               port: 50051
             initialDelaySeconds: 5
+            periodSeconds: 5
           livenessProbe:
             tcpSocket:
               port: 50051
