@@ -58,10 +58,12 @@ COPY --from=deps /caolo/sim/Cargo.lock ./sim/Cargo.lock
 
 COPY sim/.cargo/ sim/.cargo/
 COPY sim/rust-toolchain.toml sim/rust-toolchain.toml
+WORKDIR /caolo/sim
 # cache the version
 RUN cargo --version 
 RUN protoc --version
 
+WORKDIR /caolo
 COPY ./protos/ ./protos/
 COPY ./sim/ ./sim/
 
