@@ -67,16 +67,20 @@ impl ScopeStack {
         }
     }
 
+    /*
+     * Memory layout: [T0][T1][T2]...
+     */
     pub fn alloc_pod_array<T>(&mut self, size: usize) -> Result<NonNull<T>, AllocError> {
         unsafe {
-            let result_ptr = (*self.allocator.as_ptr()).allocate(alloc_size::<T>(size))?;
-            let s = result_ptr.as_ptr() as *mut usize;
-            std::ptr::write(s, size);
-            let o = result_ptr.as_ptr().add(size_of::<usize>()) as *mut T;
+            let result_ptr = (*self.allocator.as_ptr()).allocate(size_of::<T>() * size)?;
+            let o = result_ptr.as_ptr() as *mut T;
             Ok(NonNull::new_unchecked(o))
         }
     }
 
+    /*
+     * Memory layout: [Finalizer][count][T0][T1]...
+     */
     pub fn alloc_obj_array<T>(&mut self, size: usize) -> Result<NonNull<T>, AllocError> {
         unsafe {
             let result_ptr = (*self.allocator.as_ptr()).allocate(alloc_size::<T>(size))?;
@@ -106,21 +110,17 @@ fn alloc_size<T>(count: usize) -> usize {
 }
 
 unsafe fn finalizer<T>(ptr: NonNull<u8>) {
-    if std::mem::needs_drop::<T>() {
-        let ptr = ptr.as_ptr() as *mut T;
-        drop_in_place(ptr);
-    }
+    let ptr = ptr.as_ptr() as *mut T;
+    drop_in_place(ptr);
 }
 
 unsafe fn finalize_arr<T>(ptr: NonNull<u8>) {
-    if std::mem::needs_drop::<T>() {
-        let size = ptr.as_ptr() as *mut usize;
-        let size = *size;
-        let mut ptr = ptr.as_ptr().add(size_of::<usize>()) as *mut T;
-        for _ in 0..size {
-            drop_in_place(ptr);
-            ptr = ptr.add(1);
-        }
+    let size = ptr.as_ptr() as *mut usize;
+    let size = *size;
+    let mut ptr = ptr.as_ptr().add(size_of::<usize>()) as *mut T;
+    for _ in 0..size {
+        drop_in_place(ptr);
+        ptr = ptr.add(1);
     }
 }
 
@@ -129,8 +129,7 @@ impl Drop for ScopeStack {
         unsafe {
             let mut f = self.fin_stack;
             while let Some(mut fin) = f {
-                let obj =
-                    (fin.as_ptr() as *mut u8).add(aligned_size(std::mem::size_of::<Finalizer>()));
+                let obj = (fin.as_ptr() as *mut u8).add(aligned_size(size_of::<Finalizer>()));
                 let fin = fin.as_mut();
                 let obj = NonNull::new(obj).unwrap();
                 (fin.finna)(obj);
