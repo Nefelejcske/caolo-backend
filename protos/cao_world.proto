@@ -110,32 +110,6 @@ message Resource
     }
 }
 
-message Diagnostics
-{
-    Current current = 1;
-    Accumulated accumulated = 2;
-
-    message Current
-    {
-        uint64 tick = 1;
-        int64 tick_latency_ms = 2;
-        int64 scripts_execution_ms = 3;
-        int64 systems_update_ms = 4;
-        uint64 number_of_scripts_ran = 11;
-        uint64 number_of_scripts_errored = 12;
-        uint64 number_of_intents = 13;
-    }
-
-    message Accumulated
-    {
-        double tick_latency_mean = 8;
-        double tick_latency_std = 9;
-        int64 tick_latency_min = 5;
-        int64 tick_latency_max = 7;
-        uint64 tick_latency_count = 10;
-    }
-}
-
 message RoomEntities
 {
     int64 worldTime = 1;
