@@ -1,6 +1,3 @@
-/*
- * Memory layout of objects: [Finalizer][Object]...
- */
 use std::mem::size_of;
 use std::ptr::{drop_in_place, NonNull};
 
@@ -44,13 +41,15 @@ impl ScopeStack {
     }
 
     /// consumers must initialize the given object
+    /*
+     * Memory layout of objects: [Finalizer][Object]...
+     */
     pub fn alloc_obj<T>(&mut self) -> Result<NonNull<T>, AllocError>
     where
         T: Drop,
     {
         unsafe {
-            let result_ptr = (*self.allocator.as_ptr())
-                .allocate(aligned_size(size_of::<Finalizer>()) + size_of::<T>())?;
+            let result_ptr = (*self.allocator.as_ptr()).allocate(alloc_size::<T>(1))?;
             let result_ptr = result_ptr.as_ptr();
             let fin = result_ptr as *mut Finalizer;
             {
@@ -67,12 +66,61 @@ impl ScopeStack {
             Ok(NonNull::new_unchecked(o))
         }
     }
+
+    pub fn alloc_pod_array<T>(&mut self, size: usize) -> Result<NonNull<T>, AllocError> {
+        unsafe {
+            let result_ptr = (*self.allocator.as_ptr()).allocate(alloc_size::<T>(size))?;
+            let s = result_ptr.as_ptr() as *mut usize;
+            std::ptr::write(s, size);
+            let o = result_ptr.as_ptr().add(size_of::<usize>()) as *mut T;
+            Ok(NonNull::new_unchecked(o))
+        }
+    }
+
+    pub fn alloc_obj_array<T>(&mut self, size: usize) -> Result<NonNull<T>, AllocError> {
+        unsafe {
+            let result_ptr = (*self.allocator.as_ptr()).allocate(alloc_size::<T>(size))?;
+            let result_ptr = result_ptr.as_ptr();
+            let fin = result_ptr as *mut Finalizer;
+            {
+                std::ptr::write(
+                    fin,
+                    Finalizer {
+                        finna: finalize_arr::<T>,
+                        next: self.fin_stack,
+                    },
+                )
+            }
+            self.fin_stack = Some(NonNull::new_unchecked(fin));
+            let s = result_ptr.add(aligned_size(size_of::<Finalizer>())) as *mut usize;
+            std::ptr::write(s, size);
+            let o =
+                result_ptr.add(aligned_size(size_of::<Finalizer>()) + size_of::<usize>()) as *mut T;
+            Ok(NonNull::new_unchecked(o))
+        }
+    }
+}
+
+fn alloc_size<T>(count: usize) -> usize {
+    aligned_size(size_of::<Finalizer>()) + size_of::<usize>() + size_of::<T>() * count
 }
 
 unsafe fn finalizer<T>(ptr: NonNull<u8>) {
     if std::mem::needs_drop::<T>() {
         let ptr = ptr.as_ptr() as *mut T;
         drop_in_place(ptr);
+    }
+}
+
+unsafe fn finalize_arr<T>(ptr: NonNull<u8>) {
+    if std::mem::needs_drop::<T>() {
+        let size = ptr.as_ptr() as *mut usize;
+        let size = *size;
+        let mut ptr = ptr.as_ptr().add(size_of::<usize>()) as *mut T;
+        for _ in 0..size {
+            drop_in_place(ptr);
+            ptr = ptr.add(1);
+        }
     }
 }
 
@@ -171,9 +219,33 @@ mod tests {
             }
         }
         assert_eq!(0, count, "Expected count to be untouched");
-
         drop(sc);
+        assert_eq!(6, count);
+    }
 
+    #[test]
+    fn test_obj_array() {
+        let mut lin = LinearAllocator::new(100_000);
+        let mut sc = ScopeStack::new(&mut lin);
+
+        let mut count = 0;
+
+        let mut arr = sc.alloc_obj_array(6).unwrap();
+
+        for _ in 0..6 {
+            unsafe {
+                std::ptr::write(
+                    arr.as_ptr(),
+                    TestObj {
+                        res: NonNull::new_unchecked((&mut count) as *mut _),
+                    },
+                );
+                arr = NonNull::new_unchecked(arr.as_ptr().add(1));
+            }
+        }
+
+        assert_eq!(0, count, "Expected count to be untouched");
+        drop(sc);
         assert_eq!(6, count);
     }
 }
