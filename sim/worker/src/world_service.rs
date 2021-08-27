@@ -2,6 +2,7 @@ mod ser_bots;
 mod ser_resources;
 mod ser_structures;
 mod util;
+mod world_events;
 
 use caolo_sim::{
     components::RoomComponent,
@@ -76,6 +77,10 @@ impl Payload {
             &mut self.payload_by_room,
             caolo_sim::prelude::FromWorld::from_world(world),
         );
+        world_events::events_payload(
+            &mut self.payload_by_room,
+            caolo_sim::prelude::FromWorld::from_world(world),
+        )
     }
 }
 

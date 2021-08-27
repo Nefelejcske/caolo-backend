@@ -110,6 +110,10 @@ message Resource
     }
 }
 
+message DeadEntity {
+    int64 id = 1;
+}
+
 message RoomEntities
 {
     int64 worldTime = 1;
@@ -117,6 +121,7 @@ message RoomEntities
     repeated Bot bots = 3;
     repeated Structure structures = 4;
     repeated Resource resources = 5;
+    repeated DeadEntity deadEntities = 6;
 }
 
 service World

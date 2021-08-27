@@ -1,7 +1,6 @@
 //! Actions, world updates the clients _intend_ to execute.
 //!
 mod attack_intent;
-mod delete_entity_intent;
 mod dropoff_intent;
 mod log_intent;
 mod mine_intent;
@@ -10,7 +9,6 @@ mod pathcache_intent;
 mod spawn_intent;
 
 pub use self::attack_intent::*;
-pub use self::delete_entity_intent::*;
 pub use self::dropoff_intent::*;
 pub use self::log_intent::*;
 pub use self::mine_intent::*;
@@ -108,6 +106,5 @@ intents!(
     mut_path_cache_intent: MutPathCacheIntent,
     script_history_intent: ScriptHistoryEntry,
     melee_attack_intent: MeleeIntent,
-    delete_entity_intent: DeleteEntityIntent,
     say_intent: SayIntent,
 );

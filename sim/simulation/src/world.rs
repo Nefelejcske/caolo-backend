@@ -83,7 +83,6 @@ archetype!(
     table Intents<MutPathCacheIntent> : UniqueTable<EmptyKey, Intents<MutPathCacheIntent>> = mut_path_cache_intents,
     table Intents<MeleeIntent> : UniqueTable<EmptyKey, Intents<MeleeIntent>> = melee_intents,
     table Intents<ScriptHistoryEntry> : UniqueTable<EmptyKey, Intents<ScriptHistoryEntry>> = script_history_intents,
-    table Intents<DeleteEntityIntent> : UniqueTable<EmptyKey, Intents<DeleteEntityIntent>> = delete_entity_intents,
     table Intents<SayIntent> : UniqueTable<EmptyKey, Intents<SayIntent>> = say_intents
 );
 
