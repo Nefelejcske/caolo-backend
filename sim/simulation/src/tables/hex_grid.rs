@@ -1,4 +1,3 @@
-// TODO rename module to hex_grid
 use std::{convert::TryInto, ops::Index, ops::IndexMut};
 
 use crate::{geometry::Axial, prelude::Hexagon};
@@ -6,9 +5,6 @@ use crate::{geometry::Axial, prelude::Hexagon};
 use super::{SpacialStorage, Table, TableRow};
 
 /// The grid is always touching the origin
-// TODO
-// currently this stores the map in a square grid. wasting radius**2*sizeof(T) amount of memory
-// we could make this more compact?
 #[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct HexGrid<T> {
     bounds: Hexagon,
@@ -26,10 +22,10 @@ impl<T> HexGrid<T> {
     {
         let radius = radius.try_into().expect("Radius must fit into 30 bits");
         let diameter = diameter(radius) as usize;
-        let area = diameter * diameter;
+        let capacity = diameter * diameter;
         let bounds = Hexagon::from_radius(radius);
-        let mut values = Vec::with_capacity(area);
-        values.resize(area, Default::default());
+        let mut values = Vec::with_capacity(capacity);
+        values.resize(capacity, Default::default());
         Self { bounds, values }
     }
 
@@ -82,26 +78,12 @@ impl<T> HexGrid<T> {
     }
 
     /// return the existing value if successful.
-    ///
-    /// return None if the position is invalid
     pub fn insert(&mut self, pos: Axial, val: T) -> Result<T, ExtendFailure> {
         let bounds = self.bounds;
         let old = self
             .at_mut(pos)
             .ok_or(ExtendFailure::OutOfBounds { pos, bounds })?;
         Ok(std::mem::replace(old, val))
-    }
-
-    pub fn query_range<'a, Op>(&'a self, center: Axial, radius: u32, op: &mut Op)
-    where
-        Op: FnMut(Axial, &'a T),
-    {
-        let bounds = Hexagon::from_radius(radius as i32).with_center(center);
-        for p in bounds.iter_points() {
-            if let Some(t) = self.at(p) {
-                op(p, t);
-            }
-        }
     }
 
     pub fn query_hex(&self, query: Hexagon, mut op: impl FnMut(Axial, &T)) {
@@ -149,24 +131,28 @@ impl<T> HexGrid<T> {
     }
 
     pub fn iter_mut(&mut self) -> impl Iterator<Item = (Axial, &mut T)> {
-        let bounds = self.bounds;
-        bounds
+        self.bounds
             .iter_points()
             // SAFETY
             // no, this isn't safe at all, I'm guessing
             .map(move |p| (p, unsafe { std::mem::transmute(self.get_unchecked_mut(p)) }))
     }
+
+    pub fn len(&self) -> usize {
+        self.bounds().area()
+    }
 }
 
 #[inline]
-fn hex_index(Axial { q, r }: Axial, radius: i32) -> usize {
+fn hex_index(p: Axial, radius: i32) -> usize {
+    let Axial { q, r } = p;
     let diameter = diameter(radius);
 
     debug_assert!(diameter > 0);
     debug_assert!(q >= 0);
     debug_assert!(r >= 0);
 
-    q as usize * diameter as usize + r as usize
+    r as usize * diameter as usize + q as usize
 }
 
 #[inline]
@@ -265,6 +251,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
     use crate::prelude::Hexagon;
 
     use super::*;
@@ -273,12 +261,49 @@ mod tests {
     fn can_access_all_elements_in_hexagon() {
         let grid = HexGrid::<()>::new(3);
 
-        for p in Hexagon::from_radius(3).iter_points() {
+        let points: HashSet<_> = Hexagon::from_radius(3).iter_points().collect();
+
+        assert!(points.len() == grid.len());
+        for p in points {
             assert!(
                 grid.at(p).is_some(),
                 "point {:?} was expected to be in the map",
                 p
             );
+        }
+    }
+    #[test]
+    fn can_query_sub_hex() {
+        let grid = HexGrid::<()>::new(3);
+
+        let mut points = HashSet::new();
+
+        let q = Hexagon::new(Axial::new(0, 3), 3);
+        grid.query_hex(q, |p, _| {
+            points.insert(p);
+        });
+
+        dbg!(&points, grid.bounds());
+        assert_eq!(points.len(), 16);
+        for res in points {
+            assert!(q.contains(res) && grid.bounds().contains(res));
+        }
+    }
+
+    #[test]
+    fn test_query_center_small_hex() {
+        let grid = HexGrid::<()>::new(3);
+        let mut points = HashSet::new();
+
+        let q = Hexagon::new(Axial::new(2, 3), 1);
+        grid.query_hex(q, |p, _| {
+            points.insert(p);
+        });
+
+        dbg!(&points, grid.bounds());
+        assert_eq!(points.len(), 7);
+        for res in points {
+            assert!(q.contains(res) && grid.bounds().contains(res));
         }
     }
 }

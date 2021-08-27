@@ -23,26 +23,25 @@ impl Hexagon {
     pub fn contains(self, point: Axial) -> bool {
         let point = point - self.center;
         let [x, y, z] = point.hex_axial_to_cube();
-        let r = self.radius;
-        debug_assert!(r >= 0);
+        let r = self.radius.abs();
         x.abs() <= r && y.abs() <= r && z.abs() <= r
     }
 
     pub fn iter_edge(self) -> impl Iterator<Item = Axial> {
         debug_assert!(
-            self.radius >= 0,
-            "negative radius will not work as expected"
+            self.radius > 0,
+            "not-positive radius will not work as expected"
         );
-        let radius = self.radius;
-        let starts = [
-            self.center + Axial::new(0, -radius),
-            self.center + Axial::new(radius, -radius),
-            self.center + Axial::new(radius, 0),
-            self.center + Axial::new(0, radius),
-            self.center + Axial::new(-radius, radius),
-            self.center + Axial::new(-radius, 0),
+
+        const STARTS: [Axial; 6] = [
+            Axial::new(0, -1),
+            Axial::new(1, -1),
+            Axial::new(1, 0),
+            Axial::new(0, 1),
+            Axial::new(-1, 1),
+            Axial::new(-1, 0),
         ];
-        let deltas = [
+        const DELTAS: [Axial; 6] = [
             Axial::new(1, 0),
             Axial::new(0, 1),
             Axial::new(-1, 1),
@@ -50,26 +49,29 @@ impl Hexagon {
             Axial::new(0, -1),
             Axial::new(1, -1),
         ];
+        let radius = self.radius;
+        let center = self.center;
         (0..6).flat_map(move |di| {
             // iterating over `deltas` is a compile error because they're freed at the end of this
             // funciton...
-            let delta = deltas[di];
-            let pos = starts[di];
+            let delta = DELTAS[di];
+            let pos = center + STARTS[di] * radius;
             (0..radius).map(move |j| pos + delta * j)
         })
     }
 
+    pub fn area(self) -> usize {
+        debug_assert!(self.radius >= 0);
+        (1 + 3 * self.radius * (self.radius + 1)) as usize
+    }
+
+    /// points will spiral out from the center
     pub fn iter_points(self) -> impl Iterator<Item = Axial> {
-        let radius = self.radius;
-        let center = self.center;
-        (-radius..=radius).flat_map(move |x| {
-            let fromy = (-radius).max(-x - radius);
-            let toy = radius.min(-x + radius);
-            (fromy..=toy).map(move |y| {
-                let p = Axial::new(x, -x - y);
-                p + center
-            })
-        })
+        let center: Axial = self.center;
+        // radius =0 doesn't yield any points
+        Some(center)
+            .into_iter()
+            .chain((1..=self.radius).flat_map(move |r| Hexagon::new(center, r).iter_edge()))
     }
 
     pub fn with_center(mut self, center: Axial) -> Self {
@@ -125,10 +127,17 @@ mod tests {
 
     #[test]
     fn hex_iter_points_are_inside_itself() {
-        let hex = Hexagon::from_radius(12);
+        let hex = Hexagon::from_radius(3).with_center(Axial::default());
 
-        for p in hex.iter_points() {
-            assert!(hex.contains(p));
+        dbg!(hex
+            .with_center(Axial::default())
+            .with_radius(2)
+            .iter_points()
+            .collect::<Vec<_>>());
+
+        for (i, p) in hex.iter_points().enumerate() {
+            dbg!(p);
+            assert!(hex.contains(p), "{} {:?} {:?}", i, p, hex);
         }
     }
 

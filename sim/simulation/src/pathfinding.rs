@@ -8,6 +8,7 @@ use crate::{
     geometry::Axial,
     indices::{ConfigKey, Room, RoomPosition, WorldPosition},
     map_generation::room::iter_edge,
+    prelude::Hexagon,
     profile,
     storage::views::View,
     terrain::{self, TileTerrainType},
@@ -361,8 +362,8 @@ pub fn get_valid_transits(
             warn!("{}", err);
             TransitError::InternalError(anyhow::Error::msg(err))
         })?
-        .query_range(mirror_pos, 1, &mut |pos, TerrainComponent(tile)| {
-            if *tile == TileTerrainType::Bridge {
+        .query_hex(Hexagon::new(mirror_pos, 1), |pos, tile| {
+            if tile.0 == TileTerrainType::Bridge {
                 candidates
                     .try_push(WorldPosition {
                         room: target_room.0,

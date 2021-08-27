@@ -158,9 +158,31 @@ pub fn generate_room(
     }
 
     fill_edges(edges, terrain, &mut rng)?;
+    erase_lone_walls(terrain);
 
     debug!("Map generation done {:#?}", heightmap_props);
     Ok(heightmap_props)
+}
+
+fn erase_lone_walls(mut terrain: UnsafeView<Axial, TerrainComponent>) {
+    let mut to_remove = smallvec::SmallVec::<[Axial; 64]>::new();
+    for pos in terrain
+        .iter()
+        .filter_map(|(p, comp)| (comp.0 == TileTerrainType::Wall).then(|| p))
+    {
+        let mut wall_count = 0;
+        terrain.query_hex(Hexagon::new(pos, 1), |_, t| {
+            wall_count += (t.0 == TileTerrainType::Wall) as i32;
+        });
+        if wall_count <= 1 {
+            to_remove.push(pos);
+        }
+    }
+    for pos in to_remove {
+        terrain
+            .insert(pos, TerrainComponent(TileTerrainType::Plain))
+            .unwrap();
+    }
 }
 
 fn fill_edges(
@@ -256,8 +278,8 @@ fn dilate(
         .filter(|(_, t)| !t.0.is_walkable())
     {
         let mut neighbours_on = -1; // account for p
-        terrain_in.query_range(p, kernel_width, &mut |_, TerrainComponent(t)| {
-            neighbours_on += t.is_walkable() as i32;
+        terrain_in.query_hex(Hexagon::new(p, kernel_width as i32), |_, t| {
+            neighbours_on += t.0.is_walkable() as i32;
         });
 
         if neighbours_on > threshold as i32 {
@@ -544,16 +566,12 @@ fn calculate_plain_chunks(terrain: View<Axial, TerrainComponent>) -> TerrainChun
     let mut chungus_id = 0;
     let mut chungus_mass = 0;
     let mut chunks = Vec::with_capacity(4);
-    'a: loop {
-        let current = terrain
-            .iter()
-            .enumerate()
-            .skip(startind)
-            .find_map(|(i, (p, t))| (t.0.is_walkable() && !visited.contains(&p)).then(|| (i, p)));
-        if current.is_none() {
-            break 'a;
-        }
-        let (i, current) = current.unwrap();
+    while let Some((i, current)) = terrain
+        .iter()
+        .enumerate()
+        .skip(startind)
+        .find_map(|(i, (p, t))| (t.0.is_walkable() && !visited.contains(&p)).then(|| (i, p)))
+    {
         startind = i;
         todo.clear();
         todo.push_back(current);
@@ -564,9 +582,8 @@ fn calculate_plain_chunks(terrain: View<Axial, TerrainComponent>) -> TerrainChun
                 continue;
             }
             chunk.insert(current);
-            terrain.query_range(current, 1, &mut |p, t| {
-                let TerrainComponent(t) = t;
-                if t.is_walkable() && !visited.contains(&p) {
+            terrain.query_hex(Hexagon::new(current, 1), |p, t| {
+                if t.0.is_walkable() && !visited.contains(&p) {
                     todo.push_back(p);
                 }
             });

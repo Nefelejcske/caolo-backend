@@ -92,10 +92,6 @@ impl Room {
         self.0.as_array()
     }
 
-    pub fn get_axis(self, axis: u8) -> i32 {
-        self.0.get_axis(axis)
-    }
-
     pub fn new(x: i32, y: i32) -> Self {
         Self(Axial::new(x, y))
     }

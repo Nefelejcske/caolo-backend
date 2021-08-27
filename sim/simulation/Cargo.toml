@@ -25,6 +25,7 @@ thiserror = "1"
 anyhow = "1"
 serde_yaml = "0.8"
 tracing = { version = "0.1", features = ["release_max_level_info"] }
+smallvec = "1"
 
 [dev-dependencies]
 criterion = { version = "0.3", features = ["html_reports"] }

@@ -71,7 +71,7 @@ pub fn find_closest_by_range(
     let aux = vm.get_aux();
     let entity_id = aux.entity_id;
 
-    let s = tracing::debug_span!("find_closest_by_range", entity_id = entity_id.0);
+    let s = tracing::warn_span!("find_closest_by_range", entity_id = entity_id.0);
     let _e = s.enter();
 
     trace!("find_closest_by_range {:?}", param);

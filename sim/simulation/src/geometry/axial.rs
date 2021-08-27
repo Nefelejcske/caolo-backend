@@ -19,7 +19,17 @@ impl std::fmt::Display for Axial {
 unsafe impl Send for Axial {}
 
 impl Axial {
-    pub fn new(q: i32, r: i32) -> Self {
+    pub const ZERO: Axial = Axial { q: 0, r: 0 };
+    pub const NEIGHBOURS: [Axial; 6] = [
+        Axial::new(1, 0),
+        Axial::new(1, -1),
+        Axial::new(0, -1),
+        Axial::new(-1, 0),
+        Axial::new(-1, 1),
+        Axial::new(0, 1),
+    ];
+
+    pub const fn new(q: i32, r: i32) -> Self {
         Self { q, r }
     }
 
@@ -38,7 +48,7 @@ impl Axial {
 
     /// Convert self from a hexagonal axial vector to a hexagonal cube vector
     #[inline]
-    pub fn hex_axial_to_cube(self) -> [i32; 3] {
+    pub const fn hex_axial_to_cube(self) -> [i32; 3] {
         let x = self.q;
         let z = self.r;
         let y = -x - z;
@@ -46,21 +56,43 @@ impl Axial {
     }
 
     #[inline]
-    pub fn hex_cube_to_axial([q, _, r]: [i32; 3]) -> Self {
+    pub const fn hex_cube_to_axial([q, _, r]: [i32; 3]) -> Self {
         Self { q, r }
     }
 
     /// Get the neighbours of this point starting at top left and going counter-clockwise
     #[inline]
-    pub fn hex_neighbours(self) -> [Axial; 6] {
+    pub const fn hex_neighbours(self) -> [Axial; 6] {
         [
-            Axial::new(self.q + 1, self.r),
-            Axial::new(self.q + 1, self.r - 1),
-            Axial::new(self.q, self.r - 1),
-            Axial::new(self.q - 1, self.r),
-            Axial::new(self.q - 1, self.r + 1),
-            Axial::new(self.q, self.r + 1),
+            Axial::new(
+                self.q + Self::NEIGHBOURS[0].q,
+                self.r + Self::NEIGHBOURS[0].r,
+            ),
+            Axial::new(
+                self.q + Self::NEIGHBOURS[1].q,
+                self.r + Self::NEIGHBOURS[1].r,
+            ),
+            Axial::new(
+                self.q + Self::NEIGHBOURS[2].q,
+                self.r + Self::NEIGHBOURS[2].r,
+            ),
+            Axial::new(
+                self.q + Self::NEIGHBOURS[3].q,
+                self.r + Self::NEIGHBOURS[3].r,
+            ),
+            Axial::new(
+                self.q + Self::NEIGHBOURS[4].q,
+                self.r + Self::NEIGHBOURS[4].r,
+            ),
+            Axial::new(
+                self.q + Self::NEIGHBOURS[5].q,
+                self.r + Self::NEIGHBOURS[5].r,
+            ),
         ]
+    }
+
+    pub fn hex_neighbour(self, i: usize) -> Axial {
+        self + Self::NEIGHBOURS[i]
     }
 
     /// Return the index in `hex_neighbours` of the neighbour if applicable. None otherwise.
@@ -75,17 +107,12 @@ impl Axial {
     /// assert_eq!(i, Some(2));
     /// ```
     #[inline]
-    pub fn neighbour_index(Axial { q, r }: Axial) -> Option<usize> {
-        let i = match (q, r) {
-            (1, 0) => 0,
-            (1, -1) => 1,
-            (0, -1) => 2,
-            (-1, 0) => 3,
-            (-1, 1) => 4,
-            (0, 1) => 5,
-            _ => return None,
-        };
-        Some(i)
+    pub fn neighbour_index(ax: Axial) -> Option<usize> {
+        Self::NEIGHBOURS
+            .iter()
+            .enumerate()
+            .find(|(_i, bx)| ax == **bx)
+            .map(|(i, _)| i)
     }
 
     #[inline]
@@ -103,7 +130,7 @@ impl Axial {
     }
 
     #[inline]
-    pub fn rotate_right(self) -> Axial {
+    pub const fn rotate_right(self) -> Axial {
         let [x, y, z] = self.hex_axial_to_cube();
         Self::hex_cube_to_axial([-z, -x, -y])
     }
@@ -115,16 +142,8 @@ impl Axial {
     }
 
     #[inline]
-    pub fn as_array(self) -> [i32; 2] {
+    pub const fn as_array(self) -> [i32; 2] {
         [self.q, self.r]
-    }
-
-    #[inline]
-    pub fn get_axis(&self, axis: u8) -> i32 {
-        match axis & 1 {
-            0 => self.q,
-            _ => self.r,
-        }
     }
 
     #[inline]
@@ -132,7 +151,6 @@ impl Axial {
         self.hex_distance(other)
     }
 
-    /// chiefly for debugging purposes
     pub fn to_pixel_pointy(self, size: f32) -> [f32; 2] {
         let Axial { q, r } = self;
         let [q, r] = [q as f32, r as f32];
