@@ -107,7 +107,7 @@ impl FindConstant {
         let candidate = match self {
             FindConstant::Resource => {
                 let resources = storage.view::<EntityId, components::ResourceComponent>();
-                find_closest_entity_impl(storage, position, |id| resources.contains(id))
+                find_closest_entity_impl(storage, position, |id| resources.contains_id(id))
             }
             FindConstant::Spawn => {
                 let owner = storage.view::<EntityId, components::OwnedEntity>();

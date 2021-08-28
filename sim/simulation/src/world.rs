@@ -39,7 +39,7 @@ archetype!(
     table HpComponent : DenseTable<EntityId, HpComponent> = hp,
     table EnergyRegenComponent : DenseTable<EntityId, EnergyRegenComponent> = energyregen,
     table EnergyComponent : DenseTable<EntityId, EnergyComponent> = energy,
-    table ResourceComponent : BTreeTable<EntityId, ResourceComponent> = resource,
+    table ResourceComponent : DenseTable<EntityId, ResourceComponent> = resource,
     table DecayComponent : DenseTable<EntityId, DecayComponent> = decay,
     table EntityScript : DenseTable<EntityId, EntityScript> = script,
     table SpawnComponent : DenseTable<EntityId, SpawnComponent> = spawn,
