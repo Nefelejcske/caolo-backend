@@ -1,10 +1,8 @@
+use std::alloc::AllocError;
 use std::mem::size_of;
 use std::ptr::{drop_in_place, NonNull};
 
-use crate::{
-    linear::{aligned_size, LinearAllocator},
-    AllocError,
-};
+use crate::linear::{aligned_size, LinearAllocator};
 
 struct Finalizer {
     finna: unsafe fn(NonNull<u8>),
@@ -50,7 +48,7 @@ impl ScopeStack {
     {
         unsafe {
             let result_ptr = (*self.allocator.as_ptr()).allocate(alloc_size::<T>(1))?;
-            let result_ptr = result_ptr.as_ptr();
+            let result_ptr = (*result_ptr.as_ptr()).as_ptr();
             let fin = result_ptr as *mut Finalizer;
             {
                 std::ptr::write(
@@ -62,7 +60,7 @@ impl ScopeStack {
                 )
             }
             self.fin_stack = Some(NonNull::new_unchecked(fin));
-            let o = result_ptr.add(aligned_size(size_of::<Finalizer>())) as *mut T;
+            let o = result_ptr.add(aligned_size(size_of::<Finalizer>(), 16)) as *mut T;
             Ok(NonNull::new_unchecked(o))
         }
     }
@@ -84,7 +82,7 @@ impl ScopeStack {
     pub fn alloc_obj_array<T>(&mut self, size: usize) -> Result<NonNull<T>, AllocError> {
         unsafe {
             let result_ptr = (*self.allocator.as_ptr()).allocate(alloc_size::<T>(size))?;
-            let result_ptr = result_ptr.as_ptr();
+            let result_ptr = (*result_ptr.as_ptr()).as_ptr();
             let fin = result_ptr as *mut Finalizer;
             {
                 std::ptr::write(
@@ -96,17 +94,17 @@ impl ScopeStack {
                 )
             }
             self.fin_stack = Some(NonNull::new_unchecked(fin));
-            let s = result_ptr.add(aligned_size(size_of::<Finalizer>())) as *mut usize;
+            let s = result_ptr.add(aligned_size(size_of::<Finalizer>(), 16)) as *mut usize;
             std::ptr::write(s, size);
-            let o =
-                result_ptr.add(aligned_size(size_of::<Finalizer>()) + size_of::<usize>()) as *mut T;
+            let o = result_ptr.add(aligned_size(size_of::<Finalizer>(), 16) + size_of::<usize>())
+                as *mut T;
             Ok(NonNull::new_unchecked(o))
         }
     }
 }
 
 fn alloc_size<T>(count: usize) -> usize {
-    aligned_size(size_of::<Finalizer>()) + size_of::<usize>() + size_of::<T>() * count
+    aligned_size(size_of::<Finalizer>(), 16) + size_of::<usize>() + size_of::<T>() * count
 }
 
 unsafe fn finalizer<T>(ptr: NonNull<u8>) {
@@ -129,7 +127,7 @@ impl Drop for ScopeStack {
         unsafe {
             let mut f = self.fin_stack;
             while let Some(mut fin) = f {
-                let obj = (fin.as_ptr() as *mut u8).add(aligned_size(size_of::<Finalizer>()));
+                let obj = (fin.as_ptr() as *mut u8).add(aligned_size(size_of::<Finalizer>(), 16));
                 let fin = fin.as_mut();
                 let obj = NonNull::new(obj).unwrap();
                 (fin.finna)(obj);

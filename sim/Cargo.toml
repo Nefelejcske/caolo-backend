@@ -1,5 +1,5 @@
 [workspace]
-members = ["cao-storage-derive", "simulation", "worker", "storage"]
+members = ["cao-storage-derive", "simulation", "worker", "alloc"]
 exclude = []
 
 [profile.release]

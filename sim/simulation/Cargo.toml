@@ -12,6 +12,7 @@ default = []
 [dependencies]
 cao-lang = { version = "0.1" }
 cao_storage_derive = { path = "../cao-storage-derive" }
+cao_alloc = { path = "../alloc" }
 cao-profile = { git = "https://github.com/caolo-game/cao-profile.git", optional = true, features = [
     "http"
 ] }
