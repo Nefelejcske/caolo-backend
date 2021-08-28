@@ -1,4 +1,4 @@
-use std::{alloc, ptr::NonNull};
+use core::{alloc, ptr::NonNull};
 
 use crate::AllocError;
 
