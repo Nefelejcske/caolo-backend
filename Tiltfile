@@ -16,3 +16,4 @@ allow_k8s_contexts('cloud_okteto_com')
 
 local_resource('sim-tests', cmd='make -C sim test', deps=['./sim/simulation/', './sim/worker/', './sim/Cargo.lock', './protos'], allow_parallel=True, auto_init=False)
 local_resource('rt-tests', cmd='make -C rt test', deps=['./rt'], allow_parallel=True, auto_init=False)
+local_resource('api-tests', cmd='make -C api test', deps=['./api/caoloapi/', './api/test/', './api/setup.py', './api/poetry.lock', './api/pyproject.toml'], allow_parallel=True, auto_init=False)
