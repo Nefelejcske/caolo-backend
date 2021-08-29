@@ -94,7 +94,7 @@ pub fn find_path(
     (positions, terrain, room_connections, room_properties): FindPathTables,
     max_steps: u32,
     path: &mut Vec<RoomPosition>,
-    rooms_to_visit: &mut Vec<Room>,
+    next_room: &mut Option<Room>,
 ) -> Result<u32, PathFindingError> {
     profile!("find_path");
     trace!("find_path from {:?} to {:?}", from, to);
@@ -123,7 +123,7 @@ pub fn find_path(
             (positions, terrain, room_connections, room_properties),
             max_steps,
             path,
-            rooms_to_visit,
+            next_room,
         )
     }
 }
@@ -142,7 +142,7 @@ fn find_path_multiroom(
     (positions, terrain, room_connections, room_properties): FindPathMultiRoomTables,
     mut max_steps: u32,
     path: &mut Vec<RoomPosition>,
-    rooms: &mut Vec<Room>,
+    next_room: &mut Option<Room>,
 ) -> Result<u32, PathFindingError> {
     trace!("find_path_multiroom from {:?} to {:?}", from, to);
 
@@ -152,17 +152,16 @@ fn find_path_multiroom(
         Room(to.room),
         room_connections,
         max_steps,
-        rooms,
+        next_room,
     )
     .map_err(|err| {
         trace!("find_path_overworld failed {:?}", err);
         err
     })?;
-    let Room(next_room) = rooms
-        .last()
-        .expect("find_path_overworld returned OK, but the room list is empty");
+    let Room(next_room) =
+        next_room.expect("find_path_overworld returned OK, but the next room is empty");
 
-    let edge = *next_room - from_room;
+    let edge = next_room - from_room;
     let bridge = room_connections.at(from_room).ok_or_else(|| {
         trace!("Room of bridge not found");
         PathFindingError::RoomNotExists(from_room)
@@ -234,7 +233,7 @@ pub fn find_path_overworld(
     Room(to): Room,
     room_connections: View<Axial, RoomConnections>,
     mut max_steps: u32,
-    path: &mut Vec<Room>,
+    next_room: &mut Option<Room>,
 ) -> Result<u32, PathFindingError> {
     profile!("find_path_overworld");
     trace!("find_path_overworld from {:?} to {:?}", from, to);
@@ -291,13 +290,13 @@ pub fn find_path_overworld(
     let mut current = end;
     let end = from;
     while current != end {
-        path.push(Room(current));
+        *next_room = Some(Room(current));
         current = closed_set[&current].parent;
     }
     trace!(
         "find_path_overworld returning with {} steps remaining\n{:?}",
         max_steps,
-        path
+        next_room
     );
     Ok(max_steps)
 }

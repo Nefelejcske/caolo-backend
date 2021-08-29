@@ -53,7 +53,7 @@ fn bench_find_path_in_room(c: &mut Criterion) {
     }
 
     let mut path = Vec::new();
-    let mut rooms2visit = Vec::new();
+    let mut rooms2visit = None;
 
     c.bench_function("find_path_in_room", move |b| {
         let mut rng = get_rand();
@@ -63,7 +63,7 @@ fn bench_find_path_in_room(c: &mut Criterion) {
             let to = *terrain_points.choose(&mut rng).expect("to");
 
             path.clear();
-            rooms2visit.clear();
+            rooms2visit = None;
             let room = room.0;
 
             find_path(

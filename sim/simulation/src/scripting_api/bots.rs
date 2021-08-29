@@ -280,7 +280,7 @@ fn move_to_pos(
     let max_pathfinding_iter = conf.path_finding_limit;
 
     let mut path = Vec::with_capacity(max_pathfinding_iter as usize);
-    let mut rooms_path = Vec::with_capacity(to.room.hex_distance(botpos.0.room) as usize);
+    let mut next_room = None;
     if let Err(e) = pathfinding::find_path(
         botpos.0,
         to,
@@ -288,7 +288,7 @@ fn move_to_pos(
         FromWorld::from_world(storage),
         max_pathfinding_iter,
         &mut path,
-        &mut rooms_path,
+        &mut next_room,
     ) {
         trace!("pathfinding failed {:?}", e);
         return Err(OperationResult::InvalidTarget);
@@ -330,7 +330,7 @@ fn move_to_pos(
         }
         None => {
             trace!("Entity {:?} is trying to move to its own position", bot);
-            match rooms_path.pop() {
+            match next_room {
                 Some(to_room) => {
                     let is_bridge = storage
                         .view::<WorldPosition, TerrainComponent>()
