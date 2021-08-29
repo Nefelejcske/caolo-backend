@@ -204,7 +204,7 @@ fn at_in_table_rand(c: &mut Criterion) {
             .unwrap();
 
             b.iter(|| {
-                let i = rng.gen_range(0..=points.len());
+                let i = rng.gen_range(0..points.len());
                 let pos = &points[i];
                 table.at(*pos)
             });
@@ -263,7 +263,7 @@ fn random_update(c: &mut Criterion) {
             let table = &mut table;
 
             b.iter(move || {
-                let i = rng.gen_range(0..=memory.len());
+                let i = rng.gen_range(0..memory.len());
                 let p = memory[i].clone();
                 let mut updated = table.update(p, rng.next_u32());
                 black_box(&mut updated);
