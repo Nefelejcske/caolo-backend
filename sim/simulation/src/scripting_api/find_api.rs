@@ -172,7 +172,7 @@ mod tests {
     use std::convert::TryInto;
 
     use super::*;
-    use crate::world::World;
+    use crate::{systems::script_execution::get_alloc, world::World};
     use rand::{rngs::SmallRng, thread_rng, Rng, SeedableRng};
 
     fn init_resource_storage(
@@ -268,7 +268,7 @@ mod tests {
                 components::ResourceComponent(components::Resource::Energy),
             );
         let data =
-            ScriptExecutionData::new(&storage, Default::default(), entity_id, None);
+            ScriptExecutionData::new(&storage, Default::default(), entity_id, None, get_alloc());
         let mut vm = Vm::new(data).unwrap();
 
         let constant = FindConstant::Resource;
@@ -305,6 +305,7 @@ mod tests {
             Default::default(),
             entity_id,
             Default::default(),
+            get_alloc(),
         );
         let mut vm = Vm::new(data).unwrap();
 

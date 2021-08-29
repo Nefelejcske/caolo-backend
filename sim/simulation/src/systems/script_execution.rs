@@ -6,12 +6,14 @@ use crate::{
     profile,
     storage::views::{FromWorld, UnwrapView},
 };
+use cao_alloc::linear::LinearAllocator;
 use cao_lang::prelude::*;
 use rayon::prelude::*;
-use std::mem::replace;
 use std::{
+    cell::RefCell,
     convert::Infallible,
     fmt::{self, Display, Formatter},
+    rc::Rc,
 };
 use thiserror::Error;
 use tracing::{debug, trace, warn};
@@ -63,7 +65,13 @@ pub fn execute_scripts(
                 num_scripts_ran: 0,
                 num_scripts_errored: 0,
             };
-            let data = ScriptExecutionData::unsafe_default();
+            let data = ScriptExecutionData::new(
+                storage,
+                Default::default(),
+                EntityId(!0),
+                None,
+                get_alloc(),
+            );
 
             let conf = UnwrapView::<ConfigKey, GameConfig>::from_world(storage);
             let mut vm = Vm::new(data).expect("Failed to initialize VM");
@@ -109,16 +117,8 @@ pub fn execute_scripts(
     Ok(run_result.intents)
 }
 
-fn prepare_script_data(
-    entity_id: EntityId,
-    user_id: Option<UserId>,
-    storage: &World,
-) -> ScriptExecutionData {
-    let intents = BotIntents {
-        entity_id,
-        ..Default::default()
-    };
-    ScriptExecutionData::new(storage, intents, entity_id, user_id)
+pub(crate) fn get_alloc() -> Rc<RefCell<LinearAllocator>> {
+    Rc::new(RefCell::new(LinearAllocator::new(100_000_000)))
 }
 
 pub fn execute_single_script<'a>(
@@ -137,9 +137,7 @@ pub fn execute_single_script<'a>(
             ExecutionError::ScriptNotFound(script_id)
         })?;
 
-    let data = prepare_script_data(entity_id, user_id, storage);
-    vm.auxiliary_data = data;
-
+    vm.auxiliary_data.reset(entity_id, user_id);
     trace!("Starting script execution");
 
     vm.run(&program.0).map_err(|err| {
@@ -151,21 +149,16 @@ pub fn execute_single_script<'a>(
         }
     })?;
 
-    let aux = replace(
-        &mut vm.auxiliary_data,
-        ScriptExecutionData::unsafe_default(),
-    );
-    trace!("Script execution completed, intents:{:?}", aux.intents);
-
-    let intents = aux.intents;
+    let intents = std::mem::take(&mut vm.auxiliary_data.intents);
+    trace!("Script execution completed, intents:{:?}", intents);
     Ok(intents)
 }
 
-#[derive(Debug)]
 pub struct ScriptExecutionData {
     pub entity_id: EntityId,
     pub user_id: Option<UserId>,
     pub intents: BotIntents,
+    pub alloc: Rc<RefCell<LinearAllocator>>,
     storage: *const World,
 }
 
@@ -180,14 +173,10 @@ impl Display for ScriptExecutionData {
 }
 
 impl ScriptExecutionData {
-    /// To be used as a placeholder, do not consume
-    pub fn unsafe_default() -> Self {
-        Self {
-            entity_id: Default::default(),
-            user_id: None,
-            intents: Default::default(),
-            storage: std::ptr::null(),
-        }
+    pub fn reset(&mut self, entity_id: EntityId, user_id: Option<UserId>) {
+        self.intents.entity_id = entity_id;
+        self.entity_id = entity_id;
+        self.user_id = user_id;
     }
 
     pub fn new(
@@ -195,12 +184,14 @@ impl ScriptExecutionData {
         intents: BotIntents,
         entity_id: EntityId,
         user_id: Option<UserId>,
+        alloc: Rc<RefCell<LinearAllocator>>,
     ) -> Self {
         Self {
             storage: storage as *const _,
             intents,
             entity_id,
             user_id,
+            alloc,
         }
     }
 

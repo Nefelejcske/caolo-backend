@@ -1,10 +1,17 @@
+use std::{cell::RefCell, rc::Rc};
+
 use crate::prelude::World;
+use cao_alloc::linear::LinearAllocator;
 use cao_lang::prelude::*;
 
 use super::*;
 
 fn init_basic_storage() -> World {
     World::new()
+}
+
+fn get_alloc() -> Rc<RefCell<LinearAllocator>> {
+    Rc::new(RefCell::new(LinearAllocator::new(100_000_000)))
 }
 
 #[test]
@@ -15,6 +22,7 @@ fn test_parse_world_position() {
         Default::default(),
         Default::default(),
         Default::default(),
+        get_alloc(),
     );
     let mut vm = Vm::new(data).unwrap();
 
@@ -97,6 +105,7 @@ fn test_say() {
         Default::default(),
         entity_id,
         Default::default(),
+        get_alloc(),
     ))
     .unwrap();
 
@@ -131,6 +140,7 @@ fn test_say_bad_len() {
         Default::default(),
         entity_id,
         Default::default(),
+        get_alloc(),
     ))
     .unwrap();
 
