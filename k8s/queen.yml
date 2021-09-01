@@ -33,17 +33,17 @@ spec:
             periodSeconds: 5
           env:
             - name: CAO_N_ACTORS
-              value: "7500"
+              value: "10000"
             - name: CAO_ROOM_RADIUS
               value: "30"
             - name: CAO_MAP_OVERWORLD_RADIUS
-              value: "10"
+              value: "12"
             - name: CAO_QUEEN_TAG
               value: boises
             - name: RUST_LOG
               value: info
             - name: CAO_TARGET_TICK_LATENCY_MS
-              value: "1000"
+              value: "1500"
             - name: CAO_SERVICE_ADDR
               value: 0.0.0.0:50051
 ---

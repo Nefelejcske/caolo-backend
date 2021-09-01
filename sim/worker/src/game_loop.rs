@@ -15,6 +15,7 @@ pub async fn game_loop(
     outpayload: Arc<Sender<Arc<world_service::Payload>>>,
     tick_latency: Duration,
 ) {
+    let mut lag = Duration::new(0, 0);
     loop {
         let start = Instant::now();
 
@@ -50,13 +51,22 @@ pub async fn game_loop(
             }
         }
 
-        info!("Tick done in {:?}", Instant::now() - start);
+        let end = Instant::now();
+        let tick_duration = end - start;
 
-        let sleep_duration = tick_latency
-            .checked_sub(Instant::now() - start)
-            .unwrap_or_else(|| Duration::from_millis(0));
-
-        debug!("Sleeping for {:?}", sleep_duration);
+        let mut sleep_duration = tick_latency.checked_sub(tick_duration).unwrap_or_default();
+        if tick_duration < tick_latency {
+            lag = lag
+                .checked_sub(tick_latency - tick_duration)
+                .unwrap_or_default();
+            if !lag.is_zero() {
+                sleep_duration = Duration::from_millis(0);
+            }
+        } else {
+            lag += tick_duration - tick_latency;
+            sleep_duration = Duration::from_millis(0);
+        }
+        info!("Tick done in {:.2?}. Current lag: {:.2?}", tick_duration, lag);
         tokio::time::sleep(sleep_duration).await;
     }
 }
