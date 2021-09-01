@@ -4,13 +4,13 @@ import (
 	"context"
 	"flag"
 	"io"
-	"log"
 	"net/http"
 	"time"
 
 	cao_common "github.com/caolo-game/cao-rt/cao_common_pb"
 	"github.com/caolo-game/cao-rt/cao_world_pb"
 	cao_world "github.com/caolo-game/cao-rt/cao_world_pb"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/connectivity"
@@ -19,7 +19,7 @@ import (
 var addr = flag.String("addr", "localhost:8080", "http service address")
 var simAddr = flag.String("simAddr", "localhost:50051", "address of the Simulation Service")
 
-func listenToWorld(conn *grpc.ClientConn, worldState chan *cao_world.RoomEntities) {
+func listenToWorld(logger *zap.Logger, conn *grpc.ClientConn, worldState chan *cao_world.RoomEntities) {
 	client := cao_world.NewWorldClient(conn)
 
 	for {
@@ -31,34 +31,34 @@ func listenToWorld(conn *grpc.ClientConn, worldState chan *cao_world.RoomEntitie
 		for {
 			entitites, err := stream.Recv()
 			if err == io.EOF {
-				log.Println("Bai")
+				logger.Debug("Bai")
 				return
 			}
 			if err != nil {
-				log.Printf("Error in %v.Entities = %v", client, err)
+				logger.Debug("Error in  = %v", zap.Reflect("client", client), zap.Error(err))
 				break
 			}
 
 			worldState <- entitites
 		}
-		log.Print("Retrying connection")
+		logger.Info("Retrying connection")
 	}
 }
 
-func getRoomData(roomId *cao_common.Axial, client cao_world.WorldClient, send_terrain chan *cao_world_pb.RoomTerrain) {
+func getRoomData(logger *zap.Logger, roomId *cao_common.Axial, client cao_world.WorldClient, send_terrain chan *cao_world_pb.RoomTerrain) {
 	terrain, err := client.GetRoomTerrain(context.Background(), roomId)
 	if err != nil {
-		log.Fatalf("Failed to query terrain of room %v: %v", roomId, err)
+		logger.Fatal("Failed to query terrain of room", zap.Reflect("roomId", roomId), zap.Error(err))
 	}
 	send_terrain <- terrain
 }
 
-func initTerrain(conn *grpc.ClientConn, hub *GameStateHub) {
+func initTerrain(logger *zap.Logger, conn *grpc.ClientConn, hub *GameStateHub) {
 	client := cao_world.NewWorldClient(conn)
 
 	roomList, err := client.GetRoomList(context.Background(), &cao_common.Empty{})
 	if err != nil {
-		log.Fatalf("Failed to query room list %v", err)
+		logger.Fatal("Failed to query room list", zap.Error(err))
 	}
 
 	// Query the room terrains' in parallel
@@ -70,7 +70,7 @@ func initTerrain(conn *grpc.ClientConn, hub *GameStateHub) {
 	for i := range roomList.Rooms {
 		room := roomList.Rooms[i]
 		roomId := room.RoomId
-		go getRoomData(roomId, client, ch)
+		go getRoomData(logger, roomId, client, ch)
 	}
 
 	for todo > 0 {
@@ -95,7 +95,7 @@ func MinInt(a, b int) int {
 }
 
 // Wait until the queen is online
-func waitForConnectionReady() *grpc.ClientConn {
+func waitForConnectionReady(logger *zap.Logger) *grpc.ClientConn {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithInsecure(), grpc.WithConnectParams(grpc.ConnectParams{
 		Backoff: backoff.Config{
@@ -109,7 +109,7 @@ func waitForConnectionReady() *grpc.ClientConn {
 
 	conn, err := grpc.Dial(*simAddr, opts...)
 	if err != nil {
-		log.Fatalf("Failed to connect %v", err)
+		logger.Fatal("Failed to connect", zap.Error(err))
 	}
 
 	var backoff = 500
@@ -124,7 +124,7 @@ func waitForConnectionReady() *grpc.ClientConn {
 			return conn
 		case connectivity.Shutdown:
 		case connectivity.TransientFailure:
-			log.Printf("Connection state changed state=%v. Backing off for %dms", state, backoff)
+			logger.Info("Connection state changed. Backing off", zap.Reflect("state", state), zap.Int("backoff ms", backoff))
 			conn.Close()
 
 			time.Sleep(time.Duration(backoff) * time.Millisecond)
@@ -132,36 +132,42 @@ func waitForConnectionReady() *grpc.ClientConn {
 
 			conn, err = grpc.Dial(*simAddr, opts...)
 			if err != nil {
-				log.Fatalf("Failed to connect %v", err)
+				logger.Fatal("Failed to connect", zap.Error(err))
 			}
 		}
 	}
 }
 
 func main() {
+	logger, err := zap.NewProduction()
+	if err != nil {
+		panic("Failed to init logger")
+	}
+	defer logger.Sync()
+
 	flag.Parse()
 
-	log.Println("Starting")
+	logger.Info("Starting")
 
-	conn := waitForConnectionReady()
+	conn := waitForConnectionReady(logger)
 	defer conn.Close()
 
 	hub := NewGameStateHub()
 
-	go listenToWorld(conn, hub.WorldState)
+	go listenToWorld(logger, conn, hub.WorldState)
 
 	go hub.Run()
 
-	initTerrain(conn, hub)
+	initTerrain(logger, conn, hub)
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
 	http.HandleFunc("/object-stream", func(w http.ResponseWriter, r *http.Request) {
-		ServeWs(hub, w, r)
+		ServeWs(logger, hub, w, r)
 	})
 
-	log.Printf("Init done. Listening on %s", *addr)
-	log.Fatal(http.ListenAndServe(*addr, nil))
+	logger.Info("Init done. Listening on", zap.String("address", *addr))
+	logger.Fatal("Listener returned error, terminating", zap.Error(http.ListenAndServe(*addr, nil)))
 }

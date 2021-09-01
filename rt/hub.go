@@ -1,12 +1,12 @@
 package main
 
 import (
-	"log"
-
 	cao_world "github.com/caolo-game/cao-rt/cao_world_pb"
+	"go.uber.org/zap"
 )
 
 type GameStateHub struct {
+	logger   *zap.Logger
 	Entities map[RoomId]RoomState
 	Terrain  map[RoomId]*cao_world.RoomTerrain
 
@@ -79,7 +79,7 @@ func (hub *GameStateHub) Run() {
 				select {
 				case client.entities <- &state:
 				default:
-                    log.Printf("Failed to send state to client, closing connection %v", client)
+					hub.logger.Info("Failed to send state to client, closing connection", zap.Reflect("client", client))
 					delete(hub.clients, client)
 					close(client.entities)
 				}

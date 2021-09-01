@@ -3,15 +3,16 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"go.uber.org/zap"
 )
 
 // Single client handler
 type client struct {
+	logger      *zap.Logger
 	conn        *websocket.Conn
 	hub         *GameStateHub
 	roomIds     []RoomId
@@ -19,8 +20,9 @@ type client struct {
 	onNewRoomId chan RoomId
 }
 
-func NewClient(conn *websocket.Conn, hub *GameStateHub) client {
+func NewClient(logger *zap.Logger, conn *websocket.Conn, hub *GameStateHub) client {
 	return client{
+		logger:      logger,
 		conn:        conn,
 		hub:         hub,
 		roomIds:     make([]RoomId, 0, 100),
@@ -32,7 +34,7 @@ func NewClient(conn *websocket.Conn, hub *GameStateHub) client {
 type InputMsg struct {
 	Ty      string   `json:"ty"`
 	RoomId  RoomId   `json:"room_id,omitempty"`
-	RoomIds []RoomId `json:"room_ids",omitempty"`
+	RoomIds []RoomId `json:"room_ids,omitempty"`
 }
 
 func FindRoomIdIndex(arr []RoomId, key RoomId) int {
@@ -68,24 +70,24 @@ func (c *client) readPump() {
 	for {
 		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
-			log.Printf("Client going away: %v", err)
+			c.logger.Info("Client going away", zap.Error(err))
 			return
 		}
 		msg = bytes.TrimSpace(bytes.Replace(msg, []byte{'\n'}, []byte{' '}, -1))
 		var pl InputMsg
 		err = json.Unmarshal(msg, &pl)
 		if err != nil {
-			log.Printf("Invalid message %v", err)
+			c.logger.Warn("Invalid message", zap.Error(err))
 			return
 		}
-		log.Printf("Incoming message %v", pl.Ty)
+		c.logger.Debug("Incoming message", zap.Reflect("ty", pl.Ty))
 		switch pl.Ty {
 		case "room_ids":
 			if len(c.roomIds)+len(pl.RoomIds) > 100 {
-				log.Println("Client is listening to too many roomIds")
+				c.logger.Debug("Client is listening to too many roomIds")
 				continue
 			}
-			log.Printf("Client subscribed to %v", pl.RoomIds)
+			c.logger.Debug("Client subscribed to", zap.Reflect("roomIds", pl.RoomIds))
 			c.roomIds = append(c.roomIds, pl.RoomIds...)
 
 			for i := range pl.RoomIds {
@@ -94,25 +96,25 @@ func (c *client) readPump() {
 			}
 		case "room_id":
 			if len(c.roomIds) >= 100 {
-				log.Println("Client is listening to too many roomIds")
+				c.logger.Debug("Client is listening to too many roomIds")
 				continue
 			}
-			log.Printf("Client subscribed to %v", pl.RoomId)
+			c.logger.Debug("Client subscribed to", zap.Reflect("roomId", pl.RoomId))
 			c.roomIds = append(c.roomIds, pl.RoomId)
 			c.onNewRoomId <- pl.RoomId
 		case "unsubscribe_room_id":
-			log.Printf("Client unsubscribed from %v", pl.RoomId)
+			c.logger.Debug("Client unsubscribed from", zap.Reflect("roomId", pl.RoomId))
 			c.roomIds = RemoveRoomId(c.roomIds, pl.RoomId)
 		case "unsubscribe_room_ids":
-			log.Printf("Client unsubscribed from %v", pl.RoomIds)
+			c.logger.Debug("Client unsubscribed from", zap.Reflect("roomIds", pl.RoomIds))
 			for i := range pl.RoomIds {
 				c.roomIds = RemoveRoomId(c.roomIds, pl.RoomIds[i])
 			}
 		case "clear_room_ids":
-			log.Println("Client cleared their room subs")
+			c.logger.Debug("Client cleared their room subs")
 			c.roomIds = []RoomId{}
 		default:
-			log.Printf("Unhandled msg type %v", pl.Ty)
+			c.logger.Warn("Unhandled msg type", zap.Reflect("payload", pl))
 		}
 	}
 }
@@ -129,7 +131,7 @@ func sendJson(conn *websocket.Conn, ty string, payload interface{}) error {
 	}
 	pl, err := json.Marshal(response)
 	if err != nil {
-		log.Fatalf("Failed to serialize terrain payload: %v", err)
+		return err
 	}
 	w, err := conn.NextWriter(websocket.TextMessage)
 	if err != nil {
@@ -160,13 +162,13 @@ func (c *client) writePump() {
 			}
 			err := sendJson(c.conn, "terrain", terrain)
 			if err != nil {
-				log.Printf("Failed to send terrain %v", err)
+				c.logger.Debug("Failed to send terrain", zap.Error(err))
 				return
 			}
 			entities := c.hub.Entities[roomId]
 			err = sendJson(c.conn, "entities", entities)
 			if err != nil {
-				log.Printf("Failed to send initial entities %v", err)
+				c.logger.Debug("Failed to send initial entities", zap.Error(err))
 				return
 			}
 		case entities, ok := <-c.entities:
@@ -174,18 +176,18 @@ func (c *client) writePump() {
 			if !ok {
 				// hub closed this channel
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				log.Println("Hub closed the channel")
+				c.logger.Debug("Hub closed the channel")
 				return
 			}
 			err := sendJson(c.conn, "entities", entities)
 			if err != nil {
-				log.Printf("Failed to send entities %v", err)
+				c.logger.Debug("Failed to send entities", zap.Error(err))
 				return
 			}
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				log.Printf("Failed to ping %v", err)
+				c.logger.Debug("Failed to ping", zap.Error(err))
 				return
 			}
 		}
@@ -200,15 +202,15 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func ServeWs(hub *GameStateHub, w http.ResponseWriter, r *http.Request) {
+func ServeWs(logger *zap.Logger, hub *GameStateHub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Printf("Failed to upgrade ws connection %v", err)
+		logger.Warn("Failed to upgrade ws connection", zap.Error(err))
 	}
-	client := NewClient(conn, hub)
+	client := NewClient(logger, conn, hub)
 	hub.register <- &client
 
-	log.Println("New client")
+	logger.Debug("New client")
 
 	go client.writePump()
 	go client.readPump()
