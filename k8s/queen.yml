@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: queen
+  name: caolo-queen
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: queen
-  serviceName: queen
+      app: caolo-queen
+  serviceName: caolo-queen
   template:
     metadata:
       labels:
-        app: queen
+        app: caolo-queen
 
     spec:
       restartPolicy: Always
       containers:
-        - name: queen
+        - name: caolo-queen
           imagePullPolicy: IfNotPresent
           image: caolo/caolo-sim
           command:
@@ -46,15 +46,17 @@ spec:
               value: "1500"
             - name: CAO_SERVICE_ADDR
               value: 0.0.0.0:50051
+            - name: CAO_LOG_STDOUT
+              value: "true"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: queen
+  name: caolo-queen
 spec:
   type: ClusterIP
   ports:
-    - name: queen
+    - name: caolo-queen
       port: 50051
   selector:
-    app: queen
+    app: caolo-queen

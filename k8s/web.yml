@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: web
+  name: caolo-web
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: web
+      app: caolo-web
   template:
     metadata:
       labels:
-        app: web
+        app: caolo-web
     spec:
       initContainers:
         - name: web-release
@@ -21,11 +21,11 @@ spec:
             - /caolo/release.sh
           env:
             - name: DATABASE_URL
-              value: postgres://postgres:poggers@web-db:5432?sslmode=disable
+              value: postgres://postgres:poggers@postgresql:5432?sslmode=disable
 
       restartPolicy: Always
       containers:
-        - name: web
+        - name: caolo-web
           image: caolo/caolo-api
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -42,21 +42,21 @@ spec:
             - name: PORT
               value: "8000"
             - name: DATABASE_URL
-              value: postgres://postgres:poggers@web-db:5432?sslmode=disable
+              value: postgres://postgres:poggers@postgresql:5432?sslmode=disable
             - name: CAO_QUEEN_TAG
               value: boises
             - name: CAO_QUEEN_URL
-              value: queen:50051
+              value: caolo-queen:50051
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: web
+  name: caolo-web
 spec:
   type: LoadBalancer
   ports:
-    - name: "web"
+    - name: "caolo-web"
       port: 8000
   selector:
-    app: web
+    app: caolo-web

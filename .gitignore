@@ -43,3 +43,5 @@ google_secret
 /rt/caolo-backend.exe
 /rt/cao-rt/
 /api/caoloapi/protos/
+/.helm/
+/tilt_modules/

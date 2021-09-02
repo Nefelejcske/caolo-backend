@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rt
+  name: caolo-rt
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: rt
+      app: caolo-rt
   template:
     metadata:
       labels:
-        app: rt
+        app: caolo-rt
     spec:
       restartPolicy: Always
       containers:
-        - name: rt
+        - name: caolo-rt
           image: caolo/caolo-rt
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -29,17 +29,17 @@ spec:
             - name: CAO_QUEEN_TAG
               value: boises
             - name: CAO_QUEEN_URL
-              value: queen:50051
+              value: caolo-queen:50051
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: rt
+  name: caolo-rt
 spec:
   type: LoadBalancer
   ports:
-    - name: "rt"
+    - name: "caolo-rt"
       port: 8080
   selector:
-    app: rt
+    app: caolo-rt
