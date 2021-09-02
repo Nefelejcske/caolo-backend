@@ -7,35 +7,6 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
 COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
 
-
---
--- Name: on_world_ouput_insert(); Type: FUNCTION; Schema: public; Owner: postgres
---
-
-CREATE FUNCTION public.on_world_ouput_insert() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    DELETE FROM world_hot
-    WHERE
-        id NOT IN (
-            SELECT foo.id
-            FROM (
-                SELECT id
-                FROM world_hot
-                ORDER BY created DESC
-                -- TODO this should consider the queen_tag as well...
-                LIMIT 200
-            ) foo
-        );
-
-    RETURN NULL;
-END;
-$$;
-
-
-ALTER FUNCTION public.on_world_ouput_insert() OWNER TO postgres;
-
 --
 -- Name: set_updated_col(); Type: FUNCTION; Schema: public; Owner: postgres
 --
@@ -48,13 +19,6 @@ BEGIN
     RETURN NEW;   
 END;
 $$;
-
-
-ALTER FUNCTION public.set_updated_col() OWNER TO postgres;
-
-SET default_tablespace = '';
-
-SET default_table_access_method = heap;
 
 --
 -- Name: user_account; Type: TABLE; Schema: public; Owner: postgres
