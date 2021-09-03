@@ -33,11 +33,10 @@ tokio = { version = "1", features = [
 tokio-stream = "*"
 tonic = { version = "0.5" }
 prost = "0.8"
-tracing = { version = "0.1" }
-tracing-subscriber = { version = "0.2", features = [
-    "env-filter",
-    "fmt"
-] }
+tracing = { version = "0.1", features = ["release_max_level_info"] }
+tracing-subscriber = { version = "0.2", features = ["env-filter", "fmt"] }
+tracing-opentelemetry = "*"
+opentelemetry = { version = "*", features = ["rt-tokio"] }
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 jemallocator = "0.3.2"

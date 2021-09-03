@@ -19,6 +19,10 @@ use std::{env, sync::Arc, time::Duration};
 use tracing::{info, Instrument};
 use uuid::Uuid;
 
+use opentelemetry::global;
+use opentelemetry::sdk::propagation::TraceContextPropagator;
+use tracing_subscriber::layer::SubscriberExt;
+
 #[cfg(not(target_env = "msvc"))]
 #[global_allocator]
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
@@ -29,11 +33,23 @@ fn init() {
     #[cfg(feature = "dotenv")]
     dotenv::dotenv().unwrap_or_default();
 
-    let collector = tracing_subscriber::fmt()
-        .without_time()
-        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-        .finish();
-    tracing::subscriber::set_global_default(collector).unwrap();
+    let use_console = std::env::var("CAO_LOG_STDOUT")
+        .map(|x| x.parse().unwrap())
+        .unwrap_or_default();
+    if use_console {
+        let collector = tracing_subscriber::fmt()
+            .without_time()
+            .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+            .finish();
+        tracing::subscriber::set_global_default(collector).unwrap();
+    } else {
+        global::set_text_map_propagator(TraceContextPropagator::new());
+        let tracer = opentelemetry::sdk::export::trace::stdout::new_pipeline().install_simple();
+        let collector = tracing_subscriber::registry()
+            .with(tracing_subscriber::EnvFilter::from_default_env())
+            .with(tracing_opentelemetry::layer().with_tracer(tracer));
+        tracing::subscriber::set_global_default(collector).unwrap();
+    }
 }
 
 #[tokio::main]
