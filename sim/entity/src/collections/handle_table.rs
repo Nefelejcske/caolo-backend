@@ -57,10 +57,10 @@ impl HandleTable {
             // create handle
             let entry = &mut *entries.add(index as usize);
             entry.u.data = data;
-            EntityId(crate::EntityPl {
+            EntityId {
                 index,
                 gen: entry.u.gen,
-            })
+            }
         }
     }
 
@@ -68,7 +68,7 @@ impl HandleTable {
         unsafe {
             let entries = self.entries.as_ptr();
 
-            let index = id.0.index;
+            let index = id.index;
             let entry = &mut *entries.add(index as usize);
             entry.u.data = self.free_list;
             entry.u.gen += 1;
@@ -78,8 +78,8 @@ impl HandleTable {
 
     pub fn look_up(&self, id: EntityId) -> u32 {
         unsafe {
-            let index = id.0.index as usize;
-            let count = id.0.gen;
+            let index = id.index as usize;
+            let count = id.gen;
             // TODO: return result?
             assert!(self.entries()[index].u.gen == count);
             return self.entries()[index].u.data;
@@ -88,8 +88,8 @@ impl HandleTable {
 
     pub fn update(&mut self, id: EntityId, data: u32) {
         unsafe {
-            let index = id.0.index as usize;
-            let count = id.0.gen;
+            let index = id.index as usize;
+            let count = id.gen;
             // TODO: return result?
             assert!(self.entries()[index].u.gen == count);
             let entries = self.entries.as_ptr();
@@ -99,8 +99,8 @@ impl HandleTable {
 
     pub fn is_valid(&self, id: EntityId) -> bool {
         unsafe {
-            let index = id.0.index as usize;
-            let count = id.0.gen;
+            let index = id.index as usize;
+            let count = id.gen;
             if index >= self.cap as usize {
                 return false;
             }
@@ -143,8 +143,6 @@ struct DC {
 mod tests {
     use std::{cell::RefCell, rc::Rc};
 
-    use crate::EntityPl;
-
     use super::*;
 
     #[test]
@@ -160,7 +158,7 @@ mod tests {
             dbg!(i, _e);
         }
         for i in 0..4 {
-            let e = EntityId(EntityPl { gen: 0, index: i });
+            let e = EntityId { gen: 0, index: i };
             table.free(e);
         }
         for _ in 0..512 {
