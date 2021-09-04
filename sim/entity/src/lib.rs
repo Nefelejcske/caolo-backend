@@ -8,6 +8,16 @@ pub struct EntityId {
     pub(crate) index: u32,
 }
 
+impl EntityId {
+    pub fn index(self) -> u32 {
+        self.index
+    }
+
+    pub fn gen(self) -> u32 {
+        self.gen
+    }
+}
+
 impl Default for EntityId {
     fn default() -> Self {
         Self { gen: !0, index: !0 }
