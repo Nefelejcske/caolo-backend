@@ -7,7 +7,7 @@ use std::{
 use crate::EntityId;
 
 pub struct HandleTable {
-    entries: NonNull<Entry>,
+    entries: *mut Entry,
     cap: u32,
     free_list: u32,
     alloc: Box<dyn Allocator>,
@@ -34,7 +34,7 @@ impl HandleTable {
                 (*entries).data = SENTINEL;
                 (*entries).gen = SENTINEL;
             }
-            NonNull::new_unchecked(entries)
+            entries
         };
         Ok(Self {
             entries,
@@ -46,7 +46,7 @@ impl HandleTable {
 
     pub fn alloc(&mut self, data: u32) -> EntityId {
         unsafe {
-            let entries = self.entries.as_ptr();
+            let entries = self.entries;
 
             // pop element off the free list
             assert!(self.free_list != SENTINEL); // TODO: return result?
@@ -65,7 +65,7 @@ impl HandleTable {
 
     pub fn free(&mut self, id: EntityId) {
         unsafe {
-            let entries = self.entries.as_ptr();
+            let entries = self.entries;
 
             let index = id.index;
             let entry = &mut *entries.add(index as usize);
@@ -89,7 +89,7 @@ impl HandleTable {
             let gen = id.gen;
             // TODO: return result?
             assert!(self.entries()[index].gen == gen);
-            let entries = self.entries.as_ptr();
+            let entries = self.entries;
             (*entries.add(index)).data = data;
         }
     }
@@ -104,7 +104,7 @@ impl HandleTable {
     }
 
     fn entries(&self) -> &[Entry] {
-        unsafe { std::slice::from_raw_parts(self.entries.as_ptr(), self.cap as usize) }
+        unsafe { std::slice::from_raw_parts(self.entries, self.cap as usize) }
     }
 }
 
@@ -112,7 +112,7 @@ impl Drop for HandleTable {
     fn drop(&mut self) {
         unsafe {
             self.alloc.deallocate(
-                NonNull::new_unchecked(self.entries.as_ptr() as *mut u8),
+                NonNull::new_unchecked(self.entries as *mut u8),
                 Layout::from_size_align_unchecked(
                     self.cap as usize * size_of::<Entry>() + 1,
                     align_of::<Entry>(),
