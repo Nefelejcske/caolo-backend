@@ -1,6 +1,5 @@
 use std::{
     alloc::{AllocError, Allocator, Layout},
-    convert::TryInto,
     mem::{align_of, size_of},
     ptr::NonNull,
 };
@@ -17,8 +16,7 @@ pub struct HandleTable {
 const SENTINEL: u32 = !0;
 
 impl HandleTable {
-    pub fn new(cap: usize, alloc: Box<dyn Allocator>) -> Result<Self, AllocError> {
-        let cap: u32 = cap.try_into().unwrap();
+    pub fn new(cap: u32, alloc: Box<dyn Allocator>) -> Result<Self, AllocError> {
         let entries = unsafe {
             let entries = alloc.allocate(Layout::from_size_align_unchecked(
                 cap as usize * size_of::<Entry>() + 1,
