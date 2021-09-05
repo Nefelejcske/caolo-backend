@@ -89,9 +89,9 @@ impl HandleTable {
     pub fn update(&mut self, id: EntityId, data: u32) {
         unsafe {
             let index = id.index as usize;
-            let count = id.gen;
+            let gen = id.gen;
             // TODO: return result?
-            assert!(self.entries()[index].u.gen == count);
+            assert!(self.entries()[index].u.gen == gen);
             let entries = self.entries.as_ptr();
             (*entries.add(index)).u.data = data;
         }
@@ -100,11 +100,11 @@ impl HandleTable {
     pub fn is_valid(&self, id: EntityId) -> bool {
         unsafe {
             let index = id.index as usize;
-            let count = id.gen;
+            let gen = id.gen;
             if index >= self.cap as usize {
                 return false;
             }
-            self.entries()[index].u.gen == count
+            self.entries()[index].u.gen == gen
         }
     }
 
