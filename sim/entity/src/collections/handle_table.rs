@@ -29,11 +29,12 @@ impl HandleTable {
                 let mut entries = entries;
                 for i in 0..cap {
                     let entry = &mut *entries;
-                    entry.u.data = i as u32 + 1;
-                    entry.u.gen = 0;
+                    entry.data = i as u32 + 1;
+                    entry.gen = 0;
                     entries = entries.add(1);
                 }
-                (*entries).h = SENTINEL as u64 | ((SENTINEL as u64) << 32);
+                (*entries).data = SENTINEL;
+                (*entries).gen = SENTINEL;
             }
             NonNull::new_unchecked(entries)
         };
@@ -52,14 +53,14 @@ impl HandleTable {
             // pop element off the free list
             assert!(self.free_list != SENTINEL); // TODO: return result?
             let index = self.free_list;
-            self.free_list = (*entries.add(self.free_list as usize)).u.data;
+            self.free_list = (*entries.add(self.free_list as usize)).data;
 
             // create handle
             let entry = &mut *entries.add(index as usize);
-            entry.u.data = data;
+            entry.data = data;
             EntityId {
                 index,
-                gen: entry.u.gen,
+                gen: entry.gen,
             }
         }
     }
@@ -70,20 +71,18 @@ impl HandleTable {
 
             let index = id.index;
             let entry = &mut *entries.add(index as usize);
-            entry.u.data = self.free_list;
-            entry.u.gen += 1;
+            entry.data = self.free_list;
+            entry.gen += 1;
             self.free_list = index;
         }
     }
 
     pub fn look_up(&self, id: EntityId) -> u32 {
-        unsafe {
-            let index = id.index as usize;
-            let count = id.gen;
-            // TODO: return result?
-            assert!(self.entries()[index].u.gen == count);
-            return self.entries()[index].u.data;
-        }
+        let index = id.index as usize;
+        let count = id.gen;
+        // TODO: return result?
+        assert!(self.entries()[index].gen == count);
+        return self.entries()[index].data;
     }
 
     pub fn update(&mut self, id: EntityId, data: u32) {
@@ -91,21 +90,19 @@ impl HandleTable {
             let index = id.index as usize;
             let gen = id.gen;
             // TODO: return result?
-            assert!(self.entries()[index].u.gen == gen);
+            assert!(self.entries()[index].gen == gen);
             let entries = self.entries.as_ptr();
-            (*entries.add(index)).u.data = data;
+            (*entries.add(index)).data = data;
         }
     }
 
     pub fn is_valid(&self, id: EntityId) -> bool {
-        unsafe {
-            let index = id.index as usize;
-            let gen = id.gen;
-            if index >= self.cap as usize {
-                return false;
-            }
-            self.entries()[index].u.gen == gen
+        let index = id.index as usize;
+        let gen = id.gen;
+        if index >= self.cap as usize {
+            return false;
         }
+        self.entries()[index].gen == gen
     }
 
     fn entries(&self) -> &[Entry] {
@@ -128,13 +125,7 @@ impl Drop for HandleTable {
 }
 
 #[derive(Clone, Copy)]
-union Entry {
-    h: u64,
-    u: DC,
-}
-
-#[derive(Clone, Copy)]
-struct DC {
+struct Entry {
     data: u32,
     gen: u32,
 }
