@@ -2,6 +2,7 @@
 
 - Python
 - Go
+- Protoc
 
 ## Generate protobuf impls
 
