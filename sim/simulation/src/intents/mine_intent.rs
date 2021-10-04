@@ -28,12 +28,12 @@ pub fn check_mine_intent(
 ) -> OperationResult {
     let bot = intent.bot;
 
-    let s = tracing::debug_span!("check_mine_intent", entity_id = bot.0);
+    let s = tracing::debug_span!("check_mine_intent", entity_id = bot.to_string().as_str());
     let _e = s.enter();
 
-    match bots_table.get_by_id(bot) {
+    match bots_table.get(bot) {
         Some(_) => {
-            let owner_id = owner_ids_table.get_by_id(bot);
+            let owner_id = owner_ids_table.get(bot);
             if owner_id.map(|bot| bot.owner_id != userid).unwrap_or(true) {
                 return OperationResult::NotOwner;
             }
@@ -41,7 +41,7 @@ pub fn check_mine_intent(
         None => return OperationResult::InvalidInput,
     };
 
-    let botpos = match positions_table.get_by_id(bot) {
+    let botpos = match positions_table.get(bot) {
         Some(pos) => pos,
         None => {
             debug!("Bot has no position");
@@ -50,7 +50,7 @@ pub fn check_mine_intent(
     };
 
     let target = intent.resource;
-    let mineralpos = match positions_table.get_by_id(target) {
+    let mineralpos = match positions_table.get(target) {
         Some(pos) => pos,
         None => {
             debug!("{:?} has no position", target);
@@ -58,7 +58,7 @@ pub fn check_mine_intent(
         }
     };
 
-    match carry_table.get_by_id(bot) {
+    match carry_table.get(bot) {
         Some(carry) => {
             if carry.carry >= carry.carry_max {
                 debug!("{:?} is full", bot);
@@ -89,9 +89,9 @@ pub fn check_mine_intent(
         return OperationResult::NotInRange;
     }
 
-    match resources_table.get_by_id(target) {
+    match resources_table.get(target) {
         Some(components::ResourceComponent(components::Resource::Energy)) => {
-            match energy_table.get_by_id(target) {
+            match energy_table.get(target) {
                 Some(energy) => {
                     if energy.energy > 0 {
                         OperationResult::Ok

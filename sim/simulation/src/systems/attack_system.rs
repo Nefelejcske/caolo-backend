@@ -17,14 +17,14 @@ pub fn attack_system_update((mut hp_table, mut intents): Mut, (attack_table,): C
     pre_process(&mut intents.0);
 
     for intent in intents.iter() {
-        let attack = match attack_table.get_by_id(intent.attacker) {
+        let attack = match attack_table.get(intent.attacker) {
             Some(s) => s,
             None => {
                 error!("Attacker has no attack component. {:?}", intent);
                 continue;
             }
         };
-        let hp = match hp_table.get_by_id_mut(intent.defender) {
+        let hp = match hp_table.get_mut(intent.defender) {
             Some(s) => s,
             None => {
                 error!("Defender has no hp component. {:?}", intent);

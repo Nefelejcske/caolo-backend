@@ -68,7 +68,7 @@ pub fn execute_scripts(
             let data = ScriptExecutionData::new(
                 storage,
                 Default::default(),
-                EntityId(!0),
+                EntityId::default(),
                 None,
                 get_alloc(),
             );
@@ -81,10 +81,10 @@ pub fn execute_scripts(
 
             for (entity_id, script) in entity_scripts {
                 let owner_id = owners_table
-                    .get_by_id(*entity_id)
+                    .get(*entity_id)
                     .map(|OwnedEntity { owner_id }| *owner_id);
 
-                let s = tracing::error_span!("script_execution", entity_id = entity_id.0);
+                let s = tracing::error_span!("script_execution", entity_id = entity_id.to_string().as_str());
                 let _e = s.enter();
 
                 vm.clear();
@@ -131,7 +131,7 @@ pub fn execute_single_script<'a>(
     let program = storage
         .view::<ScriptId, CompiledScriptComponent>()
         .reborrow()
-        .get_by_id(script_id)
+        .get(script_id)
         .ok_or_else(|| {
             warn!("Script by ID {:?} does not exist", script_id);
             ExecutionError::ScriptNotFound(script_id)

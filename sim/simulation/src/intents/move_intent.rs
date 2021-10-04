@@ -30,9 +30,9 @@ pub fn check_move_intent(
     (owner_ids, positions, bots, terrain, entity_positions): CheckInput,
 ) -> OperationResult {
     let id = intent.bot;
-    match bots.get_by_id(id) {
+    match bots.get(id) {
         Some(_) => {
-            let owner_id = owner_ids.get_by_id(id);
+            let owner_id = owner_ids.get(id);
             if owner_id.map(|id| id.owner_id != user_id).unwrap_or(true) {
                 return OperationResult::NotOwner;
             }
@@ -40,7 +40,7 @@ pub fn check_move_intent(
         None => return OperationResult::InvalidInput,
     };
 
-    let pos = match positions.get_by_id(id) {
+    let pos = match positions.get(id) {
         Some(pos) => pos,
         None => {
             debug!("Bot has no position");
@@ -60,12 +60,12 @@ pub fn check_move_intent(
     }
 
     if let Some(components::TerrainComponent(terrain::TileTerrainType::Wall)) =
-        terrain.get_by_id(intent.position)
+        terrain.get(intent.position)
     {
         debug!("Position is occupied by terrain");
         return OperationResult::InvalidInput;
     }
-    if let Some(entity) = entity_positions.get_by_id(intent.position) {
+    if let Some(entity) = entity_positions.get(intent.position) {
         debug!("Position is occupied by another entity {:?}", entity);
         return OperationResult::InvalidInput;
     }

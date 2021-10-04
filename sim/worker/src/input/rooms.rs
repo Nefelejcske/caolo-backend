@@ -56,13 +56,13 @@ pub fn take_room(world: &mut World, msg: &TakeRoomCommand) -> Result<(), TakeRoo
     let rooms = world
         .view::<UserId, Rooms>()
         .reborrow()
-        .get_by_id(UserId(user_id));
+        .get(UserId(user_id));
     let num_rooms = rooms.map(|x| x.0.len()).unwrap_or(0);
 
     let props = world
         .view::<UserId, UserProperties>()
         .reborrow()
-        .get_by_id(UserId(user_id));
+        .get(UserId(user_id));
 
     let available_rooms = match props.map(|p| p.level) {
         Some(l) => l,
@@ -81,7 +81,7 @@ pub fn take_room(world: &mut World, msg: &TakeRoomCommand) -> Result<(), TakeRoo
 
     world
         .unsafe_view::<Axial, OwnedEntity>()
-        .insert_or_update(
+        .insert(
             room_id,
             OwnedEntity {
                 owner_id: UserId(user_id),
@@ -92,7 +92,7 @@ pub fn take_room(world: &mut World, msg: &TakeRoomCommand) -> Result<(), TakeRoo
 
     world
         .unsafe_view::<UserId, Rooms>()
-        .insert_or_update(UserId(user_id), rooms);
+        .insert(UserId(user_id), rooms);
 
     Ok(())
 }

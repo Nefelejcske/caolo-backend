@@ -71,7 +71,10 @@ pub fn find_closest_by_range(
     let aux = vm.get_aux();
     let entity_id = aux.entity_id;
 
-    let s = tracing::warn_span!("find_closest_by_range", entity_id = entity_id.0);
+    let s = tracing::warn_span!(
+        "find_closest_by_range",
+        entity_id = entity_id.to_string().as_str()
+    );
     let _e = s.enter();
 
     trace!("find_closest_by_range {:?}", param);
@@ -80,7 +83,7 @@ pub fn find_closest_by_range(
         .get_aux()
         .storage()
         .view::<EntityId, PositionComponent>()
-        .get_by_id(entity_id)
+        .get(entity_id)
     {
         Some(p) => p.0,
         None => {
@@ -107,29 +110,28 @@ impl FindConstant {
         let candidate = match self {
             FindConstant::Resource => {
                 let resources = storage.view::<EntityId, components::ResourceComponent>();
-                find_closest_entity_impl(storage, position, |id| resources.contains_id(id))
+                find_closest_entity_impl(storage, position, |id| resources.contains(id))
             }
             FindConstant::Spawn => {
                 let owner = storage.view::<EntityId, components::OwnedEntity>();
                 let spawns = storage.view::<EntityId, components::SpawnComponent>();
                 find_closest_entity_impl(storage, position, |id| {
-                    spawns.contains_id(id)
-                        && owner.get_by_id(id).map(|owner_id| owner_id.owner_id) == user_id
+                    spawns.contains(id)
+                        && owner.get(id).map(|owner_id| owner_id.owner_id) == user_id
                 })
             }
             FindConstant::EnemyBot => {
                 let owner = storage.view::<EntityId, components::OwnedEntity>();
                 let bots = storage.view::<EntityId, components::Bot>();
                 find_closest_entity_impl(storage, position, |id| {
-                    bots.contains_id(&id)
-                        && owner.get_by_id(id).map(|owner_id| owner_id.owner_id) != user_id
+                    bots.contains(&id) && owner.get(id).map(|owner_id| owner_id.owner_id) != user_id
                 })
             }
         }?;
         match candidate {
             Some(entity) => {
                 trace!("Found entity {:?}", entity);
-                let id = entity.0; // move out of the result to free the storage borrow
+                let id: u64 = entity.into();
                 vm.stack_push(id as i64)?;
             }
             None => {
@@ -231,7 +233,7 @@ mod tests {
         }) {
             storage
                 .unsafe_view::<EntityId, components::ResourceComponent>()
-                .insert_or_update(
+                .insert(
                     entity_id.0,
                     components::ResourceComponent(components::Resource::Energy),
                 );
@@ -239,7 +241,7 @@ mod tests {
 
         // the querying entity is not a resource
 
-        entity_positions.insert_or_update(entity_id, PositionComponent(center_pos));
+        entity_positions.insert(entity_id, PositionComponent(center_pos));
         position_entities
             .insert(center_pos, EntityComponent(entity_id))
             .expect("Initial insert 1");
@@ -248,13 +250,13 @@ mod tests {
 
     #[test]
     fn finds_closest_returns_itself_when_appropriate() {
-        let entity_id = EntityId(1024);
+        let entity_id = EntityId::new(1024, 0);
         let center_pos = WorldPosition {
             room: Axial::new(0, 0),
             pos: Axial::new(14, 14),
         };
 
-        let expected_id = EntityId(2040);
+        let expected_id = EntityId::new(2040, 0);
         let expected_pos = WorldPosition {
             room: Axial::new(0, 0),
             pos: Axial::new(69, 69),
@@ -263,7 +265,7 @@ mod tests {
         let mut storage = init_resource_storage(entity_id, center_pos, expected_id, expected_pos);
         storage
             .unsafe_view::<EntityId, components::ResourceComponent>()
-            .insert_or_update(
+            .insert(
                 entity_id,
                 components::ResourceComponent(components::Resource::Energy),
             );
@@ -277,7 +279,7 @@ mod tests {
 
         let res_id = vm.stack_pop();
         if let Value::Integer(p) = res_id {
-            let res_id = EntityId(p.try_into().unwrap());
+            let res_id = <EntityId as From<u64>>::from(p.try_into().unwrap());
 
             assert_eq!(res_id, entity_id);
         } else {
@@ -287,13 +289,13 @@ mod tests {
 
     #[test]
     fn finds_closest_resources_as_expected() {
-        let entity_id = EntityId(1024);
+        let entity_id = EntityId::new(1024, 0);
         let center_pos = WorldPosition {
             room: Axial::new(0, 0),
             pos: Axial::new(14, 14),
         };
 
-        let expected_id = EntityId(2040);
+        let expected_id = EntityId::new(2040, 0);
         let expected_pos = WorldPosition {
             room: Axial::new(0, 0),
             pos: Axial::new(69, 69),
@@ -315,7 +317,7 @@ mod tests {
 
         let res_id = vm.stack_pop();
         if let Value::Integer(p) = res_id {
-            let res_id = EntityId(p.try_into().expect("expected entity id"));
+            let res_id = EntityId::new(p.try_into().expect("expected entity id"), 0);
 
             assert_eq!(res_id, expected_id);
         } else {

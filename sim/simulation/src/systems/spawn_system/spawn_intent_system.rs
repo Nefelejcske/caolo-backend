@@ -24,12 +24,12 @@ pub fn update(
         let s = tracing::span!(
             tracing::Level::INFO,
             "spawn intent system update",
-            spawn_id = intent.spawn_id.0
+            spawn_id = intent.spawn_id.to_string().as_str()
         );
         let _e = s.enter();
         trace!("Spawning bot from structure");
 
-        let spawn = match spawn_queue.get_by_id_mut(intent.spawn_id) {
+        let spawn = match spawn_queue.get_mut(intent.spawn_id) {
             Some(x) => x,
             None => {
                 debug!("structure does not have spawn queue component");
@@ -43,9 +43,9 @@ pub fn update(
         }
 
         let bot_id = unsafe { insert_entity.insert_entity() };
-        spawn_bot_table.insert_or_update(bot_id, SpawnBotComponent { bot: Bot {} });
+        spawn_bot_table.insert(bot_id, SpawnBotComponent { bot: Bot {} });
         if let Some(owner_id) = intent.owner_id {
-            owner_table.insert_or_update(bot_id, OwnedEntity { owner_id });
+            owner_table.insert(bot_id, OwnedEntity { owner_id });
         }
         spawn.queue.push_back(bot_id);
     }

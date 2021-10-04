@@ -53,7 +53,7 @@ where
         mem::replace(&mut self.value, None)
     }
 
-    fn get_by_id(&self, _id: Self::Id) -> Option<&Row> {
+    fn get(&self, _id: Self::Id) -> Option<&Row> {
         self.value.as_ref()
     }
 }

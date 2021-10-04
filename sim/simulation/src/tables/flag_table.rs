@@ -18,7 +18,7 @@ where
     Id: TableId,
     Row: TableRow + Default,
 {
-    pub fn contains_id(&self, id: &Id) -> bool {
+    pub fn contains(&self, id: &Id) -> bool {
         self.ids.binary_search(id).is_ok()
     }
 
@@ -55,7 +55,7 @@ where
         })
     }
 
-    fn get_by_id(&self, id: Self::Id) -> Option<&Self::Row> {
+    fn get(&self, id: Self::Id) -> Option<&Self::Row> {
         self.ids.binary_search(&id).map(|_| &self.default).ok()
     }
 }

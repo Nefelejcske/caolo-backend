@@ -104,11 +104,11 @@ fn spawn_bot(
     };
 
     let owner = owned
-        .get_by_id(spawn_id)
+        .get(spawn_id)
         .map(|OwnedEntity { owner_id }| owner_id.0);
 
     let pos = positions
-        .get_by_id(spawn_id)
+        .get(spawn_id)
         .copied()
         .expect("Spawn should have position")
         .0;

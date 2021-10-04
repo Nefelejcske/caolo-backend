@@ -32,17 +32,17 @@ pub fn move_intents_update(
             .0
             .is_walkable());
 
-        if bots.get_by_id(intent.bot).is_none() {
+        if bots.get(intent.bot).is_none() {
             trace!("Bot by id {:?} does not exist", intent.bot);
             continue;
         }
 
-        if pos_entities.get_by_id(intent.position).is_some() {
+        if pos_entities.get(intent.position).is_some() {
             trace!("Occupied {:?} ", intent.position);
             continue;
         }
 
-        positions.insert_or_update(intent.bot, PositionComponent(intent.position));
+        positions.insert(intent.bot, PositionComponent(intent.position));
 
         trace!("Move successful");
     }
@@ -83,28 +83,28 @@ mod tests {
     fn pre_process_move_intents_removes_last_dupe() {
         let mut intents = vec![
             MoveIntent {
-                bot: EntityId(42),
+                bot: EntityId::new(42, 0),
                 position: WorldPosition {
                     room: Default::default(),
                     pos: Axial::new(42, 69),
                 },
             },
             MoveIntent {
-                bot: EntityId(123),
+                bot: EntityId::new(123, 21),
                 position: WorldPosition {
                     room: Default::default(),
                     pos: Axial::new(42, 69),
                 },
             },
             MoveIntent {
-                bot: EntityId(64),
+                bot: EntityId::new(64, 21),
                 position: WorldPosition {
                     room: Default::default(),
                     pos: Axial::new(43, 69),
                 },
             },
             MoveIntent {
-                bot: EntityId(69),
+                bot: EntityId::new(69, 123),
                 position: WorldPosition {
                     room: Default::default(),
                     pos: Axial::new(42, 69),

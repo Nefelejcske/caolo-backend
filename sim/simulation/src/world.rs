@@ -6,12 +6,13 @@ use crate::storage::{
     views::{UnsafeView, View},
 };
 use crate::tables::btree_table::BTreeTable;
-use crate::tables::dense_table::DenseTable;
 use crate::tables::flag_table::SparseFlagTable;
+use crate::tables::handle_table::HandleTable;
 use crate::tables::morton_hierarchy::ExtendFailure;
 use crate::tables::morton_hierarchy::MortonGridTable;
 use crate::tables::morton_hierarchy::MortonMortonTable;
 use crate::tables::morton_table::MortonTable;
+use crate::tables::page_table::PageTable;
 use crate::tables::unique_table::UniqueTable;
 use crate::tables::Component;
 use crate::tables::TableId;
@@ -32,27 +33,27 @@ archetype!(
     module entity_store key EntityId,
 
     table Bot : SparseFlagTable<EntityId, Bot>  = bot,
-    table PositionComponent : DenseTable<EntityId, PositionComponent> = pos,
-    table SpawnBotComponent : DenseTable<EntityId, SpawnBotComponent> = spawnbot,
-    table CarryComponent : DenseTable<EntityId, CarryComponent> = carry,
+    table PositionComponent : PageTable<PositionComponent> = pos,
+    table SpawnBotComponent : PageTable<SpawnBotComponent> = spawnbot,
+    table CarryComponent : PageTable<CarryComponent> = carry,
     table Structure : SparseFlagTable<EntityId, Structure> = structure,
-    table HpComponent : DenseTable<EntityId, HpComponent> = hp,
-    table EnergyRegenComponent : DenseTable<EntityId, EnergyRegenComponent> = energyregen,
-    table EnergyComponent : DenseTable<EntityId, EnergyComponent> = energy,
-    table ResourceComponent : DenseTable<EntityId, ResourceComponent> = resource,
-    table DecayComponent : DenseTable<EntityId, DecayComponent> = decay,
-    table EntityScript : DenseTable<EntityId, EntityScript> = script,
-    table SpawnComponent : DenseTable<EntityId, SpawnComponent> = spawn,
-    table SpawnQueueComponent : DenseTable<EntityId, SpawnQueueComponent> = spawnqueue,
-    table OwnedEntity : DenseTable<EntityId, OwnedEntity> = owner,
-    table MeleeAttackComponent : DenseTable<EntityId, MeleeAttackComponent> = melee,
-    table SayComponent : DenseTable<EntityId, SayComponent> = say,
-    table MineEventComponent : BTreeTable<EntityId, MineEventComponent> = mine_intents,
-    table DropoffEventComponent : BTreeTable<EntityId, DropoffEventComponent> = dropoff_intents,
-    table RespawnTimer : BTreeTable<EntityId, RespawnTimer> = respawn_timer,
+    table HpComponent : PageTable<HpComponent> = hp,
+    table EnergyRegenComponent : PageTable<EnergyRegenComponent> = energyregen,
+    table EnergyComponent : PageTable<EnergyComponent> = energy,
+    table ResourceComponent : PageTable<ResourceComponent> = resource,
+    table DecayComponent : PageTable<DecayComponent> = decay,
+    table EntityScript : PageTable<EntityScript> = script,
+    table SpawnComponent : PageTable<SpawnComponent> = spawn,
+    table SpawnQueueComponent : PageTable<SpawnQueueComponent> = spawnqueue,
+    table OwnedEntity : PageTable<OwnedEntity> = owner,
+    table MeleeAttackComponent : PageTable<MeleeAttackComponent> = melee,
+    table SayComponent : PageTable<SayComponent> = say,
+    table MineEventComponent : PageTable<MineEventComponent> = mine_intents,
+    table DropoffEventComponent : PageTable<DropoffEventComponent> = dropoff_intents,
+    table RespawnTimer : PageTable<RespawnTimer> = respawn_timer,
 
-    table PathCacheComponent : DenseTable<EntityId,PathCacheComponent> = pathcache,
-    table ScriptHistory : DenseTable<EntityId,ScriptHistory> = script_history
+    table PathCacheComponent : PageTable<PathCacheComponent> = pathcache,
+    table ScriptHistory : PageTable<ScriptHistory> = script_history
 
     iterby bot
     iterby structure
@@ -128,8 +129,7 @@ pub struct World {
 
     deferred_deletes: entity_store::DeferredDeletes,
 
-    next_entity: EntityId,
-    free_entity_list: Vec<EntityId>,
+    entity_handles: HandleTable,
 }
 
 macro_rules! impl_hastable {
@@ -183,9 +183,7 @@ impl World {
             scripts: Default::default(),
             positions: Default::default(),
             deferred_deletes: Default::default(),
-            next_entity: EntityId::default(),
-            free_entity_list: Default::default(),
-
+            entity_handles: HandleTable::new(500_000),
             user: Default::default(),
         };
 
@@ -217,7 +215,7 @@ impl World {
     /// Perform post-tick cleanup on the storage
     pub fn post_process(&mut self) {
         for e in self.deferred_deletes.entityid.iter().copied() {
-            self.free_entity_list.push(e);
+            self.entity_handles.free(e);
         }
         self.deferred_deletes.execute_all(&mut self.entities);
         self.deferred_deletes.clear();
@@ -231,16 +229,11 @@ impl World {
     }
 
     pub fn insert_entity(&mut self) -> EntityId {
-        use crate::tables::SerialId;
+        self.entity_handles.alloc()
+    }
 
-        if let Some(entity_id) = self.free_entity_list.pop() {
-            return entity_id;
-        }
-
-        // if no freed id is available then allocate a new entity
-        let res = self.next_entity;
-        self.next_entity = self.next_entity.next();
-        res
+    pub fn is_valid_entity(&self, id: EntityId) -> bool {
+        self.entity_handles.is_valid(id)
     }
 
     pub fn queen_tag(&self) -> Option<&str> {
@@ -318,8 +311,8 @@ mod tests {
             world
                 .entities
                 .melee
-                .insert_or_update(entity, MeleeAttackComponent { strength: 128 });
-            world.entities.pos.insert_or_update(
+                .insert(entity, MeleeAttackComponent { strength: 128 });
+            world.entities.pos.insert(
                 entity,
                 PositionComponent(WorldPosition {
                     room: Axial::new(42, 69),
@@ -332,7 +325,7 @@ mod tests {
             let entity = world.insert_entity();
 
             world.entities.structure.insert(entity);
-            world.entities.pos.insert_or_update(
+            world.entities.pos.insert(
                 entity,
                 PositionComponent(WorldPosition {
                     room: Axial::new(42, 69),

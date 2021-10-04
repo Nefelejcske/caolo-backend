@@ -1,22 +1,19 @@
 //! Structs intended to be used as table indices.
 //!
+
+pub mod entity_id;
+
 use crate::empty_key;
 use crate::geometry::Axial;
-use crate::tables::SerialId;
-use cao_lang::prelude::Value;
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
 use std::ops::Add;
+
+pub use entity_id::EntityId;
 
 #[derive(
     Debug, Clone, Default, Ord, PartialOrd, Eq, PartialEq, Copy, Hash, Serialize, Deserialize,
 )]
 pub struct EntityTime(pub EntityId, pub u64);
-
-#[derive(
-    Debug, Clone, Default, Ord, PartialOrd, Eq, PartialEq, Copy, Hash, Serialize, Deserialize,
-)]
-pub struct EntityId(pub u32);
 
 #[derive(
     Debug, Clone, Default, Ord, PartialOrd, Eq, PartialEq, Copy, Hash, Serialize, Deserialize,
@@ -30,41 +27,6 @@ pub struct ScriptId(pub uuid::Uuid);
     Debug, Clone, Default, Ord, PartialOrd, Eq, PartialEq, Copy, Hash, Serialize, Deserialize,
 )]
 pub struct UserId(pub uuid::Uuid);
-
-impl SerialId for IntentId {
-    fn next(&self) -> Self {
-        Self(self.0 + 1)
-    }
-
-    fn as_usize(&self) -> usize {
-        self.0 as usize
-    }
-}
-
-impl SerialId for EntityId {
-    fn next(&self) -> Self {
-        Self(self.0 + 1)
-    }
-
-    fn as_usize(&self) -> usize {
-        self.0 as usize
-    }
-}
-
-impl TryFrom<Value> for EntityId {
-    type Error = Value;
-    fn try_from(s: Value) -> Result<EntityId, Value> {
-        match s {
-            Value::Integer(i) => {
-                if i < 0 {
-                    return Err(s);
-                }
-                Ok(EntityId(i as u32))
-            }
-            _ => Err(s),
-        }
-    }
-}
 
 #[derive(
     Debug, Clone, Default, Ord, PartialOrd, Eq, PartialEq, Copy, Hash, Serialize, Deserialize,

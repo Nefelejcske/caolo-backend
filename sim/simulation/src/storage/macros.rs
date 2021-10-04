@@ -30,9 +30,9 @@
 ///         EntityId, Bot, .insert(entity_1);
 ///         EntityId, Bot, .insert(entity_2);
 ///         EntityId, CarryComponent,
-///                  .insert_or_update(entity_1, CarryComponent{carry: 12, carry_max: 69});
+///                  .insert(entity_1, CarryComponent{carry: 12, carry_max: 69});
 ///         EntityId, CarryComponent,
-///                  .insert_or_update(entity_2, CarryComponent{carry: 0, carry_max: 69});
+///                  .insert(entity_2, CarryComponent{carry: 0, carry_max: 69});
 ///     }
 /// );
 /// ```
@@ -89,18 +89,18 @@ macro_rules! query {
 ///        EntityId, Bot, .insert(entity_1);
 ///        EntityId, Bot, .insert(entity_2);
 ///
-///        EntityId, PositionComponent, .insert_or_update(entity_1, PositionComponent::default());
-///        EntityId, PositionComponent, .insert_or_update(entity_2, PositionComponent::default());
-///        EntityId, PositionComponent, .insert_or_update(entity_3, PositionComponent::default());
+///        EntityId, PositionComponent, .insert(entity_1, PositionComponent::default());
+///        EntityId, PositionComponent, .insert(entity_2, PositionComponent::default());
+///        EntityId, PositionComponent, .insert(entity_3, PositionComponent::default());
 ///
 ///        // notice how entity_3 is not a bot, but has carry
 ///
 ///        EntityId, CarryComponent,
-///                 .insert_or_update(entity_1, CarryComponent{carry: 12, carry_max: 69});
+///                 .insert(entity_1, CarryComponent{carry: 12, carry_max: 69});
 ///        EntityId, CarryComponent,
-///                 .insert_or_update(entity_2, CarryComponent{carry: 30, carry_max: 69});
+///                 .insert(entity_2, CarryComponent{carry: 30, carry_max: 69});
 ///        EntityId, CarryComponent,
-///                 .insert_or_update(entity_3, CarryComponent{carry: 40, carry_max: 69});
+///                 .insert(entity_3, CarryComponent{carry: 40, carry_max: 69});
 ///    }
 /// );
 ///
@@ -151,18 +151,18 @@ macro_rules! query {
 ///         EntityId, Bot, .insert(entity_1);
 ///         EntityId, Bot, .insert(entity_2);
 ///
-///         EntityId, PositionComponent, .insert_or_update(entity_1, PositionComponent::default());
-///         EntityId, PositionComponent, .insert_or_update(entity_2, PositionComponent::default());
-///         EntityId, PositionComponent, .insert_or_update(entity_3, PositionComponent::default());
+///         EntityId, PositionComponent, .insert(entity_1, PositionComponent::default());
+///         EntityId, PositionComponent, .insert(entity_2, PositionComponent::default());
+///         EntityId, PositionComponent, .insert(entity_3, PositionComponent::default());
 ///
 ///         // notice how entity_3 is not a bot, but has carry
 ///
 ///         EntityId, CarryComponent,
-///                  .insert_or_update(entity_1, CarryComponent{carry: 12, carry_max: 69});
+///                  .insert(entity_1, CarryComponent{carry: 12, carry_max: 69});
 ///         EntityId, CarryComponent,
-///                  .insert_or_update(entity_2, CarryComponent{carry: 30, carry_max: 69});
+///                  .insert(entity_2, CarryComponent{carry: 30, carry_max: 69});
 ///         EntityId, CarryComponent,
-///                  .insert_or_update(entity_3, CarryComponent{carry: 40, carry_max: 69});
+///                  .insert(entity_3, CarryComponent{carry: 40, carry_max: 69});
 ///     }
 /// );
 ///
@@ -286,7 +286,7 @@ macro_rules! join {
 /// a tuple (struct) with all optional fields.
 /// To use this the given table must have an `iter` method returning a pair of (key, value), only
 /// for keys that are in the given table.
-/// Will call `get_by_id` for all other tables.
+/// Will call `get` for all other tables.
 ///
 /// For this reason I do not recommend using this often, as hand written `join!`-s can be a lot
 /// more performant.

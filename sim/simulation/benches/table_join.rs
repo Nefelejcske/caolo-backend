@@ -1,4 +1,4 @@
-use caolo_sim::tables::{btree_table::BTreeTable, dense_table::DenseTable, JoinIterator};
+use caolo_sim::tables::{btree_table::BTreeTable, page_table::PageTable, JoinIterator};
 use caolo_sim::{indices::EntityId, tables::flag_table::SparseFlagTable};
 use criterion::{black_box, criterion_group, Criterion};
 use rand::{rngs::SmallRng, Rng, SeedableRng};
@@ -21,14 +21,14 @@ struct LargeComponent {
     _f: [u8; 10],
 }
 
-fn random_vec_table(len: usize, domain: u32) -> DenseTable<EntityId, LargeComponent> {
+fn random_vec_table(len: usize, domain: u32) -> PageTable<LargeComponent> {
     let mut rng = get_rand();
-    let mut table = DenseTable::with_capacity(domain as usize);
+    let mut table = PageTable::new(domain as usize);
     for _ in 0..len {
         let mut res = false;
         while !res {
-            let id = EntityId(rng.gen_range(0..=domain));
-            res = table.insert_or_update(id, LargeComponent::default());
+            let id = EntityId::new(rng.gen_range(0..=domain), 0);
+            res = table.insert(id, LargeComponent::default()).is_none();
         }
     }
     table
@@ -40,8 +40,8 @@ fn random_bt_table(len: usize, domain: u32) -> BTreeTable<EntityId, LargeCompone
     for _ in 0..len {
         let mut res = false;
         while !res {
-            let id = EntityId(rng.gen_range(0..=domain));
-            res = table.insert_or_update(id, LargeComponent::default());
+            let id = EntityId::new(rng.gen_range(0..=domain), 0);
+            res = table.insert(id, LargeComponent::default()).is_none();
         }
     }
     table

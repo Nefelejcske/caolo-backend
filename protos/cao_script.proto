@@ -27,13 +27,13 @@ message CompilationUnit
 
 message EntityId
 {
-    int64 id = 1;
+    uint64 id = 1;
 }
 
 message UpdateEntityScriptCommand
 {
     cao_common.Uuid userId = 1;
-    uint32 entityId = 2;
+    uint64 entityId = 2;
     cao_common.Uuid scriptId = 3;
 }
 

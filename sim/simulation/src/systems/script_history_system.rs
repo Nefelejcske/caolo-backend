@@ -16,6 +16,6 @@ pub fn script_history_update((mut history_intents, mut history_table): Mut, _: C
     let Intents(intents) = mem::take(&mut *history_intents);
     history_table.clear();
     for intent in intents {
-        history_table.insert_or_update(intent.entity_id, ScriptHistory::default());
+        history_table.insert(intent.entity_id, ScriptHistory::default());
     }
 }

@@ -197,7 +197,7 @@ where
         self.at_mut(id).map(|x| std::mem::take(x))
     }
 
-    fn get_by_id(&self, id: Self::Id) -> Option<&Self::Row> {
+    fn get(&self, id: Self::Id) -> Option<&Self::Row> {
         self.at(id)
     }
 }

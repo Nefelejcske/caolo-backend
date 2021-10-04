@@ -12,30 +12,30 @@ pub fn init_structure_spawn(id: EntityId, owner_id: Uuid, pos: WorldPosition, wo
         mutate world
         {
             EntityId, Structure, .insert(id);
-            EntityId, SpawnComponent, .insert_or_update(id, SpawnComponent::default());
-            EntityId, SpawnQueueComponent, .insert_or_update(id, SpawnQueueComponent::default());
-            EntityId, OwnedEntity, .insert_or_update(
+            EntityId, SpawnComponent, .insert(id, SpawnComponent::default());
+            EntityId, SpawnQueueComponent, .insert(id, SpawnQueueComponent::default());
+            EntityId, OwnedEntity, .insert(
                 id,
                 OwnedEntity {
                     owner_id: UserId(owner_id),
                 }
             );
-            EntityId, EnergyComponent, .insert_or_update(
+            EntityId, EnergyComponent, .insert(
                 id,
                 EnergyComponent {
                     energy: 500,
                     energy_max: 500,
                 }
             );
-            EntityId, EnergyRegenComponent, .insert_or_update(id, EnergyRegenComponent { amount: 20 });
-            EntityId, HpComponent, .insert_or_update(
+            EntityId, EnergyRegenComponent, .insert(id, EnergyRegenComponent { amount: 20 });
+            EntityId, HpComponent, .insert(
                 id,
                 HpComponent {
                     hp: 500,
                     hp_max: 500,
                 }
             );
-            EntityId, PositionComponent, .insert_or_update(id, PositionComponent(pos));
+            EntityId, PositionComponent, .insert(id, PositionComponent(pos));
             WorldPosition, EntityComponent, .insert(pos, EntityComponent(id))
                 .expect("entities_by_pos insert failed");
 
@@ -68,14 +68,14 @@ pub fn init_bot(
     user_default_scripts: View<UserId, EntityScript>,
 ) {
     bots.insert(entity_id);
-    hps.insert_or_update(
+    hps.insert(
         entity_id,
         HpComponent {
             hp: 100,
             hp_max: 100,
         },
     );
-    decay.insert_or_update(
+    decay.insert(
         entity_id,
         DecayComponent {
             interval: 10,
@@ -83,7 +83,7 @@ pub fn init_bot(
             hp_amount: 10,
         },
     );
-    carry.insert_or_update(
+    carry.insert(
         entity_id,
         CarryComponent {
             carry: 0,
@@ -91,14 +91,14 @@ pub fn init_bot(
         },
     );
 
-    positions.insert_or_update(entity_id, PositionComponent(pos));
+    positions.insert(entity_id, PositionComponent(pos));
 
     if let Some(owner_id) = owner_id {
-        if let Some(script) = user_default_scripts.get_by_id(UserId(owner_id)) {
-            script_table.insert_or_update(entity_id, *script);
+        if let Some(script) = user_default_scripts.get(UserId(owner_id)) {
+            script_table.insert(entity_id, *script);
         }
 
-        owned.insert_or_update(
+        owned.insert(
             entity_id,
             OwnedEntity {
                 owner_id: UserId(owner_id),

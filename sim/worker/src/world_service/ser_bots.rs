@@ -63,33 +63,33 @@ pub fn bot_payload(
                 );
             }
             room = Some(next_room);
-            offset = rooms.get_by_id(next_room.0).map(|x| x.offset);
+            offset = rooms.get(next_room.0).map(|x| x.offset);
             accumulator.clear();
         }
         for (pos, EntityComponent(entity_id)) in entities.iter() {
-            if bots.contains_id(entity_id) {
+            if bots.contains(entity_id) {
                 let entity_id = *entity_id;
                 accumulator.push(cao_world::Bot {
-                    id: entity_id.0.into(),
+                    id: entity_id.into(),
                     pos: Some(cao_common::WorldPosition {
                         pos: Some(pos.into()),
                         room: room.map(|x| x.0.into()),
                         offset: offset.map(|x| x.into()),
                     }),
                     hp: hp
-                        .get_by_id(entity_id)
+                        .get(entity_id)
                         .copied()
                         .map(|HpComponent { hp, hp_max }| cao_world::Bounded {
                             value: hp.into(),
                             value_max: hp_max.into(),
                         }),
-                    carry: carry.get_by_id(entity_id).copied().map(
+                    carry: carry.get(entity_id).copied().map(
                         |CarryComponent { carry, carry_max }| cao_world::Bounded {
                             value: carry.into(),
                             value_max: carry_max.into(),
                         },
                     ),
-                    decay: decay.get_by_id(entity_id).copied().map(
+                    decay: decay.get(entity_id).copied().map(
                         |DecayComponent {
                              hp_amount,
                              interval,
@@ -101,11 +101,11 @@ pub fn bot_payload(
                         },
                     ),
                     melee_strength: melee
-                        .get_by_id(entity_id)
+                        .get(entity_id)
                         .copied()
                         .map(|MeleeAttackComponent { strength }| strength.into())
                         .unwrap_or(0),
-                    owner: owner.get_by_id(entity_id).map(
+                    owner: owner.get(entity_id).map(
                         |OwnedEntity {
                              owner_id: UserId(owner_id),
                          }| {
@@ -115,26 +115,26 @@ pub fn bot_payload(
                         },
                     ),
                     script: script
-                        .get_by_id(entity_id)
+                        .get(entity_id)
                         .map(|EntityScript(ScriptId(script_id))| cao_common::Uuid {
                             data: script_id.as_bytes().to_vec(),
                         }),
                     logs: logs
-                        .get_by_id(EntityTime(entity_id, time - 1)) // send the logs of the last tick
+                        .get(EntityTime(entity_id, time - 1)) // send the logs of the last tick
                         .map(|logs| logs.payload.clone())
                         .unwrap_or_default(),
                     say: say
-                        .get_by_id(entity_id)
+                        .get(entity_id)
                         .map(|SayComponent(pl)| pl.to_string())
                         .unwrap_or_default(),
-                    dropoff_intent: dropoff.get_by_id(entity_id).map(
+                    dropoff_intent: dropoff.get(entity_id).copied().map(
                         |DropoffEventComponent(pl)| cao_intents::DropoffIntent {
-                            target_id: pl.0 as i64,
+                            target_id: pl.into(),
                         },
                     ),
-                    mine_intent: mine.get_by_id(entity_id).map(|MineEventComponent(pl)| {
+                    mine_intent: mine.get(entity_id).copied().map(|MineEventComponent(pl)| {
                         cao_intents::MineIntent {
-                            target_id: pl.0 as i64,
+                            target_id: pl.into(),
                         }
                     }),
                 });

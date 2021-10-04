@@ -137,7 +137,7 @@ where
             .and_then(|room| room.at_mut(id.pos))
     }
 
-    pub fn get_by_id(&self, id: WorldPosition) -> Option<&Row> {
+    pub fn get(&self, id: WorldPosition) -> Option<&Row> {
         self.table.at(id.room).and_then(|room| room.at(id.pos))
     }
 
@@ -297,8 +297,8 @@ where
         room.delete(pos)
     }
 
-    fn get_by_id(&self, id: Self::Id) -> Option<&Row> {
-        RoomMortonTable::get_by_id(self, id)
+    fn get(&self, id: Self::Id) -> Option<&Row> {
+        RoomMortonTable::get(self, id)
     }
 }
 
@@ -383,7 +383,7 @@ mod tests {
             .unwrap();
         table.extend_from_slice(&mut pts).unwrap();
 
-        assert_eq!(table.table.get_by_id(Axial::new(69, 69)).unwrap().len(), 2);
-        assert_eq!(table.table.get_by_id(Axial::new(42, 69)).unwrap().len(), 4);
+        assert_eq!(table.table.get(Axial::new(69, 69)).unwrap().len(), 2);
+        assert_eq!(table.table.get(Axial::new(42, 69)).unwrap().len(), 4);
     }
 }

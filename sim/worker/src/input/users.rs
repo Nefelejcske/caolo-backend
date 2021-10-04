@@ -54,9 +54,9 @@ pub fn register_user(
             UserId, UserComponent,
                 .insert(user_id);
             UserId, Rooms,
-                .insert_or_update(user_id, Rooms::default());
+                .insert(user_id, Rooms::default());
             UserId, UserProperties,
-                .insert_or_update(user_id, UserProperties{level});
+                .insert(user_id, UserProperties{level});
         }
     );
 

@@ -65,7 +65,7 @@ impl cao_users::users_server::Users for UsersService {
             // free the read guard asap
             let w = self.world.read().await;
             let props_table: View<UserId, UserProperties> = w.view();
-            properties = props_table.get_by_id(user_id).cloned();
+            properties = props_table.get(user_id).cloned();
         }
 
         let result = match properties {

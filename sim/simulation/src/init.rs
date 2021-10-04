@@ -23,7 +23,7 @@ pub fn init_world_entities(storage: &mut World, n_fake_users: usize) {
         storage
         {
             ScriptId, CompiledScriptComponent,
-                .insert_or_update(mining_script_id, CompiledScriptComponent(compiled));
+                .insert(mining_script_id, CompiledScriptComponent(compiled));
         }
     );
 
@@ -67,7 +67,7 @@ pub fn init_world_entities(storage: &mut World, n_fake_users: usize) {
         trace!("spawning entities");
         storage
             .unsafe_view::<UserId, EntityScript>()
-            .insert_or_update(UserId(user_id), EntityScript(mining_script_id));
+            .insert(UserId(user_id), EntityScript(mining_script_id));
         let id = storage.insert_entity();
         init_resource(
             &bounds,
@@ -129,19 +129,19 @@ fn init_resource(
     ): InitResourceMuts,
     (terrain,): InitResourceConst,
 ) {
-    resources_table.insert_or_update(id, ResourceComponent(Resource::Energy));
-    energy_table.insert_or_update(
+    resources_table.insert(id, ResourceComponent(Resource::Energy));
+    energy_table.insert(
         id,
         EnergyComponent {
             energy: 100,
             energy_max: 100,
         },
     );
-    respawn_timer.insert_or_update(id, RespawnTimer(2));
+    respawn_timer.insert(id, RespawnTimer(2));
 
     let pos = uncontested_pos(room, bounds, &*entities_by_pos, &*terrain, rng);
 
-    positions_table.insert_or_update(id, PositionComponent(pos));
+    positions_table.insert(id, PositionComponent(pos));
     entities_by_pos
         .table
         .at_mut(room.0)
@@ -175,7 +175,7 @@ fn uncontested_pos<T: crate::tables::TableRow + Send + Sync + Default>(
 
         let pos = WorldPosition { room: room.0, pos };
 
-        if let Some(TerrainComponent(terrain)) = terrain_table.get_by_id(pos) {
+        if let Some(TerrainComponent(terrain)) = terrain_table.get(pos) {
             if terrain.is_walkable() && !positions_table.contains_key(&pos) {
                 return pos;
             }

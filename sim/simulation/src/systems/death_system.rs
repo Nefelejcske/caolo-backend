@@ -36,11 +36,11 @@ mod tests {
             mutate
             store
             {
-                EntityId, HpComponent, .insert_or_update(entity_1, HpComponent {
+                EntityId, HpComponent, .insert(entity_1, HpComponent {
                     hp: 0,
                     hp_max: 123
                 });
-                EntityId, HpComponent, .insert_or_update(entity_2, HpComponent {
+                EntityId, HpComponent, .insert(entity_2, HpComponent {
                     hp: 50,
                     hp_max: 123
                 });

@@ -37,24 +37,24 @@ pub fn resource_payload(
                 );
             }
             room = Some(next_room);
-            offset = rooms.get_by_id(next_room.0).map(|x| x.offset);
+            offset = rooms.get(next_room.0).map(|x| x.offset);
             accumulator.clear();
         }
         for (pos, EntityComponent(entity_id)) in entities.iter() {
             let entity_id = *entity_id;
-            if let Some(resource) = resource.get_by_id(entity_id) {
+            if let Some(resource) = resource.get(entity_id) {
                 match resource.0 {
                     Resource::Empty => {}
                     Resource::Energy => {
                         accumulator.push(cao_world::Resource {
-                            id: entity_id.0.into(),
+                            id: entity_id.into(),
 
                             pos: Some(cao_common::WorldPosition {
                                 pos: Some(pos.into()),
                                 room: room.map(|x| x.0.into()),
                                 offset: offset.map(|x| x.into()),
                             }),
-                            resource_type: energy.get_by_id(entity_id).copied().map(
+                            resource_type: energy.get(entity_id).copied().map(
                                 |EnergyComponent { energy, energy_max }: EnergyComponent| {
                                     cao_world::resource::ResourceType::Energy(cao_world::Bounded {
                                         value: energy.into(),

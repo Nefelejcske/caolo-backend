@@ -14,10 +14,8 @@ fn insert_at_random(c: &mut Criterion) {
         let mut table = BTreeTable::<EntityId, i32>::new();
         b.iter(|| {
             let id = rng.gen_range(0..=1 << 20);
-            let id = EntityId(id);
-            let res = table.insert_or_update(id, rng.gen_range(0..=200));
-            debug_assert!(res);
-            res
+            let id = EntityId::new(id, 0);
+            table.insert(id, rng.gen_range(0..=200))
         });
     });
 }
@@ -31,14 +29,14 @@ fn get_by_id_random_2_pow_16(c: &mut Criterion) {
             let mut res = false;
             while !res {
                 let id = rng.gen_range(0..=1 << 25);
-                let id = EntityId(id);
-                res = table.insert_or_update(id, i);
+                let id = EntityId::new(id, 0);
+                res = table.insert(id, i).is_none();
             }
         }
         b.iter(|| {
             let id = rng.gen_range(0..=1 << 25);
-            let id = EntityId(id);
-            let res = table.get_by_id(id);
+            let id = EntityId::new(id, 0);
+            let res = table.get(id);
             res
         });
     });
@@ -54,11 +52,12 @@ fn update_all_iter_2pow14_sparse(c: &mut Criterion) {
         for i in 0..LEN {
             let mut id = Default::default();
             while table.contains(id) {
-                id = EntityId(
+                id = EntityId::new(
                     rng.gen_range(0..u32::try_from(LEN * 6 / 5).expect("max len to fit into u32")),
+                    0,
                 );
             }
-            table.insert_or_update(id, i);
+            table.insert(id, i);
         }
         b.iter(|| {
             table.iter_mut().for_each(|(_, val)| {
@@ -76,8 +75,8 @@ fn update_all_iter_2pow14_dense(c: &mut Criterion) {
         const LEN: usize = 1 << 14;
         let mut table = BTreeTable::<EntityId, usize>::new();
         for i in 0..LEN {
-            let id = EntityId(i as u32);
-            table.insert_or_update(id, i);
+            let id = EntityId::new(i as u32, 0);
+            table.insert(id, i);
         }
         b.iter(|| {
             table.iter_mut().for_each(|(_, val)| {

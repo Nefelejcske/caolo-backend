@@ -50,7 +50,7 @@ fn get_entities_in_range_sparse(c: &mut Criterion) {
                     q: rng.gen_range(0..=3900 * 2),
                     r: rng.gen_range(0..=3900 * 2),
                 };
-                (p, EntityComponent(EntityId(rng.gen())))
+                (p, EntityComponent(EntityId::new(rng.gen(), 0)))
             }))
             .unwrap();
 
@@ -82,7 +82,7 @@ fn get_entities_in_range_dense(c: &mut Criterion) {
                     q: rng.gen_range(0..=200 * 2),
                     r: rng.gen_range(0..=200 * 2),
                 };
-                (p, EntityComponent(EntityId(rng.gen())))
+                (p, EntityComponent(EntityId::new(rng.gen(), 0)))
             }))
             .unwrap();
 

@@ -52,10 +52,10 @@ pub type SayPayload = ArrayString<SAY_MAX_LEN>;
 #[serde(rename_all = "camelCase")]
 pub struct SayComponent(pub SayPayload);
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, Copy)]
 #[serde(rename_all = "camelCase")]
 pub struct MineEventComponent(pub EntityId);
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, Copy)]
 #[serde(rename_all = "camelCase")]
 pub struct DropoffEventComponent(pub EntityId);

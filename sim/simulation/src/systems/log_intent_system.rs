@@ -25,13 +25,13 @@ pub fn log_intents_update((mut log_table, mut intents): Mut, (): ()) {
         match log_table.delete(id) {
             Some(mut entry) => {
                 entry.payload.push_str(&intent.payload);
-                log_table.insert_or_update(id, entry);
+                log_table.insert(id, entry);
             }
             None => {
                 let entry = LogEntry {
                     payload: intent.payload,
                 };
-                log_table.insert_or_update(id, entry);
+                log_table.insert(id, entry);
             }
         };
     }

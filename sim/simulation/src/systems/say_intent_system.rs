@@ -18,6 +18,6 @@ pub fn say_intents_update((mut say_table, mut intents): Mut, (): ()) {
 
     for intent in intents {
         trace!("inserting say entry {:?}", intent);
-        say_table.insert_or_update(intent.entity, SayComponent(intent.payload));
+        say_table.insert(intent.entity, SayComponent(intent.payload));
     }
 }

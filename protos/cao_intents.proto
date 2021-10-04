@@ -6,10 +6,10 @@ option go_package = "github.com/caolo-game/cao-rt/cao_intents_pb";
 
 message MineIntent
 {
-    int64 targetId = 1;
+    uint64 targetId = 1;
 }
 
 message DropoffIntent
 {
-    int64 targetId = 1;
+    uint64 targetId = 1;
 }

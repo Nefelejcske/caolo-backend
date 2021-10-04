@@ -62,7 +62,7 @@ impl cao_script::scripting_server::Scripting for ScriptingService {
             let w = self.world.read().await;
             let scripts_table = w.view::<ScriptId, CaoIrComponent>();
             let ir = &scripts_table
-                .get_by_id(ScriptId(id))
+                .get(ScriptId(id))
                 .ok_or_else(|| tonic::Status::not_found("Script not found"))?
                 .0;
             payload = serde_json::to_vec(ir).unwrap();
@@ -110,15 +110,18 @@ impl cao_script::scripting_server::Scripting for ScriptingService {
         request: tonic::Request<cao_script::EntityId>,
     ) -> Result<tonic::Response<cao_common::Uuid>, tonic::Status> {
         let w = self.world.read().await;
+        let id = request
+            .get_ref()
+            .id
+            .try_into()
+            .map_err(|_| tonic::Status::invalid_argument("invalid entity id"))?;
+        if !w.is_valid_entity(id) {
+            return Err(tonic::Status::not_found("Entity id is invalid"));
+        }
         match w
             .view::<caolo_sim::prelude::EntityId, caolo_sim::prelude::EntityScript>()
-            .get_by_id(caolo_sim::prelude::EntityId(
-                request
-                    .get_ref()
-                    .id
-                    .try_into()
-                    .map_err(|_| tonic::Status::invalid_argument("invalid entity id"))?,
-            )) {
+            .get(id)
+        {
             Some(id) => Ok(tonic::Response::new(cao_common::Uuid {
                 data: (id.0).0.as_bytes().to_vec(),
             })),

@@ -205,24 +205,6 @@ where
         }
     }
 
-    /// If applicable prefer `extend` and insert many keys at once.
-    pub fn insert(&mut self, id: Axial, row: Row) -> Result<(), ExtendFailure> {
-        if !self.intersects(id) {
-            return Err(ExtendFailure::OutOfBounds(id));
-        }
-        let [x, y] = id.as_array();
-        let [x, y] = [x as u16, y as u16];
-
-        let ind = self
-            .keys
-            .binary_search(&MortonKey::new(x, y))
-            .unwrap_or_else(|i| i);
-        self.keys.insert(ind, MortonKey::new(x, y));
-        self.values.insert(ind, (id, row));
-        self.rebuild_skip_list();
-        Ok(())
-    }
-
     /// Return false if id is not in the map, otherwise override the first instance found
     pub fn update(&mut self, id: Axial, row: Row) -> Option<&Row> {
         self.find_key(id)
@@ -247,7 +229,7 @@ where
     }
 
     /// Return a reference to the new Row if it's in the map or None otherwise
-    pub fn insert_or_update(&mut self, id: Axial, row: Row) -> Result<(), ExtendFailure> {
+    pub fn insert(&mut self, id: Axial, row: Row) -> Result<(), ExtendFailure> {
         if !self.intersects(id) {
             return Err(ExtendFailure::OutOfBounds(id));
         }
@@ -589,7 +571,7 @@ where
         Some(val)
     }
 
-    fn get_by_id(&self, id: Axial) -> Option<&Row> {
+    fn get(&self, id: Axial) -> Option<&Row> {
         MortonTable::at(self, id)
     }
 }

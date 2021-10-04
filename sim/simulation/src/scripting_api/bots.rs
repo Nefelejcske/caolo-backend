@@ -20,10 +20,11 @@ pub fn melee_attack(vm: &mut Vm<ScriptExecutionData>, target: i64) -> Result<(),
     let aux = vm.get_aux();
     trace!("melee_attack");
 
-    let target: EntityId = EntityId(target.try_into().map_err(|_| {
+    let target: u64 = target.try_into().map_err(|_| {
         warn!("melee_attack called without a valid target");
         ExecutionError::invalid_argument("melee_attack called without valid a target".to_owned())
-    })?);
+    })?;
+    let target: EntityId = EntityId::from(target);
 
     let storage = aux.storage();
     let entity_id = aux.entity_id;
@@ -57,10 +58,11 @@ pub fn unload(
     let amount = TryFrom::try_from(amount).map_err(|e| {
         ExecutionError::invalid_argument(format!("unload called with invalid amount: {}", e))
     })?;
-    let target: EntityId = EntityId(target.try_into().map_err(|_| {
+    let target: u64 = target.try_into().map_err(|_| {
         warn!("melee_attack called without a valid target");
         ExecutionError::invalid_argument("melee_attack called without valid a target".to_owned())
-    })?);
+    })?;
+    let target: EntityId = EntityId::from(target);
 
     trace!(
         "unload: amount: {} type: {:?} target: {:?}, {}",
@@ -95,12 +97,13 @@ pub fn mine_resource(vm: &mut Vm<ScriptExecutionData>, target: i64) -> Result<()
 
     let aux = vm.get_aux();
 
-    let target: EntityId = EntityId(target.try_into().map_err(|_| {
+    let target: u64 = target.try_into().map_err(|_| {
         warn!("melee_attack called without a valid target");
         ExecutionError::invalid_argument("melee_attack called without valid a target".to_owned())
-    })?);
+    })?;
+    let target: EntityId = EntityId::from(target);
 
-    let s = tracing::trace_span!("mine_resource", entity_id = aux.entity_id.0);
+    let s = tracing::trace_span!("mine_resource", entity_id = aux.entity_id.to_string().as_str());
     let _e = s.enter();
 
     trace!("target: {:?}, {}", target, aux);
@@ -129,11 +132,11 @@ pub fn approach_entity(
     profile!("approach_entity");
 
     let aux = vm.get_aux();
-
-    let target: EntityId = EntityId(target.try_into().map_err(|_| {
+    let target: u64 = target.try_into().map_err(|_| {
         warn!("melee_attack called without a valid target");
         ExecutionError::invalid_argument("melee_attack called without valid a target".to_owned())
-    })?);
+    })?;
+    let target: EntityId = EntityId::from(target);
 
     trace!("approach_entity: target: {:?}", target);
 
@@ -144,7 +147,7 @@ pub fn approach_entity(
     let targetpos = match storage
         .view::<EntityId, components::PositionComponent>()
         .reborrow()
-        .get_by_id(target)
+        .get(target)
     {
         Some(x) => x,
         None => {
@@ -234,7 +237,7 @@ fn move_to_pos(
     let botpos = storage
         .view::<EntityId, components::PositionComponent>()
         .reborrow()
-        .get_by_id(bot)
+        .get(bot)
         .ok_or_else(|| {
             warn!("entity {:?} does not have position component!", bot);
             OperationResult::InvalidInput
@@ -245,7 +248,7 @@ fn move_to_pos(
     match storage
         .view::<EntityId, PathCacheComponent>()
         .reborrow()
-        .get_by_id(bot)
+        .get(bot)
     {
         Some(cache) if cache.target == to => {
             if let Some(position) = cache.path.last().cloned() {
@@ -334,7 +337,7 @@ fn move_to_pos(
                 Some(to_room) => {
                     let is_bridge = storage
                         .view::<WorldPosition, TerrainComponent>()
-                        .get_by_id(botpos.0)
+                        .get(botpos.0)
                         .map(|TerrainComponent(t)| *t == TileTerrainType::Bridge)
                         .unwrap_or_else(|| {
                             error!("Bot {:?} is not standing on terrain {:?}", bot, botpos);
@@ -429,9 +432,9 @@ mod tests {
                 EntityId, Bot,
                     .insert(bot_id);
                 EntityId, PositionComponent,
-                    .insert_or_update(bot_id, PositionComponent(from));
+                    .insert(bot_id, PositionComponent(from));
                 EntityId, OwnedEntity,
-                    .insert_or_update(bot_id, OwnedEntity{owner_id:user_id});
+                    .insert(bot_id, OwnedEntity{owner_id:user_id});
                 ConfigKey, RoomProperties,
                     .update(Some(RoomProperties{radius:room_radius as u32, center: room_center}));
 

@@ -30,37 +30,37 @@ pub fn check_melee_intent(
     let s = tracing::span!(
         tracing::Level::INFO,
         "check_melee_intent",
-        attacker = intent.attacker.0,
-        defender = intent.defender.0,
+        attacker = intent.attacker.to_string().as_str(),
+        defender = intent.defender.to_string().as_str()
     );
     let _e = s.enter();
 
     trace!("check_melee_intent");
 
     if owner_table
-        .get_by_id(intent.attacker)
+        .get(intent.attacker)
         .map(|o| o.owner_id != user_id)
         .unwrap_or(true)
     {
         // if not owner or the bot has no owner
         return OperationResult::NotOwner;
     }
-    if !melee_table.contains_id(intent.attacker) {
+    if !melee_table.contains(intent.attacker) {
         debug!("attacker has no MeleeAttackComponent");
         return OperationResult::InvalidInput;
     }
-    if !hp_table.contains_id(intent.defender) {
+    if !hp_table.contains(intent.defender) {
         debug!("defender has no HpComponent");
         return OperationResult::InvalidTarget;
     }
-    let attack_pos = match pos_table.get_by_id(intent.attacker) {
+    let attack_pos = match pos_table.get(intent.attacker) {
         Some(x) => x,
         None => {
             debug!("attacker has no PositionComponent");
             return OperationResult::InvalidInput;
         }
     };
-    let defend_pos = match pos_table.get_by_id(intent.defender) {
+    let defend_pos = match pos_table.get(intent.defender) {
         Some(x) => x,
         None => {
             debug!("defender has no PositionComponent");

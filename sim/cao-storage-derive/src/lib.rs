@@ -164,7 +164,7 @@ fn impl_iterators<'a>(
             });
             let gets = fields.iter().map(|f| {
                 quote! {
-                    let #f = self.#f.get_by_id(id)
+                    let #f = self.#f.get(id)
                 }
             });
             quote! {

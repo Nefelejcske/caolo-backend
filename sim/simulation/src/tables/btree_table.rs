@@ -32,7 +32,7 @@ where
         self.data.iter_mut().map(|(id, row)| (*id, row))
     }
 
-    pub fn get_by_id(&self, id: Id) -> Option<&Row> {
+    pub fn get(&self, id: Id) -> Option<&Row> {
         self.data.get(&id)
     }
 
@@ -52,9 +52,8 @@ where
         self.data.get(&id).is_some()
     }
 
-    pub fn insert_or_update(&mut self, id: Id, row: Row) -> bool {
-        self.data.insert(id, row);
-        true
+    pub fn insert(&mut self, id: Id, row: Row) -> Option<Row> {
+        self.data.insert(id, row)
     }
 
     pub fn len(&self) -> usize {
@@ -82,8 +81,8 @@ where
         self.data.remove(&id)
     }
 
-    fn get_by_id(&self, id: Id) -> Option<&Row> {
-        BTreeTable::get_by_id(self, id)
+    fn get(&self, id: Id) -> Option<&Row> {
+        BTreeTable::get(self, id)
     }
 }
 

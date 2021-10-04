@@ -8,16 +8,6 @@ pub trait TableId:
 {
 }
 
-/// Implement for Ids that are incremented in a serial fashion.
-/// Intended to be used in tables that reserve memory for N items where N is the largest Id
-/// inserted.
-/// e.g. inserting ids 0, 3, 4, 10 will reserve memory for 11 ([0..10]) items.
-pub trait SerialId: TableId {
-    /// Return the next Id in the domain after `self`.
-    fn next(&self) -> Self;
-    fn as_usize(&self) -> usize;
-}
-
 impl<T> TableId for T where
     T: 'static
         + Ord
@@ -39,7 +29,7 @@ impl<T: 'static + std::fmt::Debug> TableRow for T {}
 /// Components define both their shape (via their type) and the storage backend that shall be used to
 /// store them.
 pub trait Component<Id: TableId>: TableRow {
-    type Table: Table<Row = Self> + std::fmt::Debug + Default;
+    type Table: Table<Row = Self> + Default;
 }
 
 pub trait Table {
@@ -48,7 +38,7 @@ pub trait Table {
 
     // Id is Copy
     fn delete(&mut self, id: Self::Id) -> Option<Self::Row>;
-    fn get_by_id(&self, id: Self::Id) -> Option<&Self::Row>;
+    fn get(&self, id: Self::Id) -> Option<&Self::Row>;
 
     fn name() -> &'static str {
         use std::any::type_name;

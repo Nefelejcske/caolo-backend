@@ -29,9 +29,9 @@ pub fn mine_intents_update(
 
     for intent in intents.iter() {
         trace!("Bot {:?} is mining [{:?}]", intent.bot, intent.resource);
-        match resource_table.get_by_id(intent.resource) {
+        match resource_table.get(intent.resource) {
             Some(ResourceComponent(Resource::Energy)) => {
-                let resource_energy = match energy_table.get_by_id_mut(intent.resource) {
+                let resource_energy = match energy_table.get_mut(intent.resource) {
                     Some(resource_energy) => {
                         if resource_energy.energy == 0 {
                             trace!("Mineral is empty!");
@@ -44,7 +44,7 @@ pub fn mine_intents_update(
                         continue;
                     }
                 };
-                let carry = match carry_table.get_by_id_mut(intent.bot) {
+                let carry = match carry_table.get_mut(intent.bot) {
                     Some(x) => x,
                     None => {
                         warn!("MineIntent bot {:?} has no carry component", intent.bot);
@@ -58,7 +58,7 @@ pub fn mine_intents_update(
                 carry.carry += mined;
                 resource_energy.energy -= mined;
 
-                event.insert_or_update(intent.bot, MineEventComponent(intent.resource));
+                event.insert(intent.bot, MineEventComponent(intent.resource));
 
                 trace!(
                     "Mine succeeded new bot carry {:?} new resource energy {:?}",
