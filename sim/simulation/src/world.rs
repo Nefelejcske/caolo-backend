@@ -8,7 +8,6 @@ use crate::storage::{
 use crate::tables::btree_table::BTreeTable;
 use crate::tables::flag_table::SparseFlagTable;
 use crate::tables::handle_table::HandleTable;
-use crate::tables::morton_hierarchy::ExtendFailure;
 use crate::tables::morton_hierarchy::MortonGridTable;
 use crate::tables::morton_hierarchy::MortonMortonTable;
 use crate::tables::morton_table::MortonTable;
