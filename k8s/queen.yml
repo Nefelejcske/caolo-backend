@@ -46,7 +46,7 @@ spec:
               value: "1500"
             - name: CAO_SERVICE_ADDR
               value: 0.0.0.0:50051
-            - name: CAO_LOG_STDOUT
+            - name: CAO_LOG_HUMAN
               value: "true"
 ---
 apiVersion: v1

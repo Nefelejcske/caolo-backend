@@ -103,7 +103,10 @@ pub fn mine_resource(vm: &mut Vm<ScriptExecutionData>, target: i64) -> Result<()
     })?;
     let target: EntityId = EntityId::from(target);
 
-    let s = tracing::trace_span!("mine_resource", entity_id = aux.entity_id.to_string().as_str());
+    let s = tracing::trace_span!(
+        "mine_resource",
+        entity_id = aux.entity_id.to_string().as_str()
+    );
     let _e = s.enter();
 
     trace!("target: {:?}, {}", target, aux);
@@ -239,7 +242,7 @@ fn move_to_pos(
         .reborrow()
         .get(bot)
         .ok_or_else(|| {
-            warn!("entity {:?} does not have position component!", bot);
+            warn!("entity does not have position component!");
             OperationResult::InvalidInput
         })?;
 
@@ -277,7 +280,7 @@ fn move_to_pos(
         }
         _ => {}
     }
-    trace!("Bot {:?} path cache miss", bot);
+    trace!("Bot path cache miss");
 
     let conf = UnwrapView::<ConfigKey, GameConfig>::from_world(storage);
     let max_pathfinding_iter = conf.path_finding_limit;
@@ -332,7 +335,7 @@ fn move_to_pos(
             }
         }
         None => {
-            trace!("Entity {:?} is trying to move to its own position", bot);
+            trace!("Entity is trying to move to its own position");
             match next_room {
                 Some(to_room) => {
                     let is_bridge = storage
@@ -340,7 +343,7 @@ fn move_to_pos(
                         .get(botpos.0)
                         .map(|TerrainComponent(t)| *t == TileTerrainType::Bridge)
                         .unwrap_or_else(|| {
-                            error!("Bot {:?} is not standing on terrain {:?}", bot, botpos);
+                            error!("Bot is not standing on terrain {:?}", botpos);
                             false
                         });
                     if !is_bridge {
@@ -374,7 +377,7 @@ fn move_to_pos(
                     )))
                 }
                 None => {
-                    debug!("Entity {:?} is trying to move to its own position, but no next room was returned", bot);
+                    debug!("Entity is trying to move to its own position, but no next room was returned");
 
                     Ok(None)
                 }

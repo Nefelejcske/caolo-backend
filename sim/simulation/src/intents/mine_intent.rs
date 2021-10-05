@@ -2,7 +2,6 @@ use crate::components;
 use crate::indices::{EntityId, UserId};
 use crate::scripting_api::OperationResult;
 use crate::storage::views::View;
-use crate::tables::traits::Table;
 use serde::{Deserialize, Serialize};
 use tracing::{debug, trace};
 
@@ -31,14 +30,14 @@ pub fn check_mine_intent(
     let s = tracing::debug_span!("check_mine_intent", entity_id = bot.to_string().as_str());
     let _e = s.enter();
 
-    match bots_table.get(bot) {
-        Some(_) => {
+    match bots_table.contains(&bot) {
+        true => {
             let owner_id = owner_ids_table.get(bot);
             if owner_id.map(|bot| bot.owner_id != userid).unwrap_or(true) {
                 return OperationResult::NotOwner;
             }
         }
-        None => return OperationResult::InvalidInput,
+        false => return OperationResult::InvalidInput,
     };
 
     let botpos = match positions_table.get(bot) {
@@ -53,7 +52,7 @@ pub fn check_mine_intent(
     let mineralpos = match positions_table.get(target) {
         Some(pos) => pos,
         None => {
-            debug!("{:?} has no position", target);
+            debug!("{} has no position", target);
             return OperationResult::InvalidInput;
         }
     };
@@ -61,12 +60,12 @@ pub fn check_mine_intent(
     match carry_table.get(bot) {
         Some(carry) => {
             if carry.carry >= carry.carry_max {
-                debug!("{:?} is full", bot);
+                debug!("{} is full", bot);
                 return OperationResult::Full;
             }
         }
         None => {
-            debug!("{:?} has no carry component", bot);
+            debug!("{} has no carry component", bot);
             return OperationResult::InvalidInput;
         }
     }
@@ -106,7 +105,7 @@ pub fn check_mine_intent(
             }
         }
         Some(_) | None => {
-            debug!("{:?} is not a resource!", target);
+            debug!("{} is not a resource!", target);
             OperationResult::InvalidInput
         }
     }

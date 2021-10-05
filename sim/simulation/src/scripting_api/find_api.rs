@@ -130,7 +130,7 @@ impl FindConstant {
         }?;
         match candidate {
             Some(entity) => {
-                trace!("Found entity {:?}", entity);
+                tracing::debug!("Found entity {:?}", entity);
                 let id: u64 = entity.into();
                 vm.stack_push(id as i64)?;
             }
@@ -158,7 +158,7 @@ where
         .table
         .at(room)
         .ok_or_else(|| ExecutionError::InvalidArgument {
-            context: "find_closest_resource_by_range called on invalid room"
+            context: "find_closest_by_range called on invalid room"
                 .to_string()
                 .into(),
         })?;

@@ -33,9 +33,9 @@ fn init() {
     #[cfg(feature = "dotenv")]
     dotenv::dotenv().unwrap_or_default();
 
-    let use_console = std::env::var("CAO_LOG_STDOUT")
+    let use_console = std::env::var("CAO_LOG_HUMAN")
         .map(|x| x.parse().unwrap())
-        .unwrap_or_default();
+        .unwrap_or(true);
     if use_console {
         let collector = tracing_subscriber::fmt()
             .without_time()
