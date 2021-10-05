@@ -5,7 +5,7 @@ use crate::prelude::EntityId;
 use self::pt_iter::PTIter;
 use std::{mem::MaybeUninit, ptr::drop_in_place};
 
-const PAGE_SIZE: usize = 1024;
+const PAGE_SIZE: usize = 512;
 const PAGE_FLAG_SIZE: usize = PAGE_SIZE / 64;
 const PAGE_MASK: usize = PAGE_SIZE - 1; // assumes that page size is power of two
 
@@ -76,10 +76,11 @@ impl<T> PageTable<T> {
             if self.pages[page_ind].is_none() {
                 self.pages[page_ind] = Some(Box::new(Page::new()));
             }
-            self.pages[page_ind]
-                .as_mut()
-                .unwrap()
-                .insert(index.index() as usize & PAGE_MASK, value);
+            self.pages[page_ind].as_mut().unwrap().insert(
+                index.index() as usize & PAGE_MASK,
+                index.gen(),
+                value,
+            );
             None
         }
     }
@@ -140,6 +141,7 @@ impl<T> PageTable<T> {
     }
 }
 
+#[repr(align(16))]
 struct Page<T> {
     filled: [u64; PAGE_FLAG_SIZE],
     // TODO:
@@ -232,7 +234,7 @@ impl<T> Page<T> {
         }
     }
 
-    pub fn insert(&mut self, i: usize, value: T) {
+    pub fn insert(&mut self, i: usize, gen: u32, value: T) {
         assert!(
             self.filled
                 .get(i / 64)
@@ -246,6 +248,7 @@ impl<T> Page<T> {
         self.filled[i / 64] = flags | (1 << (i & 63));
         unsafe {
             std::ptr::write(self.data[i].as_mut_ptr(), value);
+            self.gens[i] = gen;
         }
     }
 
