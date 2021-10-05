@@ -247,29 +247,6 @@ impl World {
     pub fn list_users(&self) -> impl Iterator<Item = UserId> + '_ {
         self.user.user.iter().map(|(id, _)| id)
     }
-
-    /// # Safety
-    /// This function is safe to call if no references obtained via UnsafeView are held.
-    pub unsafe fn reset_world_storage(&mut self) -> Result<&mut Self, ExtendFailure> {
-        let rooms = self
-            .view::<Axial, RoomComponent>()
-            .iter()
-            .map(|(r, _)| r)
-            .collect::<Vec<Axial>>();
-
-        macro_rules! clear_table {
-            ($component: ty) => {
-                let mut table = self.unsafe_view::<WorldPosition, $component>();
-                table.clear();
-                table.extend_rooms(rooms.iter().map(|ax| Room(*ax)))?;
-            };
-        }
-
-        clear_table!(TerrainComponent);
-        clear_table!(EntityComponent);
-
-        Ok(self)
-    }
 }
 
 impl storage::DeferredDeleteById<EntityId> for World
