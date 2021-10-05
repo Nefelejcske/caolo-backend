@@ -170,11 +170,8 @@ impl<T> Page<T> {
     }
 
     pub fn contains(&self, id: usize) -> bool {
-        self.filled
-            .get(id / 64)
-            .copied()
-            .map(|flags| (flags >> (id & 63)) & 1 == 1)
-            .unwrap_or_default()
+        let flags = self.filled[id / 64];
+        (flags >> (id & 63)) != 0
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (EntityId, &T)> {
