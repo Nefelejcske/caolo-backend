@@ -137,7 +137,7 @@ impl<T> PageTable<T> {
             .get(page_index)
             .and_then(|p| p.as_ref())
             .map(|page| page.contains(index as usize & PAGE_MASK))
-            .unwrap_or_default()
+            .unwrap_or(false)
     }
 }
 
@@ -171,7 +171,7 @@ impl<T> Page<T> {
 
     pub fn contains(&self, id: usize) -> bool {
         let flags = self.filled[id / 64];
-        (flags >> (id & 63)) != 0
+        ((flags >> (id & 63)) & 1) != 0
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (EntityId, &T)> {
