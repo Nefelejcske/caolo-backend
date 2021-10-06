@@ -18,7 +18,6 @@
 ```
 migrate -database ${DATABASE_URL} -path ../db/migrations up
 poetry install
-pip install .
 ```
 
 ## Running
