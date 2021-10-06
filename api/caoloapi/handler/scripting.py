@@ -46,7 +46,7 @@ def _compile_caolang_program(prog_json: str):
         ) from err
 
     try:
-        _program = cao_lang.compile(compilation_unit)
+        _ = cao_lang.compile(compilation_unit)
     except ValueError as err:
         raise HTTPException(
             status_code=400, detail=f"Failed to compile program: {err}"
