@@ -46,7 +46,7 @@ pub fn update_spawns(
     join!([ss, en, sq]).for_each(|(_spawn_id, (spawn, energy, queue))| {
         // spawns with 500 energy and no currently spawning bot
         if let Some(bot) = queue.queue.pop_back() {
-            energy.energy -= 500;
+            energy.energy = 0;
             spawn.time_to_spawn = 10;
             spawn.spawning = Some(bot);
         }
@@ -58,9 +58,7 @@ pub fn update_spawns(
         .filter_map(|(spawn_id, spawn_component)| {
             spawn_component.time_to_spawn -= 1;
             if spawn_component.time_to_spawn == 0 {
-                let bot = spawn_component.spawning.map(|b| (spawn_id, b));
-                spawn_component.spawning = None;
-                bot
+                spawn_component.spawning.take().map(|b| (spawn_id, b))
             } else {
                 None
             }

@@ -106,3 +106,45 @@ pub fn init_bot(
         );
     }
 }
+
+type InitResourceMuts = (
+    UnsafeView<EntityId, PositionComponent>,
+    UnsafeView<EntityId, ResourceComponent>,
+    UnsafeView<EntityId, EnergyComponent>,
+    UnsafeView<EntityId, RespawnTimer>,
+    UnsafeView<WorldPosition, EntityComponent>,
+);
+
+type InitResourceConst<'a> = ();
+
+pub fn init_resource_energy(
+    id: EntityId,
+    room: Room,
+    pos: WorldPosition,
+    (
+        mut positions_table,
+        mut resources_table,
+        mut energy_table,
+        mut respawn_timer,
+        mut entities_by_pos,
+    ): InitResourceMuts,
+    (): InitResourceConst,
+) {
+    resources_table.insert(id, ResourceComponent(Resource::Energy));
+    energy_table.insert(
+        id,
+        EnergyComponent {
+            energy: 100,
+            energy_max: 100,
+        },
+    );
+    respawn_timer.insert(id, RespawnTimer(2));
+
+    positions_table.insert(id, PositionComponent(pos));
+    entities_by_pos
+        .table
+        .at_mut(room.0)
+        .expect("expected room to be in entities_by_pos table")
+        .insert(pos.pos, EntityComponent(id))
+        .expect("entities_by_pos insert");
+}

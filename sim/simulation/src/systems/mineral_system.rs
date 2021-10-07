@@ -74,6 +74,7 @@ pub fn mineral_update(
             let terrain_table = View::from_table(terrain_table);
 
             // respawning
+            // TODO: random pos in the room ?
             let pos = random_uncontested_pos_in_range(
                 position_entities,
                 terrain_table,

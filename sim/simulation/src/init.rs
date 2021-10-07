@@ -69,11 +69,18 @@ pub fn init_world_entities(storage: &mut World, n_fake_users: usize) {
             .unsafe_view::<UserId, EntityScript>()
             .insert(UserId(user_id), EntityScript(mining_script_id));
         let id = storage.insert_entity();
-        init_resource(
+        let pos = uncontested_pos(
+            Room(room),
             &bounds,
+            &*storage.view::<WorldPosition, EntityComponent>(),
+            &*storage.view::<WorldPosition, TerrainComponent>(),
+            &mut rng,
+        );
+
+        crate::entity_archetypes::init_resource_energy(
             id,
             Room(room),
-            &mut rng,
+            pos,
             FromWorldMut::from_world_mut(storage),
             FromWorld::from_world(storage),
         );
@@ -105,51 +112,6 @@ fn init_spawn(
     trace!("init_spawn done");
 }
 
-type InitResourceMuts = (
-    UnsafeView<EntityId, PositionComponent>,
-    UnsafeView<EntityId, ResourceComponent>,
-    UnsafeView<EntityId, EnergyComponent>,
-    UnsafeView<EntityId, RespawnTimer>,
-    UnsafeView<WorldPosition, EntityComponent>,
-);
-
-type InitResourceConst<'a> = (View<'a, WorldPosition, TerrainComponent>,);
-
-fn init_resource(
-    bounds: &Hexagon,
-    id: EntityId,
-    room: Room,
-    rng: &mut impl Rng,
-    (
-        mut positions_table,
-        mut resources_table,
-        mut energy_table,
-        mut respawn_timer,
-        mut entities_by_pos,
-    ): InitResourceMuts,
-    (terrain,): InitResourceConst,
-) {
-    resources_table.insert(id, ResourceComponent(Resource::Energy));
-    energy_table.insert(
-        id,
-        EnergyComponent {
-            energy: 100,
-            energy_max: 100,
-        },
-    );
-    respawn_timer.insert(id, RespawnTimer(2));
-
-    let pos = uncontested_pos(room, bounds, &*entities_by_pos, &*terrain, rng);
-
-    positions_table.insert(id, PositionComponent(pos));
-    entities_by_pos
-        .table
-        .at_mut(room.0)
-        .expect("expected room to be in entities_by_pos table")
-        .insert(pos.pos, EntityComponent(id))
-        .expect("entities_by_pos insert");
-}
-
 fn uncontested_pos<T: crate::tables::TableRow + Send + Sync + Default>(
     room: Room,
     bounds: &Hexagon,
@@ -160,6 +122,16 @@ fn uncontested_pos<T: crate::tables::TableRow + Send + Sync + Default>(
     const TRIES: usize = 10_000;
     let from = bounds.center - Axial::new(bounds.radius, bounds.radius);
     let to = bounds.center + Axial::new(bounds.radius, bounds.radius);
+
+    let room_positions = positions_table
+        .table
+        .at(room.0)
+        .expect("Given room is missing from positions table");
+    let room_terrain = terrain_table
+        .table
+        .at(room.0)
+        .expect("Given room is missing from terrain table");
+
     for _ in 0..TRIES {
         let x = rng.gen_range(from.q..to.q);
         let y = rng.gen_range(from.r..to.r);
@@ -173,11 +145,9 @@ fn uncontested_pos<T: crate::tables::TableRow + Send + Sync + Default>(
             continue;
         }
 
-        let pos = WorldPosition { room: room.0, pos };
-
-        if let Some(TerrainComponent(terrain)) = terrain_table.get(pos) {
-            if terrain.is_walkable() && !positions_table.contains_key(&pos) {
-                return pos;
+        if let Some(TerrainComponent(terrain)) = room_terrain.get(pos) {
+            if terrain.is_walkable() && !room_positions.contains_key(pos) {
+                return WorldPosition { room: room.0, pos };
             }
         }
     }
