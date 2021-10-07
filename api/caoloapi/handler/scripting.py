@@ -19,6 +19,8 @@ from asyncpg.exceptions import UniqueViolationError
 
 from google.protobuf.json_format import MessageToDict
 
+import grpc
+
 from cao_script_pb2 import Empty
 from cao_script_pb2_grpc import ScriptingStub
 
@@ -30,11 +32,17 @@ router = APIRouter(prefix="/scripting", tags=["scripting"])
 
 @router.get("/schema", response_model=List[Dict])
 async def get_schema():
-    stub = ScriptingStub(await queen_channel())
-    res = await stub.GetSchema(Empty())
-    return MessageToDict(
-        res, including_default_value_fields=True, preserving_proto_field_name=False
-    ).get("cards", [])
+    try:
+        stub = ScriptingStub(await queen_channel())
+        res = await stub.GetSchema(Empty())
+        return MessageToDict(
+            res, including_default_value_fields=True, preserving_proto_field_name=False
+        ).get("cards", [])
+    except grpc.aio.AioRpcError as err:
+        logging.exception("Unhandled rpc error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        ) from err
 
 
 def _compile_caolang_program(prog_json: str):
@@ -87,7 +95,7 @@ async def cao_lang_version() -> str:
 async def compile_program(req: Request, _body: CaoLangProgram = Body(...)):
     # Body is used for openapi hint
     # we need the program to be json encoded, so just use the raw body
-    _body # silence unused warning
+    _body  # silence unused warning
     payload = await req.body()
     payload = payload.decode(encoding="UTF-8")
     _compile_caolang_program(payload)

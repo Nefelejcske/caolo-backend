@@ -53,9 +53,8 @@ async def set_bot_script(
     msg.scriptId.data = req_payload.script_id.bytes
     msg.entityId = req_payload.bot_id
 
-    stub = await scripting_stub()
-
     try:
+        stub = await scripting_stub()
         await stub.UpdateEntityScript(msg)
     except grpc.aio.AioRpcError as err:
         if err.code() == grpc.StatusCode.INVALID_ARGUMENT:
@@ -94,8 +93,8 @@ async def place_structure(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="invalid structure type"
         )
-    stub = await commands_stub()
     try:
+        stub = await commands_stub()
         await stub.PlaceStructure(msg)
     except grpc.aio.AioRpcError as err:
         if err.code() == grpc.StatusCode.INVALID_ARGUMENT:
@@ -132,8 +131,8 @@ async def update_script(
     msg.scriptId.data = req_payload.script_id.bytes
     msg.userId.data = UUID(current_user_id).bytes
 
-    stub = await scripting_stub()
     try:
+        stub = await scripting_stub()
         await stub.UpdateScript(msg)
     except grpc.aio.AioRpcError as err:
         if err.code() == grpc.StatusCode.INVALID_ARGUMENT:
