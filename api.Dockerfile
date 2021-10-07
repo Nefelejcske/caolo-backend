@@ -4,19 +4,17 @@ FROM python:3.9-slim AS build
 
 RUN apt-get update
 RUN apt-get install curl git build-essential -y
-RUN pip install -U pip virtualenv
+RUN pip install -U pip
 
 WORKDIR /caolo/api
-RUN python -m venv .env
-RUN .env/bin/pip install --upgrade pip
-RUN .env/bin/pip install gunicorn poetry wheel
-
-COPY ./api/pyproject.toml ./pyproject.toml
-COPY ./api/poetry.lock ./poetry.lock
+RUN pip install --upgrade pip
+RUN pip install poetry wheel
 
 # Install deps
-RUN .env/bin/poetry export -f requirements.txt -o requirements.txt
-RUN .env/bin/pip install -r requirements.txt
+COPY ./api/pyproject.toml ./pyproject.toml
+COPY ./api/poetry.lock ./poetry.lock
+RUN poetry export -f requirements.txt -o requirements.txt
+RUN pip install -r requirements.txt
 
 # Build caoloapi
 WORKDIR /caolo
@@ -24,8 +22,9 @@ COPY ./protos/ ./protos/
 COPY ./api/ ./api/
 WORKDIR /caolo/api
 # build protos
-RUN .env/bin/python setup.py protos
-RUN .env/bin/poetry build
+RUN python setup.py protos
+# build the wheel
+RUN poetry build
 
 # ----------- Prod image -----------
 
@@ -35,11 +34,15 @@ WORKDIR /caolo/api
 
 RUN apt-get update
 
-COPY --from=build /caolo/api/start.sh ./
-COPY --from=build /caolo/api/.env ./.env
-COPY --from=build /caolo/api/dist ./dist
-
 ENV PATH="/caolo/api/.env/bin:$PATH"
+RUN pip install gunicorn
+
+# cache dependencies
+COPY --from=build /caolo/api/requirements.txt ./
+RUN pip install  -r requirements.txt 
+
+COPY --from=build /caolo/api/start.sh ./
+COPY --from=build /caolo/api/dist ./dist
 
 RUN pip install ./dist/caoloapi-0.1.0-py3-none-any.whl
 
