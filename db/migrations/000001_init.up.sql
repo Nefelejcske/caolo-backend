@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
 
 --
--- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner:
 --
 
 COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
@@ -16,13 +16,9 @@ CREATE FUNCTION public.set_updated_col() RETURNS trigger
     AS $$
 BEGIN
     NEW.updated = now();
-    RETURN NEW;   
+    RETURN NEW;
 END;
 $$;
-
---
--- Name: user_account; Type: TABLE; Schema: public; Owner: postgres
---
 
 CREATE TABLE public.user_account (
     id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
@@ -38,12 +34,6 @@ CREATE TABLE public.user_account (
 );
 
 
-ALTER TABLE public.user_account OWNER TO postgres;
-
---
--- Name: user_script; Type: TABLE; Schema: public; Owner: postgres
---
-
 CREATE TABLE public.user_script (
     id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
     owner_id uuid,
@@ -54,62 +44,32 @@ CREATE TABLE public.user_script (
 );
 
 
-ALTER TABLE public.user_script OWNER TO postgres;
-
---
--- Name: user_account email_is_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.user_account
     ADD CONSTRAINT email_is_unique UNIQUE (email);
 
-
---
--- Name: user_script name_owner_id_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
---
 
 ALTER TABLE ONLY public.user_script
     ADD CONSTRAINT name_owner_id_unique UNIQUE (name, owner_id);
 
 
---
--- Name: user_account user_account_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
 
 ALTER TABLE ONLY public.user_account
     ADD CONSTRAINT user_account_pkey PRIMARY KEY (id);
 
 
---
--- Name: user_script user_script_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
 
 ALTER TABLE ONLY public.user_script
     ADD CONSTRAINT user_script_pkey PRIMARY KEY (id);
 
 
---
--- Name: user_account username_is_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
---
 
 ALTER TABLE ONLY public.user_account
     ADD CONSTRAINT username_is_unique UNIQUE (username);
 
 
---
--- Name: user_account user_account_updated; Type: TRIGGER; Schema: public; Owner: postgres
---
 
 CREATE TRIGGER user_account_updated AFTER UPDATE ON public.user_account FOR EACH ROW EXECUTE FUNCTION public.set_updated_col();
 
 
---
--- Name: user_script user_script_updated; Type: TRIGGER; Schema: public; Owner: postgres
---
 
 CREATE TRIGGER user_script_updated AFTER UPDATE ON public.user_script FOR EACH ROW EXECUTE FUNCTION public.set_updated_col();
-
-
---
--- PostgreSQL database dump complete
---
