@@ -6,6 +6,6 @@ RUN apk add bash
 WORKDIR /caolo
 
 COPY ./db/migrations/ ./db/migrations/
-COPY ./release.sh ./
+COPY ./db/release.sh ./
 
 ENTRYPOINT ["./release.sh"]
