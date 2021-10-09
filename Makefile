@@ -1,6 +1,10 @@
 .DEFAULT_GOAL := all
 .PHONY: api sim rt
 
+init:
+	@${MAKE} -C api init
+	@${MAKE} -C rt init
+
 test-sim:
 	@${MAKE} -C sim test
 
