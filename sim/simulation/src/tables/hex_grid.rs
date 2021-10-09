@@ -1,3 +1,5 @@
+mod serde_impl;
+
 use std::{convert::TryInto, ops::Index, ops::IndexMut};
 
 use crate::{geometry::Axial, prelude::Hexagon};
@@ -5,7 +7,7 @@ use crate::{geometry::Axial, prelude::Hexagon};
 use super::{SpacialStorage, Table, TableRow};
 
 /// The grid is always touching the origin
-#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default)]
 pub struct HexGrid<T> {
     bounds: Hexagon,
     values: Vec<T>,
@@ -18,14 +20,14 @@ impl<T> HexGrid<T> {
 
     pub fn new(radius: usize) -> Self
     where
-        T: Default + Clone,
+        T: Default,
     {
         let radius = radius.try_into().expect("Radius must fit into 30 bits");
         let diameter = diameter(radius) as usize;
         let capacity = diameter * diameter;
         let bounds = Hexagon::from_radius(radius);
         let mut values = Vec::with_capacity(capacity);
-        values.resize(capacity, Default::default());
+        values.resize_with(capacity, Default::default);
         Self { bounds, values }
     }
 
@@ -138,6 +140,8 @@ impl<T> HexGrid<T> {
             .map(move |p| (p, unsafe { std::mem::transmute(self.get_unchecked_mut(p)) }))
     }
 
+    // Grid is never empty
+    #[allow(clippy::len_without_is_empty)]
     pub fn len(&self) -> usize {
         self.bounds().area()
     }

@@ -1,8 +1,9 @@
-use super::MortonTable;
-use super::TableRow;
+use super::{MortonTable, TableRow};
 use crate::prelude::Axial;
-use serde::de::{self, Deserialize, Deserializer, MapAccess, Visitor};
-use serde::ser::{Serialize, SerializeStruct, Serializer};
+use serde::{
+    de::{self, Deserialize, Deserializer, MapAccess, Visitor},
+    ser::{Serialize, SerializeStruct, Serializer},
+};
 use std::fmt;
 use std::marker::PhantomData;
 
@@ -24,7 +25,7 @@ struct MortonVisitor<V>
 where
     V: TableRow,
 {
-    _m: PhantomData<(Axial, V)>,
+    _m: PhantomData<V>,
 }
 
 impl<'de, Row> Visitor<'de> for MortonVisitor<Row>
