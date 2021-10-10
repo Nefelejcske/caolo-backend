@@ -212,7 +212,7 @@ impl World {
     }
 
     /// Perform post-tick cleanup on the storage
-    pub fn post_process(&mut self) {
+    pub(crate) fn post_process(&mut self) {
         for e in self.deferred_deletes.entityid.iter().copied() {
             self.entity_handles.free(e);
         }
