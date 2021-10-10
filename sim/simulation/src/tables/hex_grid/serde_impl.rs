@@ -76,9 +76,11 @@ where
 
         let len = values.len();
         if bounds.area() != len {
-            return Err(de::Error::custom(
-                "More values were given than slots in the grid",
-            ));
+            return Err(de::Error::custom(format!(
+                "Incorrect number of values were given. Expected: {}. Actual: {}.",
+                bounds.area(),
+                values.len()
+            )));
         }
         for (val, p) in values.into_iter().zip(bounds.iter_points()) {
             result.insert(p, val).map_err(|_| {
