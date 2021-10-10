@@ -43,10 +43,8 @@ pub async fn game_loop(
 
         if outpayload.receiver_count() > 0 {
             debug!("Sending world entities to subscribers");
-            // while we're sending to the database, also update the outbound payload
-
             if outpayload.send(Arc::new(pl)).is_err() {
-                // happens if the subscribers disconnect while we prepared the payload
+                // happens if the subscribers disconnect while we sent the payload
                 warn!("Lost all world subscribers");
             }
         }
