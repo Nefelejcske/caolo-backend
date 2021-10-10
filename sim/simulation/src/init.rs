@@ -24,6 +24,8 @@ pub fn init_world_entities(storage: &mut World, n_fake_users: usize) {
         {
             ScriptId, CompiledScriptComponent,
                 .insert(mining_script_id, CompiledScriptComponent(compiled));
+            ScriptId, CaoIrComponent,
+                .insert(mining_script_id, CaoIrComponent(script));
         }
     );
 

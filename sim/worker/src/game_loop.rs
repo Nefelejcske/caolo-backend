@@ -66,7 +66,11 @@ pub async fn game_loop(
             lag += tick_duration - tick_latency;
             sleep_duration = Duration::from_millis(0);
         }
-        info!("Tick done in {:.2?}. Current lag: {:.2?}", tick_duration, lag);
+        info!(
+            "Tick done in {:.2?}. Current lag: {:.2?}",
+            tick_duration, lag
+        );
+
         tokio::time::sleep(sleep_duration).await;
     }
 }

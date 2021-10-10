@@ -1,3 +1,5 @@
+mod world_serde;
+
 use crate::components::*;
 use crate::indices::*;
 use crate::intents::*;
@@ -95,7 +97,6 @@ archetype!(
 
 archetype!(
     module positions_store key WorldPosition,
-    // don't forget to implement these in `reset_world_storage`
     table TerrainComponent : MortonGridTable<TerrainComponent> = point_terrain,
     table EntityComponent : MortonMortonTable<EntityComponent> = point_entity
 );
@@ -104,6 +105,8 @@ archetype!(
     module script_store key ScriptId,
     table CompiledScriptComponent : BTreeTable<ScriptId, CompiledScriptComponent> = compiled_script,
     table CaoIrComponent : BTreeTable<ScriptId, CaoIrComponent> = cao_ir
+
+    iterby cao_ir
 );
 
 impl<Id: TableId> Component<Id> for LogEntry {
