@@ -1,4 +1,4 @@
-use crate::protos::cao_commands::RegisterUserCommand;
+use crate::protos::cao_users::RegisterUserMsg;
 use caolo_sim::{prelude::*, query};
 use std::{convert::TryFrom, num::TryFromIntError};
 use thiserror::Error;
@@ -19,7 +19,7 @@ pub enum RegisterUserError {
 
 pub fn register_user(
     world: &mut World,
-    msg: &RegisterUserCommand,
+    msg: &RegisterUserMsg,
 ) -> Result<(), RegisterUserError> {
     trace!("Register user");
 

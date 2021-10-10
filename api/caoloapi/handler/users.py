@@ -1,3 +1,4 @@
+from caoloapi.protos import cao_users_pb2, cao_users_pb2_grpc
 from typing import Optional
 import logging
 import string
@@ -144,10 +145,10 @@ async def register(req: Request, form_data: RegisterForm = Body(...)):
 async def _register_user_in_sim(userid):
     queen = await queen_channel()
 
-    stub = cao_commands_pb2_grpc.CommandStub(queen)
+    stub = cao_users_pb2_grpc.UsersStub(queen)
     cao_user_id = cao_common_pb2.Uuid()
     cao_user_id.data = userid.bytes
-    msg = cao_commands_pb2.RegisterUserCommand(userId=cao_user_id, level=1)
+    msg = cao_users_pb2.RegisterUserMsg(userId=cao_user_id, level=1)
     res = await stub.RegisterUser(msg)
 
     logging.info("Queen RegisterUser result: %s", res)

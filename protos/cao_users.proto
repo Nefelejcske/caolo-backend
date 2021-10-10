@@ -11,8 +11,15 @@ message UserInfo
     int32 level = 2;
 }
 
+message RegisterUserMsg
+{
+    cao_common.Uuid userId = 1;
+    uint32 level = 2;
+}
+
 service Users
 {
     rpc ListUsers(cao_common.Empty) returns (stream cao_common.Uuid) { }
     rpc GetUserInfo(cao_common.Uuid) returns (UserInfo) { }
+    rpc RegisterUser(RegisterUserMsg) returns (cao_common.Empty) { }
 }

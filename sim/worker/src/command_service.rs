@@ -1,5 +1,4 @@
 use crate::input::structures;
-use crate::input::users;
 use crate::{input::rooms, protos::cao_commands};
 use tonic::{Request, Response, Status};
 use tracing::info;
@@ -41,17 +40,6 @@ impl cao_commands::command_server::Command for CommandService {
         info!("Taking room");
         let mut w = self.world.write().await;
         rooms::take_room(&mut w, request.get_ref())
-            .map(|_: ()| Response::new(cao_commands::CommandResult {}))
-            .map_err(|err| Status::invalid_argument(err.to_string()))
-    }
-
-    async fn register_user(
-        &self,
-        request: tonic::Request<cao_commands::RegisterUserCommand>,
-    ) -> Result<tonic::Response<cao_commands::CommandResult>, tonic::Status> {
-        let req = request.get_ref();
-        let mut w = self.world.write().await;
-        users::register_user(&mut w, req)
             .map(|_: ()| Response::new(cao_commands::CommandResult {}))
             .map_err(|err| Status::invalid_argument(err.to_string()))
     }

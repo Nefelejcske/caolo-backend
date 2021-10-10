@@ -8,7 +8,10 @@ use tonic::Status;
 use tracing::info;
 use uuid::Uuid;
 
-use crate::protos::{cao_common, cao_users};
+use crate::{
+    input::users,
+    protos::{cao_common, cao_users},
+};
 
 #[derive(Clone)]
 pub struct UsersService {
@@ -82,5 +85,16 @@ impl cao_users::users_server::Users for UsersService {
         };
 
         Ok(tonic::Response::new(result))
+    }
+
+    async fn register_user(
+        &self,
+        request: tonic::Request<cao_users::RegisterUserMsg>,
+    ) -> Result<tonic::Response<cao_common::Empty>, tonic::Status> {
+        let req = request.get_ref();
+        let mut w = self.world.write().await;
+        users::register_user(&mut w, req)
+            .map(|_: ()| tonic::Response::new(cao_common::Empty {}))
+            .map_err(|err| Status::invalid_argument(err.to_string()))
     }
 }

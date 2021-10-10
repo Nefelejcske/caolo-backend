@@ -27,15 +27,8 @@ message TakeRoomCommand
     cao_common.Axial roomId = 2;
 }
 
-message RegisterUserCommand
-{
-    cao_common.Uuid userId = 1;
-    uint32 level = 2;
-}
-
 service Command
 {
     rpc PlaceStructure(PlaceStructureCommand) returns (CommandResult) { }
     rpc TakeRoom(TakeRoomCommand) returns (CommandResult) { }
-    rpc RegisterUser(RegisterUserCommand) returns (CommandResult) { }
 }
