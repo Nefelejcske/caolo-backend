@@ -43,6 +43,7 @@ message Room
     cao_common.Axial room_id = 1;
     cao_common.Axial offset = 2;
     int32 radius = 3;
+    uint64 seed = 4;
 }
 
 message RoomList
@@ -110,7 +111,8 @@ message Resource
     }
 }
 
-message DeadEntity {
+message DeadEntity
+{
     uint64 id = 1;
 }
 

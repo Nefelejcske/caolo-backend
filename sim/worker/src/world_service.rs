@@ -160,7 +160,8 @@ impl cao_world::world_server::World for WorldService {
                     r: point.r,
                 };
 
-                let offset = self.rooms[point].offset;
+                let room = self.rooms[point];
+                let offset = room.offset;
                 let offset = cao_common::Axial {
                     q: offset.q,
                     r: offset.r,
@@ -170,6 +171,7 @@ impl cao_world::world_server::World for WorldService {
                     room_id: Some(room_id),
                     radius: self.room_bounds.radius,
                     offset: Some(offset),
+                    seed: room.seed,
                 }
             })
             .collect();

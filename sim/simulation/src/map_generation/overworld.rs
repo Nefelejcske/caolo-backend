@@ -73,6 +73,7 @@ pub fn generate_room_layout(
                 room_id,
                 RoomComponent {
                     offset: room_id_to_axial(room_id, room_radius),
+                    seed: rng.gen(),
                 },
             )
         }))

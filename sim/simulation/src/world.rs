@@ -22,7 +22,7 @@ use crate::{archetype, tables::hex_grid::HexGrid};
 use crate::{components::game_config::GameConfig, prelude::Axial};
 
 archetype!(
-    module pos2_store key Axial,
+    module room_store key Axial,
     table RoomConnections : MortonTable<RoomConnections> = room_connections,
     table RoomComponent : MortonTable<RoomComponent> = rooms,
     table OwnedEntity : MortonTable<OwnedEntity> = owner
@@ -121,7 +121,7 @@ impl Component<Axial> for EntityComponent {
 
 pub struct World {
     pub entities: entity_store::Archetype,
-    pub room: pos2_store::Archetype,
+    pub room: room_store::Archetype,
     pub user: user_store::Archetype,
     pub config: config_store::Archetype,
     pub resources: resource_store::Archetype,
@@ -152,7 +152,7 @@ macro_rules! impl_hastable {
 }
 
 impl_hastable!(entity_store, entities);
-impl_hastable!(pos2_store, room);
+impl_hastable!(room_store, room);
 impl_hastable!(user_store, user);
 impl_hastable!(config_store, config);
 impl_hastable!(positions_store, positions);

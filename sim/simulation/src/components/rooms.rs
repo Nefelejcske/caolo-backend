@@ -35,4 +35,5 @@ pub struct RoomProperties {
 pub struct RoomComponent {
     /// Offset coordinates in world space
     pub offset: Axial,
+    pub seed: u64,
 }
