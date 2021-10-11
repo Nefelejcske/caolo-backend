@@ -19,6 +19,29 @@ pub async fn game_loop(
     loop {
         let start = Instant::now();
 
+        #[cfg(save_world)]
+        {
+            // save the latest world state on a background thread
+            // TODO use two files and double-buffer based on time()?
+            // so if save fails we'll still have the one-before the last save
+            let world = world.clone();
+            tokio::spawn(async move {
+                let start = Instant::now();
+                let world_guard = world.read().await;
+                let mut f = std::fs::OpenOptions::new()
+                    .write(true)
+                    .create(true)
+                    .open("latest_world.bin")
+                    .unwrap();
+                bincode::serialize_into(&mut f, &*world_guard).unwrap();
+                drop(world_guard);
+
+                let end = Instant::now();
+
+                info!("Saved current world state in {:?}", end - start);
+            });
+        }
+
         let world_guard = world.read().await;
         let sp = tracing::error_span!("game-loop", tick = world_guard.time());
         let _e = sp.enter();
