@@ -94,26 +94,28 @@ pub fn structure_payload(
                             }
                         },
                     ),
-                    structure_type: Default::default(),
-                };
-                if let Some(spawn) = spawn.get(entity_id) {
-                    pl.structure_type = Some(cao_world::structure::StructureType::Spawn(
-                        cao_world::structure::Spawn {
-                            spawning: spawn.spawning.map(|id| id.into()).unwrap_or(u64::MAX),
-                            time_to_spawn: spawn.time_to_spawn.into(),
-                            spawn_queue: spawn_q
-                                .get(entity_id)
-                                .map(|SpawnQueueComponent { queue }| {
-                                    queue
-                                        .iter()
-                                        .copied()
+                    structure_body: {
+                        if let Some(spawn) = spawn.get(entity_id) {
+                            Some(cao_world::structure::StructureBody::Spawn(
+                                cao_world::structure::Spawn {
+                                    spawning: spawn
+                                        .spawning
                                         .map(|id| id.into())
-                                        .collect()
-                                })
-                                .unwrap_or_default(),
-                        },
-                    ));
-                }
+                                        .unwrap_or(u64::MAX),
+                                    time_to_spawn: spawn.time_to_spawn.into(),
+                                    spawn_queue: spawn_q
+                                        .get(entity_id)
+                                        .map(|SpawnQueueComponent { queue }| {
+                                            queue.iter().copied().map(|id| id.into()).collect()
+                                        })
+                                        .unwrap_or_default(),
+                                },
+                            ))
+                        } else {
+                            None
+                        }
+                    },
+                };
                 accumulator.push(pl);
             }
         }

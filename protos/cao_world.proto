@@ -86,7 +86,7 @@ message Structure
     int64 energyRegen = 5;
     cao_common.Uuid owner = 7;
 
-    oneof structure_type
+    oneof structure_body
     {
         Spawn spawn = 8;
     }
