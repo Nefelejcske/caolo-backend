@@ -47,11 +47,7 @@ pub fn check_dropoff_intent(
         None => return OperationResult::InvalidInput,
     };
 
-    if carry
-        .get(id)
-        .map(|carry| carry.carry == 0)
-        .unwrap_or(true)
-    {
+    if carry.get(id).map(|carry| carry.carry == 0).unwrap_or(true) {
         return OperationResult::Empty;
     }
 

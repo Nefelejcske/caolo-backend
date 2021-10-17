@@ -113,9 +113,9 @@ pub fn update_entity_script(storage: &mut World, msg: &UpdateEntityScriptCommand
     let user_id =
         uuid::Uuid::from_slice(user_id).map_err(|err| UpdateProgramError::UuidError(err.into()))?;
 
-    let entity_id : EntityId= msg.entity_id.into();
+    let entity_id: EntityId = msg.entity_id.into();
 
-    if  !storage.is_valid_entity(entity_id) {
+    if !storage.is_valid_entity(entity_id) {
         return Err(UpdateProgramError::NotFound);
     }
 

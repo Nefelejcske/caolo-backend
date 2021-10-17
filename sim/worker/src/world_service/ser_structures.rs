@@ -51,7 +51,7 @@ pub fn structure_payload(
                     std::mem::take(&mut accumulator),
                     time as i64,
                 );
-           }
+            }
             room = Some(next_room);
             offset = rooms.get(next_room.0).map(|x| x.offset);
             accumulator.clear();

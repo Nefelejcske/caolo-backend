@@ -17,10 +17,7 @@ pub enum RegisterUserError {
     MissingField(&'static str),
 }
 
-pub fn register_user(
-    world: &mut World,
-    msg: &RegisterUserMsg,
-) -> Result<(), RegisterUserError> {
+pub fn register_user(world: &mut World, msg: &RegisterUserMsg) -> Result<(), RegisterUserError> {
     trace!("Register user");
 
     let user_id = msg

@@ -84,7 +84,10 @@ pub fn execute_scripts(
                     .get(*entity_id)
                     .map(|OwnedEntity { owner_id }| *owner_id);
 
-                let s = tracing::error_span!("script_execution", entity_id = entity_id.to_string().as_str());
+                let s = tracing::error_span!(
+                    "script_execution",
+                    entity_id = entity_id.to_string().as_str()
+                );
                 let _e = s.enter();
 
                 vm.clear();
