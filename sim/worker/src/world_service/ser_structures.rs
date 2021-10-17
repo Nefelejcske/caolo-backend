@@ -51,7 +51,7 @@ pub fn structure_payload(
                     std::mem::take(&mut accumulator),
                     time as i64,
                 );
-            }
+           }
             room = Some(next_room);
             offset = rooms.get(next_room.0).map(|x| x.offset);
             accumulator.clear();
@@ -59,7 +59,7 @@ pub fn structure_payload(
         for (pos, EntityComponent(entity_id)) in entities.iter() {
             if structures.contains(entity_id) {
                 let entity_id = *entity_id;
-                let mut pl = cao_world::Structure {
+                let pl = cao_world::Structure {
                     id: entity_id.into(),
                     pos: Some(cao_common::WorldPosition {
                         pos: Some(pos.into()),
