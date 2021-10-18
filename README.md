@@ -28,9 +28,13 @@ Code layout:
 
 **TBA**
 
-### Deploy the cluster
+### Local development via [Kind](https://kind.sigs.k8s.io/) 
+
+- Install [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
+- Install [ctlptl](https://github.com/tilt-dev/ctlptl#kind-with-a-built-in-registry-at-a-random-port) (Optional, but recommended)
 
 ```
+ctlptl create cluster kind --registry=ctlptl-registry
 tilt up
 ```
 
