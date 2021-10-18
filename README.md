@@ -21,6 +21,7 @@ Code layout:
 ### Requirements
 
 -   [Tilt](https://tilt.dev)
+-   [Helm](https://helm.sh/)
 -   [kubectl](https://kubernetes.io/docs/tasks/tools/)
 -   [Docker](https://www.docker.com/)
 
@@ -28,10 +29,10 @@ Code layout:
 
 **TBA**
 
-### Local development via [Kind](https://kind.sigs.k8s.io/) 
+### Local development via [Kind](https://kind.sigs.k8s.io/)
 
-- Install [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
-- Install [ctlptl](https://github.com/tilt-dev/ctlptl#kind-with-a-built-in-registry-at-a-random-port) (Optional, but recommended)
+-   Install [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
+-   Install [ctlptl](https://github.com/tilt-dev/ctlptl#kind-with-a-built-in-registry-at-a-random-port) (Optional, but recommended)
 
 ```
 ctlptl create cluster kind --registry=ctlptl-registry
