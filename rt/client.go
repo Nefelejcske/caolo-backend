@@ -80,14 +80,14 @@ func (c *client) readPump() {
 			c.logger.Warn("Invalid message", zap.Error(err))
 			return
 		}
-		c.logger.Debug("Incoming message", zap.Reflect("ty", pl.Ty))
+		c.logger.Debug("Incoming message", zap.Any("ty", pl.Ty))
 		switch pl.Ty {
 		case "room_ids":
 			if len(c.roomIds)+len(pl.RoomIds) > 100 {
 				c.logger.Debug("Client is listening to too many roomIds")
 				continue
 			}
-			c.logger.Debug("Client subscribed to", zap.Reflect("roomIds", pl.RoomIds))
+			c.logger.Debug("Client subscribed to", zap.Any("roomIds", pl.RoomIds))
 			c.roomIds = append(c.roomIds, pl.RoomIds...)
 
 			for i := range pl.RoomIds {
@@ -99,14 +99,14 @@ func (c *client) readPump() {
 				c.logger.Debug("Client is listening to too many roomIds")
 				continue
 			}
-			c.logger.Debug("Client subscribed to", zap.Reflect("roomId", pl.RoomId))
+			c.logger.Debug("Client subscribed to", zap.Any("roomId", pl.RoomId))
 			c.roomIds = append(c.roomIds, pl.RoomId)
 			c.onNewRoomId <- pl.RoomId
 		case "unsubscribe_room_id":
-			c.logger.Debug("Client unsubscribed from", zap.Reflect("roomId", pl.RoomId))
+			c.logger.Debug("Client unsubscribed from", zap.Any("roomId", pl.RoomId))
 			c.roomIds = RemoveRoomId(c.roomIds, pl.RoomId)
 		case "unsubscribe_room_ids":
-			c.logger.Debug("Client unsubscribed from", zap.Reflect("roomIds", pl.RoomIds))
+			c.logger.Debug("Client unsubscribed from", zap.Any("roomIds", pl.RoomIds))
 			for i := range pl.RoomIds {
 				c.roomIds = RemoveRoomId(c.roomIds, pl.RoomIds[i])
 			}
@@ -114,7 +114,7 @@ func (c *client) readPump() {
 			c.logger.Debug("Client cleared their room subs")
 			c.roomIds = []RoomId{}
 		default:
-			c.logger.Warn("Unhandled msg type", zap.Reflect("payload", pl))
+			c.logger.Warn("Unhandled msg type", zap.Any("payload", pl))
 		}
 	}
 }
@@ -172,6 +172,7 @@ func (c *client) writePump() {
 				return
 			}
 		case entities, ok := <-c.entities:
+            c.logger.Debug("Sending entities", zap.Any("Time", entities.Time), zap.Any("RoomId", entities.RoomId))
 			c.conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 			if !ok {
 				// hub closed this channel
@@ -184,6 +185,7 @@ func (c *client) writePump() {
 				c.logger.Debug("Failed to send entities", zap.Error(err))
 				return
 			}
+            c.logger.Debug("Sending entities done", zap.Any("Time", entities.Time), zap.Any("RoomId", entities.RoomId))
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {

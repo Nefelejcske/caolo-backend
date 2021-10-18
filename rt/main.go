@@ -35,7 +35,7 @@ func listenToWorld(logger *zap.Logger, conn *grpc.ClientConn, worldState chan *c
 				return
 			}
 			if err != nil {
-				logger.Debug("Error in  = %v", zap.Reflect("client", client), zap.Error(err))
+				logger.Debug("Error in  = %v", zap.Any("client", client), zap.Error(err))
 				break
 			}
 
@@ -48,7 +48,7 @@ func listenToWorld(logger *zap.Logger, conn *grpc.ClientConn, worldState chan *c
 func getRoomData(logger *zap.Logger, roomId *cao_common.Axial, client cao_world.WorldClient, send_terrain chan *cao_world_pb.RoomTerrain) {
 	terrain, err := client.GetRoomTerrain(context.Background(), roomId)
 	if err != nil {
-		logger.Fatal("Failed to query terrain of room", zap.Reflect("roomId", roomId), zap.Error(err))
+		logger.Fatal("Failed to query terrain of room", zap.Any("roomId", roomId), zap.Error(err))
 	}
 	send_terrain <- terrain
 }
@@ -124,7 +124,7 @@ func waitForConnectionReady(logger *zap.Logger) *grpc.ClientConn {
 			return conn
 		case connectivity.Shutdown:
 		case connectivity.TransientFailure:
-			logger.Info("Connection state changed. Backing off", zap.Reflect("state", state), zap.Int("backoff ms", backoff))
+			logger.Info("Connection state changed. Backing off", zap.Any("state", state), zap.Int("backoff ms", backoff))
 			conn.Close()
 
 			time.Sleep(time.Duration(backoff) * time.Millisecond)
@@ -152,7 +152,7 @@ func main() {
 	conn := waitForConnectionReady(logger)
 	defer conn.Close()
 
-	hub := NewGameStateHub()
+	hub := NewGameStateHub(logger)
 
 	go listenToWorld(logger, conn, hub.WorldState)
 

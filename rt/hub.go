@@ -29,8 +29,9 @@ type RoomState struct {
 	Resources  []*cao_world.Resource  `json:"resources"`
 }
 
-func NewGameStateHub() *GameStateHub {
+func NewGameStateHub(logger *zap.Logger) *GameStateHub {
 	return &GameStateHub{
+		logger:     logger,
 		Entities:   map[RoomId]RoomState{},
 		Terrain:    map[RoomId]*cao_world.RoomTerrain{},
 		clients:    map[*client]bool{},
@@ -76,16 +77,18 @@ func (hub *GameStateHub) Run() {
 				if ind < 0 {
 					continue
 				}
+				hub.logger.Debug("Sending state to client", zap.Any("client", client), zap.Any("Time", state.Time), zap.Any("RoomId", state.RoomId))
 				select {
 				case client.entities <- &state:
 				default:
-					hub.logger.Info("Failed to send state to client, closing connection", zap.Reflect("client", client))
+					hub.logger.Info("Failed to send state to client, closing connection", zap.Any("client", client))
 					delete(hub.clients, client)
 					close(client.entities)
 				}
 			}
 		case newClient := <-hub.register:
 			hub.clients[newClient] = true
+			hub.logger.Info("Registered new client", zap.Any("client", newClient))
 		case ex := <-hub.unregister:
 			if _, ok := hub.clients[ex]; ok {
 				delete(hub.clients, ex)
