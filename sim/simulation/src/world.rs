@@ -185,7 +185,7 @@ impl World {
             scripts: Default::default(),
             positions: Default::default(),
             deferred_deletes: Default::default(),
-            entity_handles: HandleTable::new(500_000),
+            entity_handles: HandleTable::new(5_000_000),
             user: Default::default(),
         };
 
