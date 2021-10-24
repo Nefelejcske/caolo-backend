@@ -13,9 +13,6 @@ default = []
 cao-lang = "0.1.39"
 cao_storage_derive = { path = "../cao-storage-derive" }
 cao_alloc = { path = "../alloc" }
-cao-profile = { git = "https://github.com/caolo-game/cao-profile.git", optional = true, features = [
-    "http"
-] }
 rand = { version = "0.8.4", features = ["small_rng"] }
 uuid = { version = "0.8.2", features = ["serde", "v4"] }
 arrayvec = { version = "0.7.1", features = ["serde"] }
