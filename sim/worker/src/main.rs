@@ -23,10 +23,6 @@ use opentelemetry::global;
 use opentelemetry::sdk::propagation::TraceContextPropagator;
 use tracing_subscriber::layer::SubscriberExt;
 
-#[cfg(not(target_env = "msvc"))]
-#[global_allocator]
-static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
-
 type WorldContainer = Arc<tokio::sync::RwLock<caolo_sim::prelude::World>>;
 
 fn init() {

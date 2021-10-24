@@ -59,8 +59,6 @@ pub async fn generate_full_map(
 
     // setup properties table
     {
-        use std::convert::TryInto;
-
         let room_radius = room_params.radius;
         room_props.value = Some(RoomProperties {
             radius: room_radius,

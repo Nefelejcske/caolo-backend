@@ -2,7 +2,7 @@
 name = "cao_storage_derive"
 version = "0.1.0"
 authors = ["Daniel Kiss <littlesnorrboy@gmail.com>"]
-edition = "2018"
+edition = "2021"
 include = [
     "**/*.rs",
     "Cargo.toml",

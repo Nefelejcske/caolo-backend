@@ -218,7 +218,7 @@ impl Schema {
 
     pub fn execute_imports(self, vm: &mut Vm<ScriptExecutionData>) {
         for fr in self.imports {
-            vm.register_function(fr.desc.name, move |vm: &mut Vm<_>| fr.fo.call(vm));
+            vm.register_function(fr.desc.name, move |vm: &mut Vm<_>| { let _ = &fr; fr.fo.call(vm) });
         }
     }
 }

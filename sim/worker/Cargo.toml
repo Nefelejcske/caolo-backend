@@ -2,7 +2,7 @@
 name = "caolo-worker"
 version = "0.1.0"
 authors = ["Daniel Kiss <littlesnorrboy@gmail.com>"]
-edition = "2018"
+edition = "2021"
 build = "build.rs"
 
 [[bin]]
@@ -38,9 +38,6 @@ tracing = { version = "0.1", features = ["release_max_level_info"] }
 tracing-subscriber = { version = "0.2", features = ["env-filter", "fmt"] }
 tracing-opentelemetry = "*"
 opentelemetry = { version = "*", features = ["rt-tokio"] }
-
-[target.'cfg(not(target_env = "msvc"))'.dependencies]
-jemallocator = "0.3.2"
 
 [dev-dependencies]
 futures-lite = "*"
