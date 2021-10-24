@@ -1,4 +1,3 @@
-import pytest
 from fastapi.testclient import TestClient
 from caoloapi.app import app
 from pprint import pprint
@@ -6,13 +5,11 @@ from pprint import pprint
 client = TestClient(app)
 
 
-@pytest.mark.dependency()
 def test_health():
     response = client.get("/health")
     assert response.status_code == 204
 
 
-@pytest.mark.dependency(depends=["test_health"])
 def test_schema():
     response = client.get("/v1/scripting/schema")
 
