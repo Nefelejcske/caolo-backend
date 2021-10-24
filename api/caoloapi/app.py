@@ -77,27 +77,7 @@ class HealthStatus:
 
 @app.get("/health", response_model=HealthStatus)
 async def health():
-    async def _ping_queen():
-        channel = await queen_channel()
-        stub = cao_common_pb2_grpc.HealthStub(channel)
-        msg = cao_common_pb2.Empty()
-        await stub.Ping(msg)
-
-    # test dependencies
-    statuses = await asyncio.gather(_ping_queen(), return_exceptions=True)
-
-    status_code = status.HTTP_200_OK
-
-    res = HealthStatus(queen="up")
-    if statuses[0]:
-        logging.error("Queen is not available: %s", statuses[0])
-        status_code = status.HTTP_503_SERVICE_UNAVAILABLE
-        res.queen = "Unavailable"
-
-    return JSONResponse(
-        jsonable_encoder(res),
-        status_code=status_code,
-    )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 app.include_router(api_v1.router, prefix="/v1")
