@@ -1,6 +1,6 @@
 # ============= planner ============================================================
 # later stages may use these cached layers
-FROM lukemathwalker/cargo-chef:latest AS planner
+FROM lukemathwalker/cargo-chef:latest-rust-1.56-alpine3.14 AS planner
 RUN rustup update
 RUN rustup self update
 
@@ -21,12 +21,11 @@ RUN cargo chef prepare --recipe-path recipe.json
 
 # ============= cache dependencies ============================================================
 
-FROM lukemathwalker/cargo-chef:latest AS deps
+FROM lukemathwalker/cargo-chef:latest-rust-1.56-alpine3.14 AS deps
 RUN rustup update
 RUN rustup self update
 
-RUN apt-get update
-RUN apt-get install lld clang libc-dev pkgconf -y
+RUN apk add lld clang libc-dev pkgconf protoc
 
 WORKDIR /caolo
 COPY sim/.cargo/ sim/.cargo/
@@ -42,12 +41,11 @@ RUN cargo chef cook --release --no-default-features --recipe-path recipe.json
 # ==============================================================================================
 
 # note: we don't use cargo-chef in this image, just making sure we use the same rust compiler version
-FROM lukemathwalker/cargo-chef:latest AS build
+FROM lukemathwalker/cargo-chef:latest-rust-1.56-alpine3.14 AS build
 RUN rustup update
 RUN rustup self update
 
-RUN apt-get update
-RUN apt-get install lld clang libc-dev pkgconf protobuf-compiler -y
+RUN apk add lld clang libc-dev pkgconf protoc
 
 WORKDIR /caolo
 
@@ -72,11 +70,10 @@ RUN cargo build --release --no-default-features
 
 # ========== Copy the built binary to a new container, to minimize the image size ==========
 
-FROM ubuntu:18.04
+FROM alpine:latest
 WORKDIR /caolo
 
-RUN apt-get update -y
-RUN apt-get install openssl -y
+RUN apk add openssl
 
 COPY --from=build /caolo/sim/target/release/caolo-worker ./caolo-worker
 
