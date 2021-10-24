@@ -1,8 +1,6 @@
-FROM golang:latest as protos
+FROM golang:alpine as protos
 
-RUN apt-get update
-RUN apt-get install python3 protobuf-compiler curl -y
-
+RUN apk add python3 protoc
 
 RUN export GO111MODULE=on  # Enable module mode
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
@@ -12,15 +10,12 @@ WORKDIR /caolo
 COPY ./protos ./protos/
 COPY ./rt/protos.py ./rt/
 
-
 WORKDIR /caolo/rt
 
 ENV CAO_PROTOS_PATH=/caolo/protos
 RUN python3 protos.py
 
-
-FROM golang:latest as build
-
+FROM golang:alpine as build
 
 WORKDIR /caolo/rt
 COPY ./rt ./
@@ -28,7 +23,7 @@ COPY --from=protos /caolo/rt/ ./
 
 RUN go build
 
-FROM ubuntu
+FROM alpine
 
 WORKDIR /caolo
 COPY --from=build /caolo/rt/cao-rt ./
