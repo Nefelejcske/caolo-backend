@@ -18,7 +18,7 @@ def test_health():
 
 @pytest.mark.dependency(depends=["test_health"])
 def test_rooms():
-    response = client.get("/world/rooms")
+    response = client.get("/v1/world/rooms")
     assert response.status_code == 200
 
     rooms = response.json()
@@ -30,7 +30,7 @@ def test_rooms():
 
 @pytest.mark.dependency(depends=["test_health"])
 def test_room_terrain_layout():
-    response = client.get(url="/world/room-terrain-layout", params={"radius": 4})
+    response = client.get(url="/v1/world/room-terrain-layout", params={"radius": 4})
     assert response.status_code == 200
 
     layout = response.json()

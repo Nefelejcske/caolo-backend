@@ -14,7 +14,7 @@ def test_health():
 
 @pytest.mark.dependency(depends=["test_health"])
 def test_schema():
-    response = client.get("/scripting/schema")
+    response = client.get("/v1/scripting/schema")
 
     assert response.status_code == 200
 
@@ -37,7 +37,7 @@ def test_schema():
 
 def test_compile_hello_world():
     response = client.post(
-        "/scripting/compile",
+        "/v1/scripting/compile",
         json={
             "lanes": [
                 {
@@ -57,7 +57,7 @@ def test_compile_hello_world():
 
 def test_compile_bad_ty():
     response = client.post(
-        "/scripting/compile",
+        "/v1/scripting/compile",
         json={
             "lanes": [
                 {
@@ -76,7 +76,7 @@ def test_compile_bad_ty():
 
 def test_compile_missing_val():
     response = client.post(
-        "/scripting/compile",
+        "/v1/scripting/compile",
         json={
             "lanes": [
                 {

@@ -11,7 +11,7 @@ import asyncpg
 from starlette.responses import JSONResponse
 from .config import DB_URL
 
-from . import handler
+from . import api_v1
 from .queen import queen_channel
 
 import cao_common_pb2
@@ -100,11 +100,7 @@ async def health():
     )
 
 
-app.include_router(handler.world.router)
-app.include_router(handler.scripting.router)
-app.include_router(handler.admin.router)
-app.include_router(handler.commands.router)
-app.include_router(handler.users.router)
+app.include_router(api_v1.router, prefix="/v1")
 
 
 @app.on_event("startup")
