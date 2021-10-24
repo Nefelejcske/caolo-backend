@@ -75,7 +75,7 @@ class HealthStatus:
     queen: str
 
 
-@app.get("/health", response_model=HealthStatus)
+@app.get("/v1/health", response_model=HealthStatus)
 async def health():
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
