@@ -32,10 +32,7 @@ FROM python:3.9-slim
 
 WORKDIR /caolo/api
 
-RUN apt-get update
-
 ENV PATH="/caolo/api/.env/bin:$PATH"
-RUN pip install gunicorn
 
 # cache dependencies
 COPY --from=build /caolo/api/requirements.txt ./
@@ -47,5 +44,7 @@ COPY --from=build /caolo/api/dist ./dist
 RUN pip install ./dist/caoloapi-0.1.0-py3-none-any.whl
 
 RUN chmod +x start.sh
+
+RUN pip freeze
 
 ENTRYPOINT [ "sh", "./start.sh"]
