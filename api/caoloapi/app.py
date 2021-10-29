@@ -1,22 +1,13 @@
-import asyncio
 import logging
 from typing import Optional
-from dataclasses import dataclass
 
 from fastapi import FastAPI, Response, status
-from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 import asyncpg
-from starlette.responses import JSONResponse
 from .config import DB_URL
 
 from . import api_v1
-from .queen import queen_channel
-
-import cao_common_pb2
-import cao_common_pb2_grpc
-
 
 logging.basicConfig(
     level=logging.INFO,
@@ -68,11 +59,6 @@ async def db_session(req, call_next):
 async def rate_limit(req, call_next):
     # TODO
     return await call_next(req)
-
-
-@dataclass
-class HealthStatus:
-    queen: str
 
 
 @app.get("/v1/health", response_model=HealthStatus)

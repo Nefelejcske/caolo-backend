@@ -1,4 +1,3 @@
-from caoloapi.protos import cao_users_pb2, cao_users_pb2_grpc
 from typing import Optional
 import logging
 import string
@@ -12,10 +11,9 @@ from jose import JWTError
 
 from asyncpg.exceptions import UniqueViolationError
 
-import cao_commands_pb2
-import cao_commands_pb2_grpc
 import cao_common_pb2
 
+from caoloapi.protos import cao_users_pb2, cao_users_pb2_grpc
 from ..queen import queen_channel
 from ..model.auth import (
     hashpw,
@@ -135,7 +133,8 @@ async def register(req: Request, form_data: RegisterForm = Body(...)):
 
             raise HTTPException(status_code=status_code, detail=detail) from err
 
-        # NOTE: these two futures could run concurrently, however `db` can not be passed to another coroutine...
+        # NOTE: these two futures could run concurrently,
+        # however `db` can not be passed to another coroutine...
         # we could use the connection pool directly instead and try with that...
         await _register_user_in_sim(res["id"])
         token = await _update_access_token(res["id"], db)

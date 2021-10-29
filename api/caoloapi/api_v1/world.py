@@ -63,7 +63,6 @@ async def room_terrain_layout(radius: int = Query(...)):
 
 
 async def __get_room_terrain_layout(radius):
-    global TERRAIN_LAYOUT_CACHE
     if radius in TERRAIN_LAYOUT_CACHE:
         return TERRAIN_LAYOUT_CACHE[radius]
 
@@ -80,7 +79,8 @@ async def __get_room_terrain_layout(radius):
 @router.get("/tile-enum")
 async def tile_enum_values():
     """
-    The dictionary returned by this endpoint can be used to map Terrain enum values to string values if necessary.
+    The dictionary returned by this endpoint can be used to
+    map Terrain enum values to string values if necessary.
     """
     return {x.index: str(x.name) for x in cao_world_pb2._TERRAIN.values}
 

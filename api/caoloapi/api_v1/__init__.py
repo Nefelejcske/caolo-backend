@@ -1,13 +1,13 @@
 """
 request handlers
 """
+from fastapi import APIRouter
+
 from . import admin
 from . import commands
 from . import scripting
 from . import users
 from . import world
-
-from fastapi import APIRouter
 
 router = APIRouter()
 router.include_router(world.router)
