@@ -164,7 +164,7 @@ func main() {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	http.HandleFunc("/object-stream", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		ServeWs(logger, hub, w, r)
 	})
 
