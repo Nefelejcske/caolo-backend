@@ -61,7 +61,7 @@ async def rate_limit(req, call_next):
     return await call_next(req)
 
 
-@app.get("/v1/health", response_model=HealthStatus)
+@app.get("/v1/health")
 async def health():
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
